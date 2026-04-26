@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Términos y Condiciones — InmobIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200;300;400;500;600;700&family=DM+Sans:wght@300;400;500&family=Comfortaa:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #B8A48E;
+    --gold-light: #DDD0BE;
+    --gold-dark: #7A6A55;
+    --gold-vivid: #c9a84c;
+    --charcoal: #1A1A1A;
+    --gray: #6B6B6B;
+    --gray-light: #F4F2EE;
+    --gray-border: #E0DDD5;
+    --white: #FEFEFE;
+    --dark: #0f1620;
+    --dark-card: #161f2b;
+    --dark-border: #243040;
+    --font-display: 'Urbanist', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--white);
+    color: var(--charcoal);
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 4rem;
+    background: rgba(15,22,32,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--dark-border);
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; line-height: 1; }
+  .nav-logo .logo-inmob {
+    font-family: 'Comfortaa', sans-serif; font-size: 1.7rem;
+    font-weight: 300; color: var(--white); letter-spacing: 0.01em;
+  }
+  .nav-logo .logo-ia {
+    font-family: 'Century Gothic', 'Trebuchet MS', sans-serif; font-size: 1.9rem;
+    font-weight: 400; color: var(--gold-vivid); letter-spacing: -0.01em; line-height: 1;
+  }
+  .nav-back {
+    color: rgba(255,255,255,0.5); text-decoration: none;
+    font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.4rem;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--gold-vivid); }
+
+  /* HERO */
+  .hero {
+    background: var(--dark);
+    padding: 5rem 4rem 4rem;
+    border-bottom: 1px solid var(--dark-border);
+  }
+  .hero-inner { max-width: 860px; margin: 0 auto; }
+  .hero-label {
+    font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--gold-vivid); font-weight: 600; margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .hero-label::before { content: ''; width: 24px; height: 1px; background: var(--gold-vivid); }
+  .hero h1 {
+    font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300; color: var(--white); line-height: 1.15; margin-bottom: 1rem;
+  }
+  .hero-meta {
+    font-size: 0.8rem; color: rgba(255,255,255,0.3);
+    display: flex; gap: 2rem; flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 0.4rem; }
+
+  /* LAYOUT */
+  .page-wrap {
+    max-width: 860px; margin: 0 auto;
+    padding: 4rem 4rem 6rem;
+    display: grid; grid-template-columns: 220px 1fr; gap: 5rem; align-items: start;
+  }
+
+  /* ÍNDICE */
+  .toc {
+    position: sticky; top: 90px;
+  }
+  .toc-title {
+    font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gray); font-weight: 600; margin-bottom: 1rem;
+  }
+  .toc ul { list-style: none; }
+  .toc li { margin-bottom: 0.1rem; }
+  .toc a {
+    display: block; padding: 0.35rem 0.7rem;
+    font-size: 0.8rem; color: var(--gray); text-decoration: none;
+    border-left: 2px solid var(--gray-border);
+    transition: all 0.2s; line-height: 1.4;
+  }
+  .toc a:hover { color: var(--gold-dark); border-color: var(--gold-dark); }
+  .toc a.active { color: var(--gold-dark); border-color: var(--gold-vivid); font-weight: 500; }
+
+  /* CONTENIDO */
+  .content { min-width: 0; }
+
+  .section {
+    margin-bottom: 3.5rem;
+    padding-bottom: 3.5rem;
+    border-bottom: 1px solid var(--gray-border);
+  }
+  .section:last-child { border-bottom: none; margin-bottom: 0; }
+
+  .section-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    background: var(--gold-vivid); color: #fff;
+    font-size: 0.72rem; font-weight: 700;
+    margin-bottom: 0.8rem; flex-shrink: 0;
+  }
+  .section h2 {
+    font-family: var(--font-display); font-size: 1.3rem; font-weight: 500;
+    color: var(--charcoal); margin-bottom: 1.2rem; line-height: 1.3;
+  }
+  .section p {
+    font-size: 0.9rem; color: var(--gray);
+    margin-bottom: 1rem; line-height: 1.8;
+  }
+  .section p:last-child { margin-bottom: 0; }
+  .section p strong { color: var(--charcoal); font-weight: 600; }
+
+  /* Tabla */
+  .tabla-wrap { overflow-x: auto; margin: 1.2rem 0; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.84rem;
+  }
+  thead tr { background: var(--gray-light); }
+  th {
+    text-align: left; padding: 0.75rem 1rem;
+    font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--gold-dark); font-weight: 700; white-space: nowrap;
+  }
+  td {
+    padding: 0.7rem 1rem; color: var(--gray);
+    border-bottom: 1px solid var(--gray-border);
+    line-height: 1.6; vertical-align: top;
+  }
+  td strong { color: var(--charcoal); }
+  tr:last-child td { border-bottom: none; }
+
+  /* Highlight box */
+  .highlight-box {
+    background: var(--gray-light);
+    border-left: 3px solid var(--gold-vivid);
+    padding: 1.2rem 1.5rem; margin: 1.2rem 0;
+    font-size: 0.88rem; color: var(--charcoal); line-height: 1.75;
+  }
+  .highlight-box strong { color: var(--charcoal); }
+
+  /* Lista */
+  .item-list { list-style: none; margin: 1rem 0; }
+  .item-list li {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    font-size: 0.88rem; color: var(--gray);
+    padding: 0.5rem 0; border-bottom: 1px solid var(--gray-border);
+    line-height: 1.6;
+  }
+  .item-list li:last-child { border-bottom: none; }
+  .item-list .dot {
+    color: var(--gold-vivid); flex-shrink: 0; font-weight: 700;
+    margin-top: 3px; font-size: 0.7rem;
+  }
+  .item-list li strong { color: var(--charcoal); }
+
+  /* Warning box */
+  .warning-box {
+    background: rgba(231,76,60,0.06);
+    border-left: 3px solid #e74c3c;
+    padding: 1.1rem 1.4rem; margin: 1.2rem 0;
+    font-size: 0.86rem; color: #b03a2e; line-height: 1.7;
+  }
+
+  /* Ejemplo de cálculo */
+  .calc-box {
+    background: var(--dark); padding: 1.5rem 1.75rem;
+    margin: 1.2rem 0;
+  }
+  .calc-box p { color: rgba(255,255,255,0.65); font-size: 0.85rem; line-height: 1.9; margin: 0; }
+  .calc-box strong { color: var(--white); }
+  .calc-box .result { color: var(--gold-vivid); font-weight: 700; font-size: 1rem; }
+
+  /* Footer */
+  .page-footer {
+    background: var(--dark); padding: 2rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.78rem; color: rgba(255,255,255,0.25);
+  }
+  .page-footer a { color: rgba(255,255,255,0.4); text-decoration: none; }
+  .page-footer a:hover { color: var(--gold-vivid); }
+
+  /* CTA al final */
+  .cta-box {
+    background: var(--gray-light); padding: 2.5rem;
+    text-align: center; margin-top: 3rem;
+  }
+  .cta-box h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 400; margin-bottom: 0.6rem; }
+  .cta-box p { font-size: 0.85rem; color: var(--gray); margin-bottom: 1.5rem; }
+  .btn-cta {
+    display: inline-block; background: var(--gold-vivid); color: #fff;
+    padding: 0.85rem 2rem; text-decoration: none;
+    font-weight: 600; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;
+    transition: background 0.2s;
+  }
+  .btn-cta:hover { background: var(--gold-dark); }
+
+  @media (max-width: 900px) {
+    nav, .hero, .page-footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .page-wrap { grid-template-columns: 1fr; gap: 2.5rem; padding: 2.5rem 1.5rem 4rem; }
+    .toc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/index.html" class="nav-logo"><span class="logo-inmob">Inmob</span><span class="logo-ia">IA</span></a>
+  <a href="/asesores.html" class="nav-back">← Volver al registro</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">Documentos legales</div>
+    <h1>Términos y Condiciones<br>para Asesores Inmobiliarios</h1>
+    <div class="hero-meta">
+      <span>📅 Última actualización: abril 2026</span>
+      <span>🇬🇹 Aplica en Guatemala</span>
+      <span>📄 Versión 1.0</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- ÍNDICE -->
+  <aside class="toc">
+    <div class="toc-title">Contenido</div>
+    <ul>
+      <li><a href="#s1">1. Quiénes somos</a></li>
+      <li><a href="#s2">2. Aceptación</a></li>
+      <li><a href="#s3">3. Registro y cuenta</a></li>
+      <li><a href="#s4">4. Planes y precios</a></li>
+      <li><a href="#s5">5. Comisión por cierre</a></li>
+      <li><a href="#s6">6. Trazabilidad del lead</a></li>
+      <li><a href="#s7">7. Red colaborativa</a></li>
+      <li><a href="#s8">8. Score del asesor</a></li>
+      <li><a href="#s9">9. Publicación de propiedades</a></li>
+      <li><a href="#s10">10. Pagos y facturación</a></li>
+      <li><a href="#s11">11. Suspensión y baja</a></li>
+      <li><a href="#s12">12. Responsabilidad</a></li>
+      <li><a href="#s13">13. Privacidad</a></li>
+      <li><a href="#s14">14. Modificaciones</a></li>
+      <li><a href="#s15">15. Contacto</a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTENIDO -->
+  <main class="content">
+
+    <div class="section" id="s1">
+      <div class="section-num">1</div>
+      <h2>Quiénes somos</h2>
+      <p>
+        <strong>Inmobia</strong> es una plataforma tecnológica inmobiliaria que opera en Guatemala. Conecta a clientes que buscan propiedades con asesores que las tienen, usando inteligencia artificial para facilitar el match entre oferta y demanda.
+      </p>
+      <p>
+        Inmobia actúa exclusivamente como intermediario tecnológico. No es parte directa de ningún contrato de compraventa ni de arrendamiento. No acompaña físicamente al cliente en visitas, ni representa legalmente a ninguna de las partes en una transacción inmobiliaria.
+      </p>
+      <div class="highlight-box">
+        <strong>Mensaje central:</strong> No te vendemos un plan. Te ofrecemos ser parte de la red que más propiedades mueve en Guatemala. Gratis para empezar. Solo pagas cuando cierras.
+      </div>
+    </div>
+
+    <div class="section" id="s2">
+      <div class="section-num">2</div>
+      <h2>Aceptación de los términos</h2>
+      <p>
+        Al crear una cuenta de asesor en Inmobia, ya sea completando el formulario de registro en línea, mediante el proceso de registro en un evento presencial o a través de cualquier otro medio habilitado por la plataforma, el asesor declara haber leído, comprendido y aceptado en su totalidad los presentes Términos y Condiciones.
+      </p>
+      <p>
+        Si el asesor no está de acuerdo con alguno de los términos aquí establecidos, deberá abstenerse de crear una cuenta y de utilizar los servicios de Inmobia.
+      </p>
+      <p>
+        Estos términos constituyen el acuerdo completo entre el asesor e Inmobia y prevalecen sobre cualquier comunicación verbal o escrita anterior.
+      </p>
+    </div>
+
+    <div class="section" id="s3">
+      <div class="section-num">3</div>
+      <h2>Registro y cuenta del asesor</h2>
+      <p>
+        Para acceder a los servicios de Inmobia, el asesor debe crear una cuenta personal proporcionando información veraz, completa y actualizada. Los datos mínimos requeridos son: nombre completo, correo electrónico, número de teléfono (WhatsApp), zonas de trabajo y contraseña.
+      </p>
+      <p>
+        Al registrarse, Inmobia asignará automáticamente al asesor una URL personalizada con el formato <strong>inmobia.com/asesor/nombre</strong>, desde la cual podrá publicar sus propiedades y recibir contacto directo de clientes.
+      </p>
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span>El asesor es el único responsable de mantener la confidencialidad de su contraseña.</span></li>
+        <li><span class="dot">▸</span><span>Cada cuenta es personal e intransferible. No se permite compartir credenciales.</span></li>
+        <li><span class="dot">▸</span><span>El asesor deberá notificar a Inmobia de inmediato ante cualquier uso no autorizado de su cuenta.</span></li>
+        <li><span class="dot">▸</span><span>Para la facturación SAT, se solicitará NIT o CUI al momento de activar el plan Premium o al realizar el primer pago de comisión.</span></li>
+        <li><span class="dot">▸</span><span>Todo asesor registrado inicia con un <strong>score de 3.0★</strong> — nivel neutro, sin penalización.</span></li>
+      </ul>
+    </div>
+
+    <div class="section" id="s4">
+      <div class="section-num">4</div>
+      <h2>Planes y precios</h2>
+      <p>
+        Inmobia ofrece dos modalidades de uso para los asesores:
+      </p>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Característica</th>
+              <th>Plan Gratis</th>
+              <th>Plan Premium</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Precio mensual</td><td><strong>Q0</strong></td><td><strong>Q399/mes</strong></td></tr>
+            <tr><td>Página propia /asesor/nombre</td><td>✓</td><td>✓</td></tr>
+            <tr><td>CRM básico + pipeline</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Formularios y agendamiento</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Publicación de propiedades</td><td>Ilimitada</td><td>Ilimitada</td></tr>
+            <tr><td>Leads Inmobia por mes</td><td>4 a 6</td><td>Ilimitados</td></tr>
+            <tr><td>Prioridad en distribución de leads</td><td>—</td><td>✓</td></tr>
+            <tr><td>Notificaciones en tiempo real</td><td>—</td><td>✓</td></tr>
+            <tr><td>Ver requerimientos de la red</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Publicar requerimientos a la red</td><td>—</td><td>✓</td></tr>
+            <tr><td>Match automático de requerimientos</td><td>—</td><td>✓</td></tr>
+            <tr><td>Métricas de desempeño</td><td>—</td><td>✓</td></tr>
+            <tr><td>Badge Premium verificado</td><td>—</td><td>✓</td></tr>
+            <tr><td>Automatizaciones personalizadas</td><td>—</td><td>✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        El plan Premium se cobra mensualmente de forma automática a través de la pasarela de pagos <strong>Recurrente</strong>. La tarjeta de crédito o débito se solicita únicamente al momento de activar el plan Premium, nunca al registrarse en el plan Gratis.
+      </p>
+      <p>
+        El plan Premium no tiene permanencia mínima. El asesor puede cancelarlo en cualquier momento desde su panel, sin penalización. Las propiedades publicadas permanecen visibles aunque se cancele el plan Premium y se regrese al plan Gratis.
+      </p>
+      <div class="highlight-box">
+        <strong>Sin permanencia:</strong> El cobro del plan Premium es mensual vía Recurrente y el asesor puede cancelarlo en cualquier momento desde su panel, sin penalización ni permanencia mínima.
+      </div>
+    </div>
+
+    <div class="section" id="s5">
+      <div class="section-num">5</div>
+      <h2>Comisión por cierre</h2>
+      <p>
+        Inmobia cobra una comisión del <strong>30% sobre la comisión que recibe el asesor</strong> únicamente cuando se cierra exitosamente un negocio (venta o renta) generado a través de la plataforma. Esta comisión no aplica a clientes directos del asesor que llegaron por medios ajenos a Inmobia.
+      </p>
+
+      <div class="calc-box">
+        <p>
+          <strong>Ejemplo de cálculo:</strong><br>
+          Propiedad en venta: Q500,000<br>
+          Comisión del asesor (3%): Q15,000<br>
+          Inmobia recibe (30% de Q15,000): Q4,500<br>
+          <span class="result">Asesor recibe neto: Q10,500</span>
+        </p>
+      </div>
+
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span>La comisión se activa cuando: el asesor mueve el lead a "Cerrado" en su CRM, declara el valor del cierre y el cliente valida la transacción de forma independiente.</span></li>
+        <li><span class="dot">▸</span><span>El asesor tiene <strong>5 días hábiles</strong> para realizar el pago de la comisión desde la confirmación del cierre.</span></li>
+        <li><span class="dot">▸</span><span>El sistema calcula automáticamente el monto de la comisión al declarar el valor del cierre y el porcentaje de comisión del asesor.</span></li>
+        <li><span class="dot">▸</span><span>Inmobia emitirá factura electrónica SAT (FEL) por el monto de la comisión cobrada.</span></li>
+        <li><span class="dot">▸</span><span>Si el asesor tiene Plan Premium, el cobro se realiza automáticamente a la tarjeta registrada. Si tiene Plan Gratis, se envía un link de pago por WhatsApp.</span></li>
+      </ul>
+
+      <div class="warning-box">
+        <strong>Importante:</strong> Declarar un cierre falso o no declarar un cierre real son faltas graves que resultan en reducción de score, suspensión de leads y, en caso de reincidencia, suspensión definitiva del acceso a la plataforma. El cliente actúa como validador independiente: si confirma un cierre sin que el asesor lo haya reportado, se generará una alerta automática.
+      </div>
+    </div>
+
+    <div class="section" id="s6">
+      <div class="section-num">6</div>
+      <h2>Trazabilidad del lead</h2>
+      <p>
+        El origen de cada lead queda registrado automáticamente en el momento del agendamiento. El sistema captura: ID de propiedad, ID de asesor, fecha y hora del contacto, y datos del cliente.
+      </p>
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span><strong>Lead Inmobia:</strong> Cliente que llegó a través del buscador de Inmobia, la página personalizada del asesor dentro de Inmobia, o cualquier formulario de contacto de la plataforma. <strong>La comisión del 30% aplica al cerrar.</strong></span></li>
+        <li><span class="dot">▸</span><span><strong>Cliente directo:</strong> Cliente que el asesor ya tenía con anterioridad o que llegó por vías completamente externas a Inmobia (WhatsApp propio, referido personal, tarjeta de presentación). <strong>No aplica comisión Inmobia.</strong></span></li>
+        <li><span class="dot">▸</span><span>El origen del lead es inmutable una vez sellado — no puede ser modificado posteriormente por el asesor.</span></li>
+        <li><span class="dot">▸</span><span>En caso de disputa sobre el origen del lead, Inmobia resolverá con base en los registros automáticos del sistema.</span></li>
+      </ul>
+    </div>
+
+    <div class="section" id="s7">
+      <div class="section-num">7</div>
+      <h2>Red colaborativa entre asesores</h2>
+      <p>
+        La red colaborativa permite que dos asesores cierren un negocio juntos: uno tiene el cliente, el otro tiene la propiedad. Inmobia facilita la conexión interna entre ambos.
+      </p>
+
+      <div class="calc-box">
+        <p>
+          <strong>Distribución en cierre colaborativo:</strong><br>
+          Asesor A (tiene el cliente): 47.5% de la comisión total<br>
+          Asesor B (tiene la propiedad): 47.5% de la comisión total<br>
+          <span class="result">Inmobia: 5% a cada asesor por separado (total 10%)</span>
+        </p>
+      </div>
+
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span>Solo asesores con <strong>Plan Premium</strong> pueden publicar requerimientos en la red colaborativa.</span></li>
+        <li><span class="dot">▸</span><span>Todos los asesores (Gratis y Premium) pueden <strong>ver</strong> los requerimientos publicados en la red.</span></li>
+        <li><span class="dot">▸</span><span>El cierre colaborativo requiere confirmación de <strong>ambos asesores</strong> y validación independiente del cliente.</span></li>
+        <li><span class="dot">▸</span><span>No declarar un cierre colaborativo afecta el score de ambos asesores y puede resultar en la pérdida de acceso a la red.</span></li>
+      </ul>
+    </div>
+
+    <div class="section" id="s8">
+      <div class="section-num">8</div>
+      <h2>Score del asesor</h2>
+      <p>
+        Inmobia mantiene un sistema de puntuación interno para cada asesor, basado en su desempeño dentro de la plataforma. El score es privado: solo el asesor puede ver su puntuación exacta. Los clientes únicamente ven badges simplificados: <em>Verificado</em>, <em>Destacado</em> o <em>Élite</em>.
+      </p>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Nivel</th><th>Rango</th><th>Beneficios principales</th></tr></thead>
+          <tbody>
+            <tr><td>★</td><td>1.0 – 2.0</td><td>2 leads/mes · sin red colaborativa</td></tr>
+            <tr><td>★★</td><td>2.1 – 3.0</td><td>4–6 leads/mes · puede ver requerimientos</td></tr>
+            <tr><td>★★★</td><td>3.1 – 4.0</td><td>Leads ilimitados · red colaborativa activa</td></tr>
+            <tr><td>★★★★</td><td>4.1 – 4.7</td><td>Leads prioritarios · badge destacado</td></tr>
+            <tr><td>★★★★★</td><td>4.8 – 5.0</td><td>Primero en todo · badge Élite · descuento Premium</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        El score se calcula como promedio móvil de los últimos 3 meses: el mes actual pesa 50%, el mes anterior 30%, y hace 2 meses 20%. Todo asesor nuevo comienza en 3.0★.
+      </p>
+      <p>
+        Acciones que <strong>suben</strong> el score: cierres declarados correctamente, calificaciones altas del cliente, visitas atendidas puntualmente, leads actualizados en menos de 24h, propiedades con galería completa (5+ fotos), respuesta rápida a leads (menos de 2h).
+      </p>
+      <p>
+        Acciones que <strong>bajan</strong> el score: cierres no declarados, ausencias a visitas sin cancelar, calificaciones bajas del cliente, leads sin actualizar más de 48h, propiedades con información incompleta.
+      </p>
+    </div>
+
+    <div class="section" id="s9">
+      <div class="section-num">9</div>
+      <h2>Publicación de propiedades</h2>
+      <p>
+        El asesor puede publicar sus propiedades en Inmobia con dos modalidades de visibilidad, controlables individualmente por propiedad:
+      </p>
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span><strong>Privada:</strong> Visible únicamente en la página personalizada del asesor (<em>/asesor/nombre</em>), pero no aparece en el buscador general de Inmobia. Los leads que se generen desde esta propiedad <strong>no aplican comisión</strong> para Inmobia.</span></li>
+        <li><span class="dot">▸</span><span><strong>En Inmobia:</strong> Visible en el buscador general. Los leads que genere quedan sellados como "lead Inmobia" y aplica la comisión del 30% al cerrar.</span></li>
+        <li><span class="dot">▸</span><span>El asesor puede cambiar el estado de visibilidad en cualquier momento desde su panel.</span></li>
+        <li><span class="dot">▸</span><span>El asesor es el único responsable de la veracidad, exactitud y actualización de la información de sus propiedades.</span></li>
+        <li><span class="dot">▸</span><span>Inmobia se reserva el derecho de desactivar propiedades que incumplan sus políticas de contenido o que contengan información falsa o engañosa.</span></li>
+      </ul>
+    </div>
+
+    <div class="section" id="s10">
+      <div class="section-num">10</div>
+      <h2>Pagos y facturación</h2>
+      <p>
+        Todos los pagos se procesan a través de <strong>Recurrente</strong> (recurrente.com), pasarela de pagos guatemalteca con más de 200,000 negocios activos. Se aceptan tarjetas de crédito, débito y transferencias bancarias.
+      </p>
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span>El plan Premium se cobra automáticamente el mismo día de cada mes desde la fecha de activación.</span></li>
+        <li><span class="dot">▸</span><span>El asesor recibirá notificación 3 días antes de cada cobro automático.</span></li>
+        <li><span class="dot">▸</span><span>Inmobia emite factura electrónica FEL (SAT Guatemala) por cada cobro realizado.</span></li>
+        <li><span class="dot">▸</span><span>Si un cobro automático falla, el asesor tiene 3 días de gracia para regularizar su pago. Al día 5, el plan baja a Gratis automáticamente.</span></li>
+        <li><span class="dot">▸</span><span>Las comisiones no pagadas en 10 días hábiles resultan en suspensión de nuevos leads hasta regularizar la situación.</span></li>
+        <li><span class="dot">▸</span><span>Inmobia nunca elimina una cuenta por deudas — siempre existe la opción de regularizar y reactivar.</span></li>
+      </ul>
+    </div>
+
+    <div class="section" id="s11">
+      <div class="section-num">11</div>
+      <h2>Suspensión y baja de cuenta</h2>
+      <p>
+        Inmobia se reserva el derecho de suspender el acceso a la plataforma en los siguientes casos:
+      </p>
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span>Evasión comprobada de comisiones: cierre confirmado por el cliente que el asesor no declaró.</span></li>
+        <li><span class="dot">▸</span><span>Información falsa en el registro o en las propiedades publicadas.</span></li>
+        <li><span class="dot">▸</span><span>Conducta inapropiada hacia clientes u otros asesores dentro de la plataforma.</span></li>
+        <li><span class="dot">▸</span><span>Score sostenidamente bajo (por debajo de 1.0★ durante 3 meses consecutivos).</span></li>
+        <li><span class="dot">▸</span><span>Incumplimiento reiterado de los presentes términos y condiciones.</span></li>
+      </ul>
+      <p>
+        La suspensión es gradual: primero reducción de leads, luego suspensión temporal, luego baja definitiva solo en casos de reincidencia grave. El asesor siempre será notificado antes de cualquier acción y tendrá un período para responder o regularizar su situación.
+      </p>
+      <div class="warning-box">
+        <strong>Importante:</strong> La suspensión no implica la eliminación de los datos del asesor ni de las propiedades previamente publicadas. El asesor puede solicitar la reactivación de su cuenta en cualquier momento, sujeto a revisión por parte de Inmobia.
+      </div>
+    </div>
+
+    <div class="section" id="s12">
+      <div class="section-num">12</div>
+      <h2>Responsabilidad y limitaciones</h2>
+      <p>
+        Inmobia actúa exclusivamente como plataforma tecnológica de intermediación. En consecuencia:
+      </p>
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span>Inmobia <strong>no garantiza</strong> un número mínimo de leads, cierres o ingresos al asesor.</span></li>
+        <li><span class="dot">▸</span><span>Inmobia <strong>no es parte</strong> de ningún contrato de compraventa, arrendamiento ni cualquier otro acuerdo entre el asesor y el cliente.</span></li>
+        <li><span class="dot">▸</span><span>El asesor es el único responsable de la legalidad, exactitud y cumplimiento de los contratos que celebre con sus clientes.</span></li>
+        <li><span class="dot">▸</span><span>Inmobia <strong>no acompaña</strong> físicamente al cliente en visitas a propiedades.</span></li>
+        <li><span class="dot">▸</span><span>Inmobia <strong>no se hace responsable</strong> por daños directos o indirectos derivados del uso o imposibilidad de uso de la plataforma, interrupciones del servicio, pérdida de datos o actos de terceros.</span></li>
+        <li><span class="dot">▸</span><span>Inmobia <strong>no cobra comisión</strong> por cierres con clientes directos del asesor que llegaron por vías ajenas a la plataforma.</span></li>
+      </ul>
+    </div>
+
+    <div class="section" id="s13">
+      <div class="section-num">13</div>
+      <h2>Privacidad y datos personales</h2>
+      <p>
+        Inmobia recopila y procesa datos personales del asesor con el propósito exclusivo de prestar los servicios descritos en estos términos: gestión de cuenta, distribución de leads, facturación y comunicación de la plataforma.
+      </p>
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span>Los datos personales del asesor no serán vendidos a terceros.</span></li>
+        <li><span class="dot">▸</span><span>Los datos de clientes gestionados a través de la plataforma son confidenciales y no pueden ser utilizados por el asesor fuera del contexto de la relación comercial correspondiente.</span></li>
+        <li><span class="dot">▸</span><span>El score del asesor es privado. Los clientes únicamente ven el badge simplificado, nunca la puntuación exacta.</span></li>
+        <li><span class="dot">▸</span><span>El asesor puede solicitar la exportación o eliminación de sus datos personales en cualquier momento, escribiendo a contacto@inmobia.com.</span></li>
+      </ul>
+    </div>
+
+    <div class="section" id="s14">
+      <div class="section-num">14</div>
+      <h2>Modificaciones a los términos</h2>
+      <p>
+        Inmobia se reserva el derecho de modificar los presentes Términos y Condiciones en cualquier momento. Cuando se realicen cambios materiales, el asesor será notificado con al menos <strong>15 días de anticipación</strong> mediante correo electrónico al email registrado en la cuenta.
+      </p>
+      <p>
+        Si el asesor continúa utilizando la plataforma después de la fecha de entrada en vigencia de los nuevos términos, se entenderá que los ha aceptado. Si el asesor no está de acuerdo con los cambios, puede cancelar su cuenta antes de la fecha de vigencia sin penalización.
+      </p>
+    </div>
+
+    <div class="section" id="s15">
+      <div class="section-num">15</div>
+      <h2>Jurisdicción y contacto</h2>
+      <p>
+        Los presentes Términos y Condiciones se rigen por las leyes de la República de Guatemala. Cualquier controversia derivada de su interpretación o cumplimiento será sometida a los tribunales competentes de Guatemala, Ciudad de Guatemala.
+      </p>
+      <p>
+        Para consultas sobre estos términos, planes, comisiones o cualquier aspecto del servicio, el asesor puede comunicarse con Inmobia a través de:
+      </p>
+      <ul class="item-list">
+        <li><span class="dot">▸</span><span><strong>Correo electrónico:</strong> contacto@inmobia.com</span></li>
+        <li><span class="dot">▸</span><span><strong>WhatsApp:</strong> Disponible desde el botón de contacto en la plataforma</span></li>
+        <li><span class="dot">▸</span><span><strong>Horario de atención:</strong> Lunes a viernes, 8:00 a 18:00 horas (hora Guatemala)</span></li>
+      </ul>
+    </div>
+
+    <div class="cta-box">
+      <h3>¿Listo para unirte a la red?</h3>
+      <p>Registro gratuito. Sin tarjeta. Sin permanencia mínima.</p>
+      <a href="/asesores.html#registro" class="btn-cta">Crear mi cuenta gratuita</a>
+    </div>
+
+  </main>
+</div>
+
+<!-- FOOTER -->
+<div class="page-footer">
+  <span>© 2026 Inmobia · Guatemala · Todos los derechos reservados</span>
+  <div style="display:flex;gap:1.5rem">
+    <a href="/index.html">Ver propiedades</a>
+    <a href="/asesores.html">Área de asesores</a>
+  </div>
+</div>
+
+<script>
+  // Resaltar ítem del índice según scroll
+  const sections = document.querySelectorAll('.section[id]');
+  const links = document.querySelectorAll('.toc a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.toc a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

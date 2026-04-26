@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelos de Negocio · Inmobia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --border: #e4e2da;
+    --text-primary: #1a1916;
+    --text-secondary: #6b6960;
+    --text-tertiary: #9c9a92;
+    --purple-50: #EEEDFE; --purple-200: #AFA9EC; --purple-600: #534AB7; --purple-800: #3C3489;
+    --teal-50: #E1F5EE; --teal-200: #5DCAA5; --teal-600: #0F6E56; --teal-800: #085041;
+    --coral-50: #FAECE7; --coral-200: #F0997B; --coral-600: #993C1D; --coral-800: #712B13;
+    --amber-50: #FAEEDA; --amber-200: #EF9F27; --amber-600: #854F0B; --amber-800: #633806;
+    --blue-50: #E6F1FB; --blue-200: #85B7EB; --blue-600: #185FA5; --blue-800: #0C447C;
+    --gray-50: #F1EFE8; --gray-200: #B4B2A9; --gray-600: #5F5E5A; --gray-800: #444441;
+    --red-50: #FCEBEB; --red-600: #A32D2D;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 48px 24px;
+  }
+
+  header {
+    max-width: 900px;
+    margin: 0 auto 56px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+  }
+
+  .logo-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  header h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  header p {
+    margin-top: 8px;
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  .nav {
+    max-width: 900px;
+    margin: 0 auto 48px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nav a {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: var(--surface);
+    transition: all .15s;
+  }
+  .nav a:hover { border-color: var(--purple-600); color: var(--purple-600); }
+
+  .section {
+    max-width: 900px;
+    margin: 0 auto 64px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .model-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .1em;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+  }
+
+  .section-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+
+  .split-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-left: auto;
+  }
+
+  .badge-purple { background: var(--purple-50); color: var(--purple-800); }
+  .badge-teal   { background: var(--teal-50);   color: var(--teal-800); }
+  .badge-coral  { background: var(--coral-50);   color: var(--coral-800); }
+  .badge-amber  { background: var(--amber-50);   color: var(--amber-800); }
+  .badge-blue   { background: var(--blue-50);    color: var(--blue-800); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    overflow-x: auto;
+  }
+
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+  /* SVG element styles */
+  .th { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; fill: inherit; }
+  .ts { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 400; fill: var(--text-secondary); }
+  .arr { stroke: var(--gray-200); stroke-width: 1.5; fill: none; }
+
+  .note {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: .02em;
+  }
+
+  footer {
+    max-width: 900px;
+    margin: 80px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-family: 'DM Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-tag">Inmobia · Referencia interna</div>
+  <h1>Modelos de Negocio</h1>
+  <p>Diagramas de flujo y estructura de comisiones · Versión consolidada</p>
+</header>
+
+<nav class="nav">
+  <a href="#modelo-1d">1D · 50/50 Inmobia</a>
+  <a href="#modelo-2a">2A · 30/70 Asesores</a>
+  <a href="#modelo-3s">3S · Premium</a>
+  <a href="#modelo-4t">4T · 40/20/40 Tripartito</a>
+  <a href="#modelo-5ra">5RA · 45/5/45 Red</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════ MODELO 1D -->
+<section class="section" id="modelo-1d">
+  <div class="section-header">
+    <span class="model-code">Modelo 1D</span>
+    <h2>Propiedades de Inmobia</h2>
+    <span class="split-badge badge-purple">50 / 50</span>
+  </div>
+  <div class="card">
+    <svg viewBox="0 0 820 460">
+      <defs>
+        <marker id="arr1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Clientes RRSS -->
+      <rect x="260" y="20" width="300" height="52" rx="8" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+      <text class="th" x="410" y="40" text-anchor="middle" dominant-baseline="central" fill="#0C447C">Clientes desde publicidad en RRSS</text>
+      <text class="ts" x="410" y="58" text-anchor="middle" dominant-baseline="central">Facebook · Google · Marketplace</text>
+
+      <line x1="410" y1="72" x2="410" y2="100" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+      <!-- Inmobia -->
+      <rect x="250" y="100" width="320" height="52" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="120" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Inmobia</text>
+      <text class="ts" x="410" y="138" text-anchor="middle" dominant-baseline="central">Recibe y centraliza leads</text>
+
+      <line x1="410" y1="152" x2="410" y2="180" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+      <!-- Propiedades Inmobia -->
+      <rect x="230" y="180" width="360" height="52" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="200" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Propiedades de Inmobia</text>
+      <text class="ts" x="410" y="218" text-anchor="middle" dominant-baseline="central">Inventario propio · formulario 50/50</text>
+
+      <line x1="410" y1="232" x2="410" y2="260" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+      <!-- Agendamiento -->
+      <rect x="290" y="260" width="240" height="40" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text class="th" x="410" y="280" text-anchor="middle" dominant-baseline="central" fill="#444441">Agendamiento de visita</text>
+
+      <line x1="350" y1="300" x2="230" y2="336" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr1)"/>
+      <line x1="470" y1="300" x2="590" y2="336" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+      <!-- Asesor interno -->
+      <rect x="80" y="336" width="280" height="52" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="220" y="356" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Asesor interno Inmobia</text>
+      <text class="ts" x="220" y="374" text-anchor="middle" dominant-baseline="central">Comisión pura · sin relación laboral</text>
+
+      <!-- Asesor red -->
+      <rect x="460" y="336" width="280" height="52" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="600" y="356" text-anchor="middle" dominant-baseline="central" fill="#085041">Asesor de la red</text>
+      <text class="ts" x="600" y="374" text-anchor="middle" dominant-baseline="central">Por negociación directa con Inmobia</text>
+
+      <line x1="220" y1="388" x2="220" y2="408" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr1)"/>
+      <line x1="600" y1="388" x2="600" y2="408" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+      <!-- Cierre -->
+      <rect x="80" y="408" width="280" height="44" rx="8" fill="#FAEEDA" stroke="#EF9F27" stroke-width="0.5"/>
+      <text class="th" x="220" y="424" text-anchor="middle" dominant-baseline="central" fill="#633806">Cierre · 50% Inmobia · 50% Asesor</text>
+      <text class="ts" x="220" y="440" text-anchor="middle" dominant-baseline="central">Sobre comisión total acordada</text>
+
+      <rect x="460" y="408" width="280" height="44" rx="8" fill="#FAEEDA" stroke="#EF9F27" stroke-width="0.5"/>
+      <text class="th" x="600" y="424" text-anchor="middle" dominant-baseline="central" fill="#633806">Cierre · 50% Inmobia · 50% Asesor</text>
+      <text class="ts" x="600" y="440" text-anchor="middle" dominant-baseline="central">Sobre comisión total acordada</text>
+    </svg>
+  </div>
+  <p class="note">Modelo interno · no visible para la red externa · el asesor trabaja por comisión pura</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ MODELO 2A -->
+<section class="section" id="modelo-2a">
+  <div class="section-header">
+    <span class="model-code">Modelo 2A</span>
+    <h2>Propiedades de Asesores</h2>
+    <span class="split-badge badge-teal">30 / 70</span>
+  </div>
+  <div class="card">
+    <svg viewBox="0 0 820 430">
+      <defs>
+        <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Asesor -->
+      <rect x="40" y="20" width="320" height="60" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="200" y="40" text-anchor="middle" dominant-baseline="central" fill="#085041">Asesor</text>
+      <text class="ts" x="200" y="58" text-anchor="middle" dominant-baseline="central">Capta y sube propiedad · plan gratis o Premium · ilimitadas</text>
+
+      <!-- Inmobia -->
+      <rect x="460" y="20" width="320" height="60" rx="8" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+      <text class="th" x="620" y="40" text-anchor="middle" dominant-baseline="central" fill="#0C447C">Inmobia</text>
+      <text class="ts" x="620" y="58" text-anchor="middle" dominant-baseline="central">Capta cliente vía RRSS · hasta 6 leads gratis/mes</text>
+
+      <line x1="200" y1="80" x2="330" y2="148" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="620" y1="80" x2="490" y2="148" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+      <!-- Centraliza -->
+      <rect x="210" y="148" width="400" height="52" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="168" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Inmobia centraliza el match</text>
+      <text class="ts" x="410" y="186" text-anchor="middle" dominant-baseline="central">Propiedad del asesor + lead captado por RRSS</text>
+
+      <line x1="410" y1="200" x2="410" y2="228" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+      <!-- Formulario -->
+      <rect x="250" y="228" width="320" height="40" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text class="th" x="410" y="248" text-anchor="middle" dominant-baseline="central" fill="#444441">Formulario 30/70 · agendamiento</text>
+
+      <line x1="410" y1="268" x2="410" y2="296" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+      <!-- Asesor atiende -->
+      <rect x="210" y="296" width="400" height="52" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="410" y="316" text-anchor="middle" dominant-baseline="central" fill="#085041">Asesor captador atiende al cliente</text>
+      <text class="ts" x="410" y="334" text-anchor="middle" dominant-baseline="central">Interlocutor único · visitas · seguimiento</text>
+
+      <line x1="330" y1="348" x2="220" y2="378" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="490" y1="348" x2="600" y2="378" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+      <!-- Split -->
+      <rect x="60" y="378" width="280" height="44" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="200" y="394" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Inmobia · 30%</text>
+      <text class="ts" x="200" y="412" text-anchor="middle" dominant-baseline="central">Comisión al cierre</text>
+
+      <rect x="480" y="378" width="280" height="44" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="620" y="394" text-anchor="middle" dominant-baseline="central" fill="#085041">Asesor · 70%</text>
+      <text class="ts" x="620" y="412" text-anchor="middle" dominant-baseline="central">Comisión al cierre</text>
+    </svg>
+  </div>
+  <p class="note">Propiedades ilimitadas en plan gratis · el split 30/70 aplica igual en ambos planes</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ MODELO 3S -->
+<section class="section" id="modelo-3s">
+  <div class="section-header">
+    <span class="model-code">Modelo 3S</span>
+    <h2>Premium · Suscripciones</h2>
+    <span class="split-badge badge-purple">Q399 / mes</span>
+  </div>
+  <div class="card">
+    <svg viewBox="0 0 820 420">
+      <defs>
+        <marker id="arr3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Asesor -->
+      <rect x="250" y="20" width="320" height="52" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="410" y="40" text-anchor="middle" dominant-baseline="central" fill="#085041">Asesor se suscribe al plan Premium</text>
+      <text class="ts" x="410" y="58" text-anchor="middle" dominant-baseline="central">Sin tarjeta inicial requerida para registrarse</text>
+
+      <line x1="410" y1="72" x2="410" y2="100" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+      <!-- Pago -->
+      <rect x="260" y="100" width="300" height="52" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text class="th" x="410" y="120" text-anchor="middle" dominant-baseline="central" fill="#444441">Pago Q399/mes · Recurrente</text>
+      <text class="ts" x="410" y="138" text-anchor="middle" dominant-baseline="central">Activación inmediata del plan</text>
+
+      <line x1="410" y1="152" x2="410" y2="180" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+      <!-- Premium activo -->
+      <rect x="220" y="180" width="380" height="52" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="200" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Plan Premium activo</text>
+      <text class="ts" x="410" y="218" text-anchor="middle" dominant-baseline="central">Beneficios exclusivos habilitados en la plataforma</text>
+
+      <!-- Flechas a 5 beneficios -->
+      <line x1="255" y1="232" x2="90" y2="280" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="310" y1="232" x2="240" y2="280" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="410" y1="232" x2="410" y2="280" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="510" y1="232" x2="580" y2="280" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="565" y1="232" x2="730" y2="280" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+      <!-- Beneficios -->
+      <rect x="20" y="280" width="130" height="56" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="85" y="300" text-anchor="middle" dominant-baseline="central" fill="#085041">Destacadas</text>
+      <text class="ts" x="85" y="318" text-anchor="middle" dominant-baseline="central">Al tope en búsquedas</text>
+
+      <rect x="165" y="280" width="130" height="56" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="230" y="300" text-anchor="middle" dominant-baseline="central" fill="#085041">Leads</text>
+      <text class="ts" x="230" y="318" text-anchor="middle" dominant-baseline="central">Ilimitados al mes</text>
+
+      <rect x="345" y="280" width="130" height="56" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="410" y="300" text-anchor="middle" dominant-baseline="central" fill="#085041">Red 4T · 5RA</text>
+      <text class="ts" x="410" y="318" text-anchor="middle" dominant-baseline="central">Cierre colaborativo</text>
+
+      <rect x="515" y="280" width="130" height="56" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="580" y="300" text-anchor="middle" dominant-baseline="central" fill="#085041">Automatiz.</text>
+      <text class="ts" x="580" y="318" text-anchor="middle" dominant-baseline="central">Seguimiento leads</text>
+
+      <rect x="665" y="280" width="130" height="56" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="730" y="300" text-anchor="middle" dominant-baseline="central" fill="#085041">Requerim.</text>
+      <text class="ts" x="730" y="318" text-anchor="middle" dominant-baseline="central">Publicar en red</text>
+
+      <!-- Ingreso recurrente -->
+      <line x1="85" y1="336" x2="260" y2="376" stroke="#B4B2A9" stroke-width="1" marker-end="url(#arr3)"/>
+      <line x1="230" y1="336" x2="310" y2="376" stroke="#B4B2A9" stroke-width="1" marker-end="url(#arr3)"/>
+      <line x1="410" y1="336" x2="410" y2="376" stroke="#B4B2A9" stroke-width="1" marker-end="url(#arr3)"/>
+      <line x1="580" y1="336" x2="510" y2="376" stroke="#B4B2A9" stroke-width="1" marker-end="url(#arr3)"/>
+      <line x1="730" y1="336" x2="560" y2="376" stroke="#B4B2A9" stroke-width="1" marker-end="url(#arr3)"/>
+
+      <rect x="190" y="376" width="440" height="44" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="392" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Ingreso recurrente · Inmobia · Q399/mes por asesor</text>
+      <text class="ts" x="410" y="410" text-anchor="middle" dominant-baseline="central">Predecible · independiente de cierres</text>
+    </svg>
+  </div>
+  <p class="note">Plan gratis incluye 6 leads/mes y propiedades ilimitadas · Premium desbloquea leads ilimitados y red colaborativa</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ MODELO 4T -->
+<section class="section" id="modelo-4t">
+  <div class="section-header">
+    <span class="model-code">Modelo 4T</span>
+    <h2>Tripartito</h2>
+    <span class="split-badge badge-coral">40 / 20 / 40</span>
+  </div>
+  <div class="card">
+    <svg viewBox="0 0 820 580">
+      <defs>
+        <marker id="arr4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Inmobia -->
+      <rect x="260" y="20" width="300" height="52" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="40" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Inmobia</text>
+      <text class="ts" x="410" y="58" text-anchor="middle" dominant-baseline="central">Facilita la conexión tripartita</text>
+
+      <line x1="320" y1="72" x2="210" y2="116" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+      <line x1="500" y1="72" x2="610" y2="116" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+      <!-- Asesor 1 -->
+      <rect x="30" y="116" width="340" height="64" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="200" y="136" text-anchor="middle" dominant-baseline="central" fill="#085041">Portal Asesor 1</text>
+      <text class="ts" x="200" y="154" text-anchor="middle" dominant-baseline="central">Tiene al cliente · activa toggle de</text>
+      <text class="ts" x="200" y="168" text-anchor="middle" dominant-baseline="central">propiedades de otros asesores</text>
+
+      <!-- Asesor 2 -->
+      <rect x="450" y="116" width="340" height="64" rx="8" fill="#FAECE7" stroke="#F0997B" stroke-width="0.5"/>
+      <text class="th" x="620" y="136" text-anchor="middle" dominant-baseline="central" fill="#712B13">Portal Asesor 2 · Premium</text>
+      <text class="ts" x="620" y="154" text-anchor="middle" dominant-baseline="central">Tiene la propiedad indicada</text>
+      <text class="ts" x="620" y="168" text-anchor="middle" dominant-baseline="central">Comparte en modelo tripartito</text>
+
+      <line x1="620" y1="180" x2="620" y2="212" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+      <!-- Propiedad compartida -->
+      <rect x="450" y="212" width="340" height="44" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text class="th" x="620" y="228" text-anchor="middle" dominant-baseline="central" fill="#444441">Propiedad compartida en red</text>
+      <text class="ts" x="620" y="244" text-anchor="middle" dominant-baseline="central">Opción exclusiva plan Premium</text>
+
+      <!-- Flecha cruzada de asesor 2 a zona asesor 1 -->
+      <line x1="450" y1="234" x2="370" y2="258" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+      <line x1="200" y1="180" x2="200" y2="258" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+      <!-- Visible tiempo real -->
+      <rect x="30" y="258" width="340" height="56" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text class="th" x="200" y="278" text-anchor="middle" dominant-baseline="central" fill="#444441">Visible en tiempo real</text>
+      <text class="ts" x="200" y="296" text-anchor="middle" dominant-baseline="central">En propiedades similares del portal</text>
+      <text class="ts" x="200" y="310" text-anchor="middle" dominant-baseline="central">del Asesor 1 · match proactivo</text>
+
+      <line x1="200" y1="314" x2="320" y2="358" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+      <!-- Cliente encuentra -->
+      <rect x="210" y="358" width="400" height="52" rx="8" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+      <text class="th" x="410" y="378" text-anchor="middle" dominant-baseline="central" fill="#0C447C">El cliente encuentra la propiedad ideal</text>
+      <text class="ts" x="410" y="396" text-anchor="middle" dominant-baseline="central">Asesor 1 acompaña en visita · interlocutor único</text>
+
+      <line x1="410" y1="410" x2="410" y2="438" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+      <!-- Convenio -->
+      <rect x="230" y="438" width="360" height="44" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="454" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Convenio tripartito firmado</text>
+      <text class="ts" x="410" y="470" text-anchor="middle" dominant-baseline="central">Documento interno · el cliente no lo ve</text>
+
+      <line x1="310" y1="482" x2="200" y2="516" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+      <line x1="410" y1="482" x2="410" y2="516" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+      <line x1="510" y1="482" x2="620" y2="516" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+      <!-- Split -->
+      <rect x="40" y="516" width="230" height="52" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="155" y="536" text-anchor="middle" dominant-baseline="central" fill="#085041">Asesor 1 · 40%</text>
+      <text class="ts" x="155" y="554" text-anchor="middle" dominant-baseline="central">Sobre comisión total</text>
+
+      <rect x="295" y="516" width="230" height="52" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="536" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Inmobia · 20%</text>
+      <text class="ts" x="410" y="554" text-anchor="middle" dominant-baseline="central">Retiene antes de distribuir</text>
+
+      <rect x="550" y="516" width="230" height="52" rx="8" fill="#FAECE7" stroke="#F0997B" stroke-width="0.5"/>
+      <text class="th" x="665" y="536" text-anchor="middle" dominant-baseline="central" fill="#712B13">Asesor 2 · 40%</text>
+      <text class="ts" x="665" y="554" text-anchor="middle" dominant-baseline="central">Sobre comisión total</text>
+    </svg>
+  </div>
+  <p class="note">Asesor 2 debe ser Premium · Asesor 1 puede estar en plan gratis · cliente solo firma contrato estándar de compraventa</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ MODELO 5RA -->
+<section class="section" id="modelo-5ra">
+  <div class="section-header">
+    <span class="model-code">Modelo 5RA</span>
+    <h2>Red de Asesores</h2>
+    <span class="split-badge badge-teal">45 / 5 / 45</span>
+  </div>
+  <div class="card">
+    <svg viewBox="0 0 820 560">
+      <defs>
+        <marker id="arr5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Inmobia -->
+      <rect x="260" y="20" width="300" height="52" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="40" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Inmobia</text>
+      <text class="ts" x="410" y="58" text-anchor="middle" dominant-baseline="central">Opera la red de asesores Premium</text>
+
+      <line x1="340" y1="72" x2="220" y2="120" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+      <!-- Asesor A -->
+      <rect x="30" y="120" width="360" height="64" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="210" y="140" text-anchor="middle" dominant-baseline="central" fill="#085041">Asesor A · Premium</text>
+      <text class="ts" x="210" y="158" text-anchor="middle" dominant-baseline="central">Tiene al cliente · publica requerimiento</text>
+      <text class="ts" x="210" y="172" text-anchor="middle" dominant-baseline="central">con criterios: zona · precio · tipo · m²</text>
+
+      <line x1="210" y1="184" x2="210" y2="216" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+      <!-- Requerimiento -->
+      <rect x="30" y="216" width="360" height="52" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text class="th" x="210" y="236" text-anchor="middle" dominant-baseline="central" fill="#444441">Requerimiento publicado</text>
+      <text class="ts" x="210" y="254" text-anchor="middle" dominant-baseline="central">Timestamp registrado · vigencia 3 días</text>
+
+      <!-- Notificación día 3 -->
+      <rect x="30" y="284" width="360" height="44" rx="8" fill="#FAEEDA" stroke="#EF9F27" stroke-width="0.5"/>
+      <text class="th" x="210" y="300" text-anchor="middle" dominant-baseline="central" fill="#633806">Día 3 · notificación de renovación</text>
+      <text class="ts" x="210" y="316" text-anchor="middle" dominant-baseline="central">WhatsApp + in-app · renueva o expira</text>
+
+      <!-- Red notifica -->
+      <line x1="390" y1="242" x2="470" y2="242" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+      <rect x="470" y="216" width="320" height="52" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="630" y="236" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Red · Inmobia notifica</text>
+      <text class="ts" x="630" y="254" text-anchor="middle" dominant-baseline="central">Asesores con propiedades coincidentes</text>
+
+      <line x1="630" y1="268" x2="630" y2="300" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+      <!-- Asesor B -->
+      <rect x="470" y="300" width="320" height="52" rx="8" fill="#FAECE7" stroke="#F0997B" stroke-width="0.5"/>
+      <text class="th" x="630" y="320" text-anchor="middle" dominant-baseline="central" fill="#712B13">Asesor B · responde</text>
+      <text class="ts" x="630" y="338" text-anchor="middle" dominant-baseline="central">Tiene la propiedad · no requiere Premium</text>
+
+      <line x1="210" y1="328" x2="320" y2="384" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+      <line x1="630" y1="352" x2="510" y2="384" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+      <!-- Match -->
+      <rect x="210" y="384" width="400" height="52" rx="8" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+      <text class="th" x="410" y="404" text-anchor="middle" dominant-baseline="central" fill="#0C447C">Match confirmado</text>
+      <text class="ts" x="410" y="422" text-anchor="middle" dominant-baseline="central">Asesor A acompaña visita · interlocutor único</text>
+
+      <line x1="410" y1="436" x2="410" y2="464" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+      <!-- Convenio -->
+      <rect x="230" y="464" width="360" height="44" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text class="th" x="410" y="480" text-anchor="middle" dominant-baseline="central" fill="#444441">Convenio 45/5/45 firmado</text>
+      <text class="ts" x="410" y="496" text-anchor="middle" dominant-baseline="central">Documento interno entre las 3 partes</text>
+
+      <line x1="310" y1="508" x2="200" y2="532" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+      <line x1="410" y1="508" x2="410" y2="532" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+      <line x1="510" y1="508" x2="620" y2="532" stroke="#B4B2A9" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+      <!-- Split -->
+      <rect x="40" y="532" width="230" height="20" rx="6" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text class="th" x="155" y="542" text-anchor="middle" dominant-baseline="central" fill="#085041">Asesor A · 45%</text>
+
+      <rect x="295" y="532" width="230" height="20" rx="6" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+      <text class="th" x="410" y="542" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Inmobia · 5%</text>
+
+      <rect x="550" y="532" width="230" height="20" rx="6" fill="#FAECE7" stroke="#F0997B" stroke-width="0.5"/>
+      <text class="th" x="665" y="542" text-anchor="middle" dominant-baseline="central" fill="#712B13">Asesor B · 45%</text>
+    </svg>
+  </div>
+  <p class="note">5RA aplica solo si existe requerimiento con timestamp anterior al match · si hay duda, aplica el Modelo 4T por defecto</p>
+</section>
+
+<footer>
+  <span>Inmobia · Modelos de Negocio · Versión consolidada</span>
+  <span>Documento de referencia interna</span>
+</footer>
+
+</body>
+</html>

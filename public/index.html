@@ -1,0 +1,3251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InmobIA — Asesoría Inmobiliaria Profesional en Guatemala</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200;300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&family=Comfortaa:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  :root {
+    --gold: #B8A48E;
+    --gold-light: #DDD0BE;
+    --gold-dark: #7A6A55;
+    --charcoal: #1A1A1A;
+    --charcoal-mid: #2C2C2C;
+    --gray: #6B6B6B;
+    --gray-light: #F4F2EE;
+    --gray-border: #E0DDD5;
+    --white: #FEFEFE;
+    --font-display: 'Urbanist', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+ 
+  html { scroll-behavior: smooth; overflow-x: hidden; }
+ 
+  body {
+    font-family: var(--font-body);
+    background: var(--white);
+    color: var(--charcoal);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+ 
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 4rem;
+    background: rgba(254,254,254,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-border);
+    transition: var(--transition);
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .nav-logo-text {
+    display: inline-flex; align-items: baseline; line-height: 1;
+  }
+  .nav-logo-text .logo-inmob {
+    font-family: 'Comfortaa', sans-serif; font-size: 1.9rem;
+    font-weight: 300; color: #1e2d4a; letter-spacing: 0.01em;
+  }
+  .nav-logo-text .logo-ia {
+    font-family: 'Century Gothic', 'Trebuchet MS', sans-serif; font-size: 2.2rem;
+    font-weight: 400; color: var(--gold); letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .nav-logo img {
+    height: 38px;
+    width: auto;
+    display: block;
+user-select: none;
+    -webkit-user-drag: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.82rem; font-weight: 400; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--gray);
+    text-decoration: none; transition: color var(--transition);
+    position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
+    height: 1px; background: var(--gold);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform var(--transition);
+  }
+  .nav-links a:hover { color: var(--charcoal); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+  .nav-cta {
+    background: var(--gold); color: var(--white);
+    border: 1px solid var(--gold); padding: 0.65rem 1.5rem;
+    font-family: var(--font-body); font-size: 0.78rem;
+    font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all var(--transition);
+    text-decoration: none; display: inline-block; border-radius: 20px;
+  }
+  .nav-cta:hover { background: var(--gold-dark); border-color: var(--gold-dark); }
+  .nav-login {
+    background: transparent; color: var(--charcoal);
+    border: 1px solid var(--gray-border); padding: 0.65rem 1.25rem;
+    font-family: var(--font-body); font-size: 0.78rem;
+    font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all var(--transition);
+    text-decoration: none; display: none; border-radius: 20px;
+  }
+  .nav-login:hover { border-color: var(--gold); color: var(--gold); }
+ 
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    padding-top: 80px;
+  }
+  .hero-content {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 5rem 4rem 5rem 4rem;
+    background: var(--gray-light);
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold-dark); margin-bottom: 2rem;
+  }
+  .hero-badge::before {
+    content: ''; width: 28px; height: 1px; background: var(--gold);
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 4vw, 4.2rem);
+    font-weight: 300; line-height: 1.15;
+    color: var(--charcoal); margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+  .hero-title em { font-style: normal; font-weight: 700; color: var(--gold); white-space: nowrap; }
+  .hero-sub {
+    font-size: 0.95rem; color: var(--gray);
+    max-width: 400px; line-height: 1.8; margin-bottom: 3rem;
+  }
+  .hero-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--charcoal); color: var(--white);
+    padding: 1rem 2rem; border: none; cursor: pointer;
+    font-family: var(--font-body); font-size: 0.78rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    transition: background var(--transition); text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--gold-dark); }
+  .btn-outline {
+    background: transparent; color: var(--charcoal);
+    padding: 1rem 2rem; border: 1px solid var(--charcoal); cursor: pointer;
+    font-family: var(--font-body); font-size: 0.78rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    transition: all var(--transition); text-decoration: none;
+    display: inline-block;
+  }
+  .btn-outline:hover { background: var(--charcoal); color: var(--white); }
+ 
+  .hero-image {
+    position: relative; overflow: hidden;
+    background: var(--charcoal);
+  }
+  .hero-slide {
+    position: absolute; inset: 0;
+    opacity: 0; transition: opacity 1s ease;
+    will-change: opacity; pointer-events: none;
+  }
+  .hero-slide.active { opacity: 1; pointer-events: auto; }
+  .hero-slide img {
+    width: 100%; height: 100%; object-fit: cover; opacity: 0.72;
+    transform: scale(1); transition: transform 7s ease;
+  }
+  .hero-slide.active img { transform: scale(1.06); }
+  /* fallback static image while slides load */
+  .hero-image > img.hero-static {
+    width: 100%; height: 100%; object-fit: cover; opacity: 0.75;
+    transition: transform 8s ease;
+  }
+  .hero-image:hover > img.hero-static { transform: scale(1.04); }
+  /* slide dots */
+  /* nombre de propiedad — parte superior del slide */
+  .hero-slide-label {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 3;
+    padding: 1.6rem 2rem 3rem;
+    background: linear-gradient(rgba(0,0,0,0.52), transparent);
+    opacity: 0; transition: opacity 1s ease;
+    pointer-events: none;
+  }
+  .hero-slide.active .hero-slide-label { opacity: 1; }
+  .hero-slide-titulo {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3vw, 3.2rem);
+    font-weight: 300; line-height: 1.2;
+    color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.45);
+  }
+  .hero-slide-meta {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; align-items: center;
+  }
+  .hero-slide-meta span {
+    font-family: var(--font-body); font-size: 0.72rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(255,255,255,0.82); text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  .hero-slide-meta .sep { color: rgba(255,255,255,0.35); font-size: 0.65rem; }
+  /* botón Ver — centrado verticalmente, anclado a la derecha */
+  .hero-slide-btn {
+    position: absolute; top: 50%; right: 5rem; z-index: 6;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.55); border-radius: 20px;
+    color: #fff; font-family: var(--font-body); font-size: 0.72rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.55rem 1.3rem; cursor: pointer; text-decoration: none;
+    backdrop-filter: blur(6px);
+    opacity: 0; transition: opacity 1s ease, background 0.2s, border-color 0.2s;
+    pointer-events: none;
+  }
+  .hero-slide.active .hero-slide-btn { opacity: 1; pointer-events: auto; }
+  .hero-slide-btn:hover { background: rgba(255,255,255,0.3); border-color: #fff; }
+  .hero-dots {
+    position: absolute; bottom: 8rem; left: 2.5rem;
+    display: flex; gap: 0.4rem; z-index: 4;
+  }
+  .hero-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.35); cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .hero-dot.active { background: #fff; transform: scale(1.35); }
+  /* zonas clic izq/der */
+  .hero-nav {
+    position: absolute; top: 0; bottom: 0; z-index: 5;
+    width: 40%; display: flex; align-items: center;
+    opacity: 0; transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .hero-nav-prev { left: 0; justify-content: flex-start; padding-left: 1rem; }
+  .hero-nav-next { right: 0; justify-content: flex-end; padding-right: 1rem; }
+  .hero-image:hover .hero-nav { opacity: 1; }
+  .hero-nav-arrow {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.12); backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    pointer-events: auto; cursor: pointer;
+  }
+  .hero-nav-arrow svg { display:block; }
+  .hero-nav:hover .hero-nav-arrow {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.8);
+    transform: scale(1.08);
+  }
+  .hero-image-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 2.5rem;
+    background: linear-gradient(transparent, rgba(26,26,26,0.85));
+    pointer-events: none;
+  }
+  .hero-stat {
+    display: flex; gap: 2.5rem;
+  }
+  .hero-stat-item { color: var(--white); }
+  .hero-stat-num {
+    font-family: var(--font-display); font-size: 2rem; font-weight: 300;
+    display: block; line-height: 1;
+  }
+  .hero-stat-label {
+    font-size: 0.72rem; letter-spacing: 0.1em;
+    text-transform: uppercase; opacity: 0.7;
+  }
+ 
+  /* ── SEARCH BAR ── */
+  #search-section {
+    background: var(--charcoal); padding: 0;
+  }
+  .search-bar {
+    display: none; grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: 0; border: 1px solid rgba(255,255,255,0.15);
+  }
+  .search-field {
+    padding: 1.1rem 1.5rem; border-right: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+  }
+  .search-field:last-child { border-right: none; }
+  .search-field label {
+    display: block; font-size: 0.65rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 0.3rem;
+  }
+  .search-field select, .search-field input {
+    background: transparent; border: none; outline: none;
+    color: var(--white); font-family: var(--font-body);
+    font-size: 0.88rem; width: 100%; cursor: pointer;
+  }
+  .search-field select option { background: var(--charcoal-mid); }
+  .search-btn {
+    background: var(--gold); border: none; cursor: pointer;
+    padding: 0 2rem; display: flex; align-items: center; gap: 0.5rem;
+    font-family: var(--font-body); font-size: 0.75rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--charcoal); font-weight: 500;
+    transition: background var(--transition);
+  }
+  .search-btn:hover { background: var(--gold-light); }
+ 
+  /* ── SECTION HEADERS ── */
+  .section-header { text-align: center; margin-bottom: 3.5rem; }
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 0.75rem;
+    font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold-dark); margin-bottom: 1rem;
+  }
+  .section-badge::before, .section-badge::after {
+    content: ''; width: 24px; height: 1px; background: var(--gold);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    font-weight: 300; color: var(--charcoal); line-height: 1.2;
+  }
+  .section-title em { font-style: normal; font-weight: 700; color: var(--gold); }
+  #propiedades .section-title { font-size: clamp(2rem, 4vw, 3.2rem); }
+  .section-title--question {
+    font-size: clamp(2.6rem, 4.5vw, 4rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--charcoal);
+  }
+  .section-sub {
+    font-size: 0.9rem; color: var(--gray);
+    max-width: 520px; margin: 1rem auto 0; line-height: 1.8;
+  }
+  .section-sub--destacado {
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    font-weight: 300;
+    color: var(--charcoal);
+    max-width: 640px;
+    line-height: 1.7;
+    margin: 1.5rem auto 0;
+  }
+  .section-sub--destacado strong {
+    font-weight: 600;
+    color: var(--gold-dark);
+  }
+  .section-sub--destacado em {
+    font-style: normal;
+    color: var(--gold-dark);
+    font-weight: 600;
+  }
+  .frase-clave {
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 2vw, 1.6rem);
+    font-style: normal;
+    font-weight: 600;
+    color: var(--gold-dark);
+    white-space: nowrap;
+    line-height: 1.2;
+    margin-top: 0.4rem;
+    letter-spacing: -0.02em;
+  }
+  .steps-claim {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 4.5vw, 4rem);
+    font-weight: 700; font-style: normal;
+    color: var(--gold);
+    line-height: 1; margin-top: 0.6rem;
+    letter-spacing: -0.01em;
+  }
+  .steps-subclaim {
+    font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gray); margin-top: 1rem;
+  }
+ 
+  /* ── PROPIEDADES ── */
+  #propiedades { padding: 6rem 4rem; background: var(--white); }
+
+  .filter-tabs,
+  .filtro-activo,
+  #apt-filters {
+    margin-left: -4rem;
+    margin-right: -4rem;
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+
+  .filter-tabs {
+    display: flex; flex-wrap: wrap; gap: 0; margin-bottom: 0;
+    border-bottom: 1px solid var(--gray-border);
+    justify-content: center;
+  }
+  .filter-tab {
+    padding: 0.75rem 1.5rem; border: none; background: none;
+    font-family: var(--font-body); font-size: 0.75rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--gray); cursor: pointer;
+    border-top: 2px solid transparent;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .filter-tab.active {
+    color: var(--charcoal); border-top-color: var(--gold);
+  }
+  .filter-tab:hover {
+    color: var(--charcoal);
+    background: var(--gray-light);
+    border-top-color: var(--gold-light);
+  }
+
+  /* ── BARRA FILTRO ACTIVO (oscura) ── */
+  .filtro-activo {
+    display: none;
+    align-items: center; gap: 0; flex-wrap: nowrap;
+    background: #2c2420;
+    margin-bottom: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+  .filtro-activo.visible { display: flex; }
+  .filtro-activo-field {
+    display: flex; align-items: center;
+    flex: 1; padding: 0 0.75rem; height: 62px;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    min-width: 0; position: relative;
+  }
+  .filtro-activo-field .select-pill {
+    display: flex; align-items: center; gap: 0.45rem;
+    border: 1px solid rgba(255,255,255,0.28); border-radius: 20px;
+    padding: 0; width: 100%;
+    transition: all 0.2s; cursor: pointer;
+    overflow: hidden;
+  }
+  .filtro-activo-field .select-pill label {
+    padding-left: 0.85rem; pointer-events: none; flex-shrink: 0;
+  }
+  .filtro-activo-field .select-pill label::after {
+    content: ''; display: inline-block;
+    width: 1px; height: 1rem;
+    background: rgba(255,255,255,0.4);
+    margin-left: 0.6rem; vertical-align: middle;
+  }
+  .filtro-activo-field .select-pill select {
+    flex: 1; width: 100%; height: 100%; min-height: 36px;
+    cursor: pointer; background: transparent; border: none;
+    color: rgba(255,255,255,0.85); font-family: var(--font-body);
+    font-size: 0.75rem; outline: none; padding: 0 0.85rem 0 0;
+    -webkit-appearance: auto; appearance: auto;
+  }
+  .filtro-activo-field .select-pill:hover {
+    border-color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.05);
+  }
+  .filtro-activo-field .select-pill:focus-within {
+    border-color: var(--gold);
+    background: rgba(255,255,255,0.05);
+  }
+  .filtro-activo-field .select-pill.activo {
+    border-color: var(--gold);
+    background: rgba(var(--gold-rgb, 180,140,90), 0.15);
+  }
+  .filtro-activo-field .select-pill.activo label {
+    color: var(--gold);
+  }
+  .filtro-activo-field label {
+    font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; white-space: nowrap; flex-shrink: 0;
+  }
+  .filtro-activo-field select {
+    background: transparent; border: none;
+    color: rgba(255,255,255,0.85); font-family: var(--font-body);
+    font-size: 0.75rem; cursor: pointer; outline: none;
+    flex: 1; min-width: 0; padding: 0; width: 100%;
+  }
+  .filtro-activo-field select option { background: #2c2420; color: var(--white); }
+  .filtro-activo-field select:focus { color: var(--white); }
+  .filtro-activo-actions {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0 1rem; flex-shrink: 0; height: 62px;
+  }
+  .filtro-activo-btn {
+    padding: 0.3rem 0.9rem; font-size: 0.72rem; cursor: pointer;
+    font-family: var(--font-body); white-space: nowrap;
+    letter-spacing: 0.04em; border-radius: 20px;
+    transition: all 0.2s;
+  }
+  .filtro-activo-btn-apply {
+    background: var(--gold); color: var(--white); border: none;
+  }
+  .filtro-activo-btn-apply:hover { background: var(--gold-dark); }
+  .filtro-activo-btn-clear {
+    background: transparent; color: rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .filtro-activo-btn-clear:hover { color: var(--white); border-color: rgba(255,255,255,0.4); }
+  .apt-clear-btn {
+    background: transparent; color: #7a7060;
+    border: 1px solid #b8b3a8; border-radius: 20px;
+    padding: 0.3rem 0.9rem; font-size: 0.75rem; cursor: pointer;
+    font-family: var(--font-body); letter-spacing: 0.04em;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .apt-clear-btn:hover {
+    background: #1e2d4a; color: var(--white);
+    border-color: #1e2d4a;
+    box-shadow: 0 2px 8px rgba(30,45,74,0.2);
+  }
+
+  /* ── BARRA SUB-FILTROS (clara) ── */
+  .apt-filters {
+    display: none;
+    align-items: center; gap: 0; flex-wrap: nowrap;
+    background: #f5f4f2;
+    border-bottom: 2px solid #b8b3a8;
+    margin-bottom: 2.5rem;
+  }
+  .apt-filters.visible { display: flex; }
+  .apt-filter-group {
+    display: flex; align-items: center;
+    flex: 1; padding: 0 0.75rem; height: 52px;
+    border-right: 1px solid #b8b3a8;
+  }
+  .apt-filter-group:last-child { border-right: none; }
+  .apt-filter-group .select-pill {
+    display: flex; align-items: center; gap: 0.45rem;
+    border: 1px solid #b8b3a8; border-radius: 20px;
+    padding: 0; width: 100%;
+    transition: all 0.2s; cursor: pointer;
+    overflow: hidden;
+  }
+  .apt-filter-group .select-pill label {
+    padding-left: 0.85rem; pointer-events: none; flex-shrink: 0;
+  }
+  .apt-filter-group .select-pill label::after {
+    content: ''; display: inline-block;
+    width: 1px; height: 1rem;
+    background: rgba(0,0,0,0.35);
+    margin-left: 0.6rem; vertical-align: middle;
+  }
+  .apt-filter-group .select-pill select {
+    flex: 1; min-width: 0; height: 100%; min-height: 36px;
+    cursor: pointer; background: transparent; border: none;
+    color: var(--charcoal); font-family: var(--font-body);
+    font-size: 0.75rem; outline: none; padding: 0 0.5rem 0 0;
+  }
+  .apt-filter-group .select-pill:hover {
+    border-color: var(--gold);
+    background: rgba(180,140,90,0.14);
+    box-shadow: 0 2px 8px rgba(180,140,90,0.15);
+  }
+  .apt-filter-group .select-pill:focus-within {
+    border-color: var(--gold);
+    background: rgba(180,140,90,0.14);
+    box-shadow: 0 2px 8px rgba(180,140,90,0.15);
+  }
+  .apt-filter-group .select-pill.activo {
+    border-color: var(--gold);
+    background: rgba(180,140,90,0.1);
+  }
+  .apt-filter-group .select-pill.activo label {
+    color: var(--gold);
+  }
+  .apt-filter-group label {
+    font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--gold-dark); font-weight: 600; white-space: nowrap; flex-shrink: 0;
+  }
+  .apt-filter-group select {
+    border: none; background: transparent; font-family: var(--font-body);
+    font-size: 0.8rem; color: var(--charcoal);
+    cursor: pointer; outline: none; flex: 1; min-width: 0; padding: 0;
+  }
+  .apt-filter-group select:focus { color: var(--charcoal); }
+
+  .properties-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+  }
+  .property-card {
+    border: 1px solid var(--gray-border); overflow: hidden;
+    border-radius: 12px;
+    transition: transform var(--transition), box-shadow var(--transition);
+    cursor: pointer;
+    display: block;
+  }
+  .property-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+  }
+  .property-img {
+    position: relative; height: 260px; overflow: hidden;
+    background: var(--gray-light);
+  }
+  .property-img img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform var(--transition);
+  }
+  .property-card:hover .property-img img { transform: scale(1.06); }
+  .property-badge {
+    position: absolute; top: 1rem; left: 1rem;
+    background: var(--charcoal); color: var(--white);
+    font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.3rem 0.75rem;
+  }
+  .property-badge.venta { background: var(--gold-dark); }
+  .property-status-tag {
+    position: absolute; bottom: 1rem; left: 1rem;
+    font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 700; padding: 0.28rem 0.7rem;
+    backdrop-filter: blur(4px);
+  }
+  .property-status-tag.disponible {
+    background: rgba(30,60,20,0.82);
+    color: #7ddc5a;
+    border: 1px solid rgba(125,220,90,0.35);
+  }
+  .property-status-tag.pendiente {
+    background: rgba(60,50,10,0.82);
+    color: #f0c040;
+    border: 1px solid rgba(240,192,64,0.35);
+  }
+  .property-price-tag {
+    position: absolute; bottom: 1rem; right: 1rem;
+    background: var(--white); color: var(--charcoal);
+    font-family: var(--font-display); font-size: 1.2rem; font-weight: 500;
+    padding: 0.4rem 0.9rem;
+  }
+  .property-body { padding: 1.5rem; }
+  .property-type {
+    font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold-dark); margin-bottom: 0.4rem;
+  }
+  .property-name {
+    font-family: var(--font-display); font-size: 1.3rem; font-weight: 400;
+    color: var(--charcoal); margin-bottom: 0.5rem; line-height: 1.3;
+  }
+  .property-location {
+    font-size: 0.8rem; color: var(--gray); margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 0.35rem;
+  }
+  .property-location::before {
+    content: '◎'; font-size: 0.7rem; color: var(--gold);
+  }
+  .card-tags {
+    font-size: 0.72rem; color: var(--charcoal);
+    margin-bottom: 0.65rem;
+  }
+  .property-specs {
+    display: flex; gap: 1.75rem; flex-wrap: wrap;
+    border-top: 1px solid var(--gray-border);
+    padding-top: 0.9rem;
+  }
+  .spec {
+    display: flex; flex-direction: column; align-items: center; gap: 0.1rem;
+  }
+  .spec strong { font-size: 1.05rem; font-weight: 600; color: var(--charcoal); line-height: 1.2; }
+  .spec span   { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray); }
+ 
+  /* ── PROPERTY PLACEHOLDER IMAGES ── */
+  .img-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; background: var(--gray-light);
+  }
+ 
+  /* ── CÓMO FUNCIONA + FORMULARIO (sección unificada) ── */
+  #como-funciona {
+    background: #1B2A3A;
+    padding: 0;
+  }
+  #como-funciona .section-header {
+    padding: 6rem 4rem 4rem;
+  }
+  #como-funciona .section-badge { color: var(--gold); }
+  #como-funciona .section-badge::before,
+  #como-funciona .section-badge::after { background: var(--gold); }
+  #como-funciona .section-title { color: var(--white); }
+  #como-funciona .section-title em { color: var(--gold); }
+  #como-funciona .section-sub--destacado { color: rgba(255,255,255,0.6); max-width: 900px; white-space: nowrap; font-size: clamp(0.85rem, 1.2vw, 1.05rem); }
+  #como-funciona .section-sub--destacado em { color: var(--gold); }
+  #como-funciona .frase-clave { color: var(--gold); }
+  #como-funciona .steps-subclaim { color: rgba(255,255,255,0.4); }
+  .steps-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0; position: relative;
+    background: transparent;
+    max-width: 1000px; margin: 0 auto;
+  }
+  .steps-grid::before { display: none; }
+  .step {
+    padding: 4rem 3rem;
+    border-right: 1px solid rgba(201,168,76,0.3);
+    position: relative; overflow: hidden;
+  }
+  .step:last-child { border-right: none; }
+
+  /* número gigante como marca de agua */
+  .step-num {
+    position: absolute; top: -0.5rem; right: 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 5.5vw, 6rem);
+    font-weight: 800; font-style: normal;
+    color: rgba(201,168,76,0.13);
+    line-height: 1; pointer-events: none; user-select: none;
+    display: block;
+  }
+  /* línea dorada + etiqueta "PASO 0X" */
+  .step-label {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  .step-label::before {
+    content: ''; display: block;
+    width: 2rem; height: 1px;
+    background: var(--gold); flex-shrink: 0;
+  }
+  .step-label span {
+    font-family: var(--font-body);
+    font-size: 0.7rem; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .step-title {
+    font-family: var(--font-display); font-size: clamp(1.3rem, 1.8vw, 1.6rem);
+    font-weight: 400; color: var(--white); margin-bottom: 1.1rem;
+    line-height: 1.3;
+  }
+  .step-desc {
+    font-size: 0.87rem; color: rgba(255,255,255,0.5); line-height: 1.9;
+  }
+  .step-highlight {
+    display: inline-block; margin-top: 1.75rem;
+    font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold); opacity: 0.75;
+  }
+ 
+  /* ── VISITA / CTA CENTRAL ── */
+  .visita-row {
+    padding: 5rem 4rem 6rem;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .visita-content {
+    text-align: center;
+    max-width: 640px;
+    margin-bottom: 2.5rem;
+  }
+  .visita-badge {
+    font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.5rem; display: block;
+  }
+  .visita-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2.5vw, 2.2rem); font-weight: 300;
+    color: var(--white); line-height: 1.2; margin-bottom: 1.5rem;
+    white-space: nowrap;
+  }
+  .visita-title em { font-style: normal; font-weight: 700; color: var(--gold); }
+  .visita-desc { font-size: 0.9rem; color: rgba(255,255,255,0.6); line-height: 1.8; margin-bottom: 2.5rem; }
+  .visita-whatsapp {
+    display: inline-flex; align-items: center; gap: 0.75rem;
+    background: #25D366; color: var(--white);
+    padding: 1rem 1.75rem; text-decoration: none;
+    font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: opacity var(--transition);
+  }
+  .visita-whatsapp:hover { opacity: 0.88; }
+ 
+  /* ── FORM CITA ── */
+  .cita-form {
+    background: transparent; padding: 0;
+    width: 100%; max-width: 800px;
+  }
+  .cita-form h3 {
+    font-family: var(--font-display); font-size: 1.4rem;
+    font-weight: 400; color: var(--white); margin-bottom: 0.5rem;
+  }
+  .cita-form p {
+    font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-bottom: 1.75rem;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label {
+    display: block; font-size: 0.7rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 0.4rem;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.75rem 1rem;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    font-family: var(--font-body); font-size: 0.88rem; color: var(--white);
+    outline: none; transition: border-color var(--transition);
+  }
+  .form-group select option { background: #1B2A3A; color: var(--white); }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.25); }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--gold);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .horarios-group label.main-label {
+    display: block; font-size: 0.7rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 0.75rem;
+  }
+  .horarios-checks {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .horario-option { position: relative; }
+  .horario-option input[type="checkbox"], .horario-option input[type="radio"] { position: absolute; opacity: 0; }
+  .horario-option label {
+    display: block; padding: 0.6rem 0.5rem; text-align: center;
+    border: 1px solid rgba(255,255,255,0.15); font-size: 0.72rem;
+    letter-spacing: 0.06em; cursor: pointer; text-transform: none;
+    color: rgba(255,255,255,0.5); transition: all var(--transition);
+  }
+  .horario-option label:hover {
+    border-color: var(--gold); color: rgba(255,255,255,0.85); background: rgba(184,164,142,0.1);
+  }
+  .horario-option input:checked + label {
+    background: var(--gold); color: #1B2A3A; border-color: var(--gold); font-weight: 600;
+  }
+  .dias-checks {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .dia-option { position: relative; }
+  .dia-option input[type="checkbox"] { position: absolute; opacity: 0; }
+  .dia-option label {
+    display: block; padding: 0.6rem 0.3rem; text-align: center;
+    border: 1px solid rgba(255,255,255,0.15); font-size: 0.7rem;
+    cursor: pointer; color: rgba(255,255,255,0.5); transition: all var(--transition);
+    text-transform: none; letter-spacing: 0;
+  }
+  .dia-option label:hover {
+    border-color: var(--gold); color: rgba(255,255,255,0.85); background: rgba(184,164,142,0.1);
+  }
+  .dia-option input:checked + label {
+    background: var(--gold); color: #1B2A3A; border-color: var(--gold); font-weight: 600;
+  }
+  .nota-cita {
+    font-size: 0.72rem; color: rgba(255,255,255,0.4);
+    padding: 0.75rem 1rem; background: rgba(255,255,255,0.05);
+    border-left: 2px solid var(--gold); margin-bottom: 1.2rem;
+  }
+  .form-submit {
+    width: 100%; padding: 1rem; background: var(--gold); color: #1B2A3A;
+    border: none; font-family: var(--font-body); font-size: 0.8rem;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    font-weight: 600; transition: opacity var(--transition);
+  }
+  .form-submit:hover { opacity: 0.85; }
+  .tel-group { display: flex; gap: 0; }
+  .tel-group select {
+    width: auto; flex-shrink: 0;
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    font-size: 0.82rem; padding: 0.75rem 0.5rem;
+  }
+  .tel-group input { flex: 1; border-radius: 0 6px 6px 0 !important; }
+  .req-mark { display: none; color: var(--gold); font-weight: 600; }
+  #busqueda-form.renta-activa .req-mark { display: inline; }
+  .caract-solo-casa { display: none; }
+  .caract-solo-oficina { display: none; }
+  .caract-solo-local { display: none; }
+ 
+  /* ── SERVICIOS ── */
+  #servicios { padding: 6rem 4rem; background: var(--white); }
+  .servicios-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .servicio-card {
+    padding: 2.5rem; background: var(--gray-light);
+    transition: background var(--transition);
+    position: relative; overflow: hidden;
+  }
+  .servicio-card::before {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px; background: var(--gold);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform var(--transition);
+  }
+  .servicio-card:hover { background: var(--white); }
+  .servicio-card:hover::before { transform: scaleX(1); }
+  .servicio-icon {
+    width: 2.2rem; height: 2.2rem; margin-bottom: 1.25rem; display: block;
+    color: var(--gold); stroke: currentColor; fill: none;
+  }
+  .servicio-title {
+    font-family: var(--font-display); font-size: 1.25rem;
+    font-weight: 400; color: var(--charcoal); margin-bottom: 0.75rem;
+  }
+  .servicio-desc { font-size: 0.83rem; color: var(--gray); line-height: 1.8; }
+ 
+  /* ── TESTIMONIOS ── */
+  #testimonios { padding: 6rem 4rem; background: var(--gray-light); }
+  .testimonios-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .testimonio-card {
+    background: var(--white); padding: 2rem;
+    border: 1px solid var(--gray-border);
+  }
+  .testimonio-stars { color: var(--gold); font-size: 0.8rem; margin-bottom: 1rem; }
+  .testimonio-text {
+    font-family: var(--font-display); font-size: 1.05rem; font-weight: 300;
+    font-style: normal; color: var(--charcoal); line-height: 1.7;
+    margin-bottom: 1.25rem;
+  }
+  .testimonio-author { display: flex; align-items: center; gap: 0.75rem; }
+  .testimonio-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--charcoal); display: flex; align-items: center;
+    justify-content: center; font-family: var(--font-display);
+    font-size: 0.9rem; color: var(--white);
+  }
+  .testimonio-name { font-size: 0.82rem; font-weight: 500; color: var(--charcoal); }
+  .testimonio-zona { font-size: 0.75rem; color: var(--gray); }
+ 
+  /* ── FOOTER ── */
+  footer {
+    background: var(--charcoal); padding: 4rem 4rem 2rem;
+  }
+  .footer-grid {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem; margin-bottom: 3rem;
+  }
+  .footer-logo {
+    display: inline-flex; align-items: baseline; line-height: 1;
+    margin-bottom: 1rem;
+  }
+  .footer-logo .logo-inmob {
+    font-family: 'Comfortaa', sans-serif; font-size: 1.6rem;
+    font-weight: 300; color: var(--white); letter-spacing: 0.01em;
+  }
+  .footer-logo .logo-ia {
+    font-family: 'Century Gothic', 'Trebuchet MS', sans-serif; font-size: 1.9rem;
+    font-weight: 400; color: var(--gold); letter-spacing: -0.01em; line-height: 1;
+  }
+  .footer-desc { font-size: 0.83rem; color: rgba(255,255,255,0.5); line-height: 1.8; margin-bottom: 1.5rem; }
+  .footer-social { display: flex; gap: 0.75rem; }
+  .social-link {
+    width: 36px; height: 36px; border: 1px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.5); font-size: 0.8rem; text-decoration: none;
+    transition: all var(--transition);
+  }
+  .social-link:hover { border-color: var(--gold); color: var(--gold); }
+  .footer-col h4 {
+    font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.25rem;
+  }
+  .footer-links { list-style: none; }
+  .footer-links li { margin-bottom: 0.6rem; }
+  .footer-links a {
+    font-size: 0.83rem; color: rgba(255,255,255,0.5);
+    text-decoration: none; transition: color var(--transition);
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 2rem;
+    display: flex; justify-content: center; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+  }
+  .footer-copy { font-size: 0.78rem; color: rgba(255,255,255,0.35); }
+ 
+  /* ── WHATSAPP FLOAT ── */
+  .whatsapp-float {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 200;
+    width: 56px; height: 56px; background: #25D366; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .whatsapp-float:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 30px rgba(37,211,102,0.5);
+  }
+  .whatsapp-float svg { width: 28px; height: 28px; fill: white; }
+ 
+  /* ── SUCCESS MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: rgba(26,26,26,0.7); align-items: center; justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: var(--white); padding: 3rem; max-width: 420px;
+    width: 90%; text-align: center;
+  }
+  .modal-icon { font-size: 2.5rem; margin-bottom: 1.25rem; }
+  .modal-title {
+    font-family: var(--font-display); font-size: 1.6rem;
+    font-weight: 400; color: var(--charcoal); margin-bottom: 0.75rem;
+  }
+  .modal-desc { font-size: 0.88rem; color: var(--gray); line-height: 1.8; margin-bottom: 1.75rem; }
+  .modal-close {
+    padding: 0.75rem 2rem; background: var(--charcoal); color: var(--white);
+    border: none; cursor: pointer; font-family: var(--font-body);
+    font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: background var(--transition);
+  }
+  .modal-close:hover { background: var(--gold-dark); }
+ 
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate { opacity: 0; }
+  .animate.visible { animation: fadeUp 0.7s ease forwards; }
+ 
+  /* ── TABLET ── */
+  @media (max-width: 1100px) {
+    .filter-tabs,
+    .filtro-activo,
+    #apt-filters {
+      margin-left: -1.5rem;
+      margin-right: -1.5rem;
+    }
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    #hero { grid-template-columns: 1fr; }
+    .hero-image { aspect-ratio: 1 / 1; height: auto; }
+    .hero-image > img.hero-static { opacity: 1; object-fit: cover; object-position: center; }
+    .hero-content { padding: 3rem 1.5rem; }
+    .hero-image-overlay { padding: 16rem 1rem 1rem; background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 40%); min-height: 220px; }
+    .hero-stat { gap: 2rem; }
+    .hero-stat-num { font-size: 2.5rem; }
+    .hero-stat-label { font-size: 0.85rem; letter-spacing: 0.05em; }
+    .hero-slide-titulo { font-size: clamp(2.8rem, 6vw, 4rem); }
+    .hero-slide-meta span { font-size: 0.95rem; letter-spacing: 0.08em; }
+    #search-section { padding: 2rem 1.5rem; }
+    .search-bar { grid-template-columns: 1fr; }
+    .search-field { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.15); }
+    #propiedades, #como-funciona, #servicios, #testimonios { padding: 4rem 1.5rem; }
+    #como-funciona .section-header { padding: 4rem 1.5rem 3rem; }
+    .filter-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-left: 0; margin-right: 0; padding: 0; border-bottom: none; margin-bottom: 1rem; }
+    .filter-tab {
+      padding: 0.6rem 0.4rem;
+      font-size: 0.65rem;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      margin-bottom: 0;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .filter-tab.active {
+      border-bottom-color: var(--gold);
+      color: var(--charcoal);
+      background: none;
+    }
+    .filter-tab:hover {
+      border-bottom-color: var(--gold);
+      background: none;
+    }
+    .filtro-activo { flex-wrap: wrap; padding: 0.6rem 1.5rem; gap: 0.5rem; height: auto; margin-left: -1.5rem; margin-right: -1.5rem; }
+    .filtro-activo-field { height: 40px; flex: 1 1 calc(50% - 0.5rem); min-width: 120px; border-right: none; padding: 0; }
+    .filtro-activo-field .select-pill { width: 100%; height: 100%; border: 1px solid rgba(255,255,255,0.25); border-radius: 16px; padding: 0 0.4rem; gap: 0.2rem; }
+    .filtro-activo-field .select-pill label { font-size: 0.5rem; letter-spacing: 0.03em; padding-left: 0.3rem; pointer-events: auto; cursor: pointer; }
+    .filtro-activo-field .select-pill label::after { margin-left: 0.2rem; width: 0.5px; }
+    .filtro-activo-field .select-pill select { font-size: 0.6rem; padding-right: 0.2rem; padding-left: 0; }
+    .filtro-activo-actions { height: 36px; width: 100%; justify-content: flex-end; padding: 0.2rem 0.3rem; border-right: none; }
+    .apt-filters { flex-wrap: wrap; gap: 0.3rem; padding: 0.4rem 1.5rem; height: auto; margin-left: -1.5rem; margin-right: -1.5rem; }
+    .apt-filter-group { flex: 1 1 calc(50% - 0.3rem); min-width: 100px; height: 32px; border-right: none; padding: 0; }
+    .apt-filter-group .select-pill { width: 100%; height: 100%; border: 1px solid #b8b3a8; border-radius: 14px; padding: 0 0.3rem; gap: 0.15rem; }
+    .apt-filter-group .select-pill label { font-size: 0.48rem; letter-spacing: 0.02em; padding-left: 0.2rem; pointer-events: auto; cursor: pointer; }
+    .apt-filter-group .select-pill select { font-size: 0.58rem; padding: 0 0.2rem; }
+    #apt-filters { margin-left: -1.5rem !important; margin-right: -1.5rem !important; padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+    .filter-tabs { padding-left: 0 !important; padding-right: 0 !important; }
+    .properties-grid, .testimonios-grid, .servicios-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr; gap: 0; }
+    .steps-grid::before { display: none; }
+    .step { padding: 2.5rem 2rem; border-right: none; border-bottom: none; }
+    .step-num { font-size: 3.5rem; }
+    .visita-row { padding: 3rem 1.5rem 4rem; }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    footer { padding: 3rem 1.5rem 2rem; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  /* ── MOBILE SMALL ── */
+  @media (max-width: 480px) {
+    .hero-slide-titulo { font-size: clamp(1.8rem, 4vw, 2.5rem); }
+    .hero-slide-meta span { font-size: 0.65rem; letter-spacing: 0.06em; }
+    .hero-stat-num { font-size: 1.8rem; }
+    .hero-stat-label { font-size: 0.7rem; }
+    .filtro-activo-actions { display: none; }
+    .visita-row { padding: 2rem 1rem 3rem; }
+    .visita-content { padding: 0 1rem; }
+    .cita-form { padding: 0 1rem; }
+    .visita-title { white-space: normal; }
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-text"><span class="logo-inmob">Inmob</span><span class="logo-ia">IA<span style="font-size:0.38em;font-weight:400;vertical-align:super;letter-spacing:0.05em">GT</span></span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#propiedades">Propiedades</a></li>
+    <li><a href="#como-funciona">Búsqueda personalizada</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#testimonios">Testimonios</a></li>
+    <li><a href="https://wa.me/50247073915?text=Hola,%20quisiera%20m%C3%A1s%20informaci%C3%B3n" target="_blank">Contacto</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:0.6rem">
+    <a href="/asesores.html" class="nav-cta">Área de asesores</a>
+    <a href="/asesores.html#login" class="nav-login" onclick="irAlLogin(event)">Iniciar sesión</a>
+  </div>
+</nav>
+ 
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Asesoría inmobiliaria en Guatemala</div>
+    <h1 class="hero-title">
+      Encuentre la <em>propiedad ideal</em><br>con asesoría experta
+    </h1>
+    <p class="hero-sub">
+      Propiedades verificadas en las mejores zonas de Guatemala. Le acompañamos desde la primera búsqueda hasta la entrega de llaves.
+    </p>
+    <div class="hero-actions">
+      <a href="#propiedades" class="btn-primary">Ver propiedades</a>
+      <a href="#busqueda-personalizada" class="btn-outline">Búsqueda personalizada</a>
+    </div>
+  </div>
+  <div class="hero-image" id="hero-image-wrap">
+    <!-- slides insertados por JS; fallback estático mientras carga -->
+    <img src="recursos/1-exterior-1 (1).jpg" alt="Propiedad destacada" loading="eager" decoding="async" class="hero-static" id="hero-static-img" width="900" height="1200">
+    <div class="hero-nav hero-nav-prev">
+      <div class="hero-nav-arrow" onclick="heroGoTo(heroSlideIndex - 1)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+    </div>
+    <div class="hero-nav hero-nav-next">
+      <div class="hero-nav-arrow" onclick="heroGoTo(heroSlideIndex + 1)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+    <div id="hero-dots" class="hero-dots"></div>
+    <div class="hero-image-overlay">
+      <div class="hero-stat">
+        <div class="hero-stat-item">
+          <span class="hero-stat-num">+150</span>
+          <span class="hero-stat-label">Propiedades activas</span>
+        </div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-num">+300</span>
+          <span class="hero-stat-label">Clientes satisfechos</span>
+        </div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-num">5★</span>
+          <span class="hero-stat-label">Calificación promedio</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- BÚSQUEDA -->
+<div id="search-section">
+  <div class="search-bar">
+    <div class="search-field">
+      <label>Tipo de operación</label>
+      <select id="select-operacion" onchange="actualizarPresupuesto()">
+        <option>Renta / Alquiler</option>
+        <option>Compra / Venta</option>
+      </select>
+    </div>
+    <div class="search-field">
+      <label>Tipo de propiedad</label>
+      <select>
+        <option>Apartamentos</option>
+        <option>Casas</option>
+        <option>Terrenos</option>
+        <option>Oficinas</option>
+        <option>Locales Comerciales</option>
+      </select>
+    </div>
+    <div class="search-field">
+      <label>Zona / Sector</label>
+      <select>
+        <option>Todas las zonas</option>
+        <option>Zona 1</option>
+        <option>Zona 2</option>
+        <option>Zona 3</option>
+        <option>Zona 4</option>
+        <option>Zona 5</option>
+        <option>Zona 6</option>
+        <option>Zona 7</option>
+        <option>Zona 8</option>
+        <option>Zona 9</option>
+        <option>Zona 10</option>
+        <option>Zona 11</option>
+        <option>Zona 12</option>
+        <option>Zona 13</option>
+        <option>Zona 14</option>
+        <option>Zona 15</option>
+        <option>Zona 16</option>
+        <option>Zona 17</option>
+        <option>Zona 18</option>
+        <option>Zona 19</option>
+        <option>Zona 21</option>
+        <option>Zona 24</option>
+        <option>Zona 25</option>
+        <option>Mixco</option>
+        <option>Villa Nueva</option>
+        <option>San Miguel Petapa</option>
+        <option>Santa Catarina Pinula</option>
+        <option>San José Pinula</option>
+        <option>Amatitlán</option>
+        <option>Villa Canales</option>
+        <option>Chinautla</option>
+        <option>San Pedro Sacatepéquez</option>
+        <option>San Juan Sacatepéquez</option>
+        <option>San Raymundo</option>
+        <option>Chuarrancho</option>
+        <option>Fraijanes</option>
+        <option>Palencia</option>
+      </select>
+    </div>
+    <div class="search-field">
+      <label>Presupuesto máximo</label>
+      <select id="select-presupuesto" onchange="buscarPropiedades()">
+        <option>Sin límite</option>
+        <option>Hasta Q3,000/mes</option>
+        <option>Hasta Q5,000/mes</option>
+        <option>Hasta Q8,000/mes</option>
+        <option>Hasta Q15,000/mes</option>
+        <option>Hasta Q30,000/mes</option>
+        <option>Hasta Q50,000/mes</option>
+        <option>Hasta Q100,000/mes</option>
+        <option>Q100,000+/mes</option>
+      </select>
+      <!-- opciones se regeneran dinámicamente por actualizarPresupuesto() -->
+    </div>
+    <button class="search-btn" onclick="buscarPropiedades()">
+      &#x2315; Buscar
+    </button>
+  </div>
+</div>
+ 
+<!-- PROPIEDADES -->
+<section id="propiedades">
+  <div class="section-header animate">
+    <div class="section-badge">Portafolio</div>
+    <h2 class="section-title">Propiedades <em>disponibles</em></h2>
+    <p class="section-sub" style="text-align: center; max-width: 600px;">Contamos con la red más amplia de socios lo cual garantiza encontrar la más amplia galería de propiedades de Guatemala</p>
+  </div>
+ 
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filtrarMultiple('todos', event)">Todas</button>
+    <button class="filter-tab" onclick="filtrarMultiple('renta', event)">En renta</button>
+    <button class="filter-tab" onclick="filtrarMultiple('venta', event)">En venta</button>
+    <button class="filter-tab" onclick="filtrarMultiple('apartamento', event)">Apartamentos</button>
+    <button class="filter-tab" onclick="filtrarMultiple('casa', event)">Casas</button>
+    <button class="filter-tab" onclick="filtrarMultiple('terreno', event)">Terrenos</button>
+    <button class="filter-tab" onclick="filtrarMultiple('oficina', event)">Oficinas</button>
+    <button class="filter-tab" onclick="filtrarMultiple('local', event)">Locales comerciales</button>
+  </div>
+
+  <div class="filtro-activo visible" id="filtro-resumen">
+    <div class="filtro-activo-field">
+      <div class="select-pill">
+        <label for="fr-operacion">Operación</label>
+        <select id="fr-operacion" onchange="aplicarFiltroActivo()">
+          <option value="">Todas</option>
+          <option>Renta / Alquiler</option>
+          <option>Compra / Venta</option>
+        </select>
+      </div>
+    </div>
+    <div class="filtro-activo-field">
+      <div class="select-pill">
+        <label for="fr-propiedad">Propiedad</label>
+        <select id="fr-propiedad" onchange="aplicarFiltroActivo()">
+          <option value="">Todos</option>
+          <option>Apartamentos</option>
+          <option>Casas</option>
+          <option>Terrenos</option>
+          <option>Oficinas</option>
+          <option>Locales Comerciales</option>
+        </select>
+      </div>
+    </div>
+    <div class="filtro-activo-field">
+      <div class="select-pill">
+        <label for="fr-zona">Zona / Sector</label>
+        <select id="fr-zona" onchange="aplicarFiltroActivo()">
+          <option>Todas las zonas</option>
+          <option>Zona 1</option><option>Zona 2</option><option>Zona 3</option><option>Zona 4</option>
+          <option>Zona 5</option><option>Zona 6</option><option>Zona 7</option><option>Zona 8</option>
+          <option>Zona 9</option><option>Zona 10</option><option>Zona 11</option><option>Zona 12</option>
+          <option>Zona 13</option><option>Zona 14</option><option>Zona 15</option><option>Zona 16</option>
+          <option>Zona 17</option><option>Zona 18</option><option>Zona 19</option><option>Zona 21</option>
+          <option>Zona 24</option><option>Zona 25</option>
+          <option>Mixco</option><option>Villa Nueva</option><option>San Miguel Petapa</option>
+          <option>Santa Catarina Pinula</option><option>San José Pinula</option><option>Amatitlán</option>
+          <option>Villa Canales</option><option>Chinautla</option><option>San Pedro Sacatepéquez</option>
+          <option>San Juan Sacatepéquez</option><option>San Raymundo</option><option>Chuarrancho</option>
+          <option>Fraijanes</option><option>Palencia</option>
+        </select>
+      </div>
+    </div>
+    <div class="filtro-activo-field">
+      <div class="select-pill">
+        <label for="fr-presupuesto">Presupuesto</label>
+        <select id="fr-presupuesto" onchange="aplicarFiltroActivo()">
+          <option>Sin límite</option>
+          <option>Hasta Q3,000/mes</option>
+          <option>Hasta Q5,000/mes</option>
+          <option>Hasta Q8,000/mes</option>
+          <option>Hasta Q15,000/mes</option>
+          <option>Hasta Q30,000/mes</option>
+          <option>Hasta Q50,000/mes</option>
+          <option>Hasta Q100,000/mes</option>
+          <option>Q100,000+/mes</option>
+        </select>
+        <!-- opciones se regeneran dinámicamente por actualizarPresupuesto() -->
+      </div>
+    </div>
+    <div class="filtro-activo-actions">
+      <button class="filtro-activo-btn filtro-activo-btn-clear" onclick="limpiarFiltrosBarra()">Limpiar</button>
+    </div>
+  </div>
+
+  <div class="apt-filters visible" id="apt-filters">
+    <div class="apt-filter-group">
+      <div class="select-pill">
+        <label>Habitaciones</label>
+        <select id="f-habitaciones" onchange="aplicarFiltrosApt()">
+          <option value="">Todas</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4+</option>
+        </select>
+      </div>
+    </div>
+    <div class="apt-filter-group">
+      <div class="select-pill">
+        <label>Parqueos</label>
+        <select id="f-parqueos" onchange="aplicarFiltrosApt()">
+          <option value="">Todos</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6+</option>
+        </select>
+      </div>
+    </div>
+    <div class="apt-filter-group">
+      <div class="select-pill">
+        <label>Orden de precio</label>
+        <select id="f-precio" onchange="aplicarFiltrosApt()">
+          <option value="">Sin ordenar</option>
+          <option value="asc">Menor precio primero</option>
+          <option value="desc">Mayor precio primero</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;padding:0 1rem;flex-shrink:0">
+      <button class="apt-clear-btn" onclick="limpiarFiltrosApt()">Limpiar</button>
+    </div>
+  </div>
+ 
+  <div class="properties-grid" id="properties-grid">
+
+    <!-- Las propiedades se cargan desde la API -->
+    <div id="props-loading" style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#999">
+      <div style="width:36px;height:36px;border:3px solid #e0d8cc;border-top-color:#c9a84c;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 16px"></div>
+      Cargando propiedades...
+    </div>
+    <div id="props-empty" style="display:none;grid-column:1/-1;text-align:center;padding:60px 20px;color:#999">
+      <div style="font-size:3rem;margin-bottom:12px">🏠</div>
+      <p>No se encontraron propiedades con estos filtros.</p>
+    </div>
+
+  </div>
+ 
+</section>
+ 
+<!-- CÓMO FUNCIONA -->
+<section id="como-funciona">
+  <div class="section-header animate">
+    <div class="section-badge">Búsqueda personalizada</div>
+    <h2 class="section-title section-title--question">¿No encontró <em>lo que busca?</em></h2>
+    <p class="section-sub--destacado">Descríbanos su propiedad ideal y nosotros la encontramos por usted, <em class="frase-clave">en 3 pasos.</em></p>
+    <p class="steps-subclaim">Sin costo ni compromiso.</p>
+  </div>
+  <div class="steps-grid">
+
+    <div class="step animate">
+      <div class="step-num">01</div>
+      <div class="step-label"><span>Paso 01</span></div>
+      <h3 class="step-title">Descríbanos la propiedad que necesita</h3>
+      <p class="step-desc">Describa las características de la propiedad que busca en nuestro formulario de búsqueda personalizada.</p>
+      <span class="step-highlight">Solo toma 2 minutos</span>
+    </div>
+
+    <div class="step animate">
+      <div class="step-num">02</div>
+      <div class="step-label"><span>Paso 02</span></div>
+      <h3 class="step-title">Reciba acompañamiento por WhatsApp</h3>
+      <p class="step-desc">Nuestros asesores buscan por usted y le envían opciones personalizadas sin que tenga que buscar nada.</p>
+      <span class="step-highlight">Respuesta en menos de 24 horas</span>
+    </div>
+
+    <div class="step animate">
+      <div class="step-num">03</div>
+      <div class="step-label"><span>Paso 03</span></div>
+      <h3 class="step-title">Elija, agende su visita y cierre el trato</h3>
+      <p class="step-desc">Seleccione la propiedad que más le interese, coordinamos la visita con el propietario y le acompañamos en todo el proceso hasta la entrega de llaves. Sin complicaciones.</p>
+      <span class="step-highlight">Asesoría sin costo.</span>
+    </div>
+
+  </div>
+
+  <div class="visita-row" id="busqueda-personalizada">
+  <div class="visita-content animate">
+    <h2 class="visita-title">Formulario de <em>búsqueda personalizada</em></h2>
+    <p class="visita-desc">Complete el formulario indicando las características de la propiedad de su interés. Buscaremos opciones con esas características y le enviaremos por WhatsApp las opciones disponibles.</p>
+  </div>
+ 
+  <div class="cita-form animate">
+    <form id="busqueda-form" onsubmit="enviarBusqueda(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre y apellido <span class="req-mark">*</span></label>
+          <input id="b-nombre" type="text" placeholder="Su nombre" required>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp <span class="req-mark">*</span></label>
+          <div class="tel-group">
+            <select id="b-codigo-pais">
+              <option value="+502">🇬🇹 +502</option>
+              <option value="+52">🇲🇽 +52</option>
+              <option value="+503">🇸🇻 +503</option>
+              <option value="+504">🇭🇳 +504</option>
+              <option value="+505">🇳🇮 +505</option>
+              <option value="+506">🇨🇷 +506</option>
+              <option value="+507">🇵🇦 +507</option>
+              <option value="+53">🇨🇺 +53</option>
+              <option value="+1-809">🇩🇴 +1-809</option>
+              <option value="+57">🇨🇴 +57</option>
+              <option value="+58">🇻🇪 +58</option>
+              <option value="+593">🇪🇨 +593</option>
+              <option value="+51">🇵🇪 +51</option>
+              <option value="+591">🇧🇴 +591</option>
+              <option value="+56">🇨🇱 +56</option>
+              <option value="+54">🇦🇷 +54</option>
+              <option value="+598">🇺🇾 +598</option>
+              <option value="+595">🇵🇾 +595</option>
+            </select>
+            <input id="b-whatsapp" type="tel" placeholder="0000-0000" required>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Correo electrónico <span class="req-mark">*</span></label>
+          <input id="b-email" type="email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label>Operación</label>
+          <select id="b-operacion" required onchange="actualizarObligatoriosRenta()">
+            <option value="">Seleccionar...</option>
+            <option>Renta</option>
+            <option>Compra</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de propiedad <span class="req-mark">*</span></label>
+          <select id="b-tipo" required onchange="actualizarObligatoriosRenta()">
+            <option value="">Seleccionar...</option>
+            <option>Apartamento</option>
+            <option>Casa</option>
+            <option>Townhouse</option>
+            <option>Terreno</option>
+            <option>Oficina</option>
+            <option>Local comercial</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group" id="grp-fecha">
+          <label>Fecha prevista de mudanza <span class="req-mark">*</span></label>
+          <input id="b-fecha" type="date">
+        </div>
+      </div>
+
+      <!-- ── VER MÁS ── -->
+      <div style="text-align:center;margin:1.2rem 0 0.25rem">
+        <button type="button" id="btn-ver-mas-b" onclick="toggleBusquedaExtra()" style="
+          background:rgba(201,168,76,0.15);border:1.5px solid var(--gold);
+          color:var(--gold);border-radius:20px;padding:0.55rem 1.8rem;
+          font-size:0.88rem;font-weight:600;font-family:var(--font-body);cursor:pointer;
+          transition:all 0.2s;display:inline-flex;align-items:center;gap:0.5rem;
+          letter-spacing:0.04em;
+        ">Ver más <span id="ver-mas-b-icon" style="font-size:1rem;line-height:1;transition:transform 0.3s">▼</span></button>
+      </div>
+
+      <!-- ── CAMPOS EXTRA ── -->
+      <div id="busqueda-extra" style="overflow:hidden;max-height:0;opacity:0;transition:max-height 0.45s ease,opacity 0.3s ease">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ubicación preferida <span class="req-mark">*</span></label>
+          <select id="b-ubicacion">
+            <option value="">Seleccionar...</option>
+            <optgroup label="Zonas Ciudad de Guatemala">
+              <option>Zona 1</option>
+              <option>Zona 2</option>
+              <option>Zona 3</option>
+              <option>Zona 4</option>
+              <option>Zona 5</option>
+              <option>Zona 6</option>
+              <option>Zona 7</option>
+              <option>Zona 8</option>
+              <option>Zona 9</option>
+              <option>Zona 10</option>
+              <option>Zona 11</option>
+              <option>Zona 12</option>
+              <option>Zona 13</option>
+              <option>Zona 14</option>
+              <option>Zona 15</option>
+              <option>Zona 16</option>
+              <option>Zona 17</option>
+              <option>Zona 18</option>
+              <option>Zona 19</option>
+              <option>Zona 21</option>ord
+              <option>Zona 24</option>
+              <option>Zona 25</option>
+            </optgroup>
+            <optgroup label="Municipios">
+              <option>Mixco</option>
+              <option>Villa Nueva</option>
+              <option>San Miguel Petapa</option>
+              <option>Villa Canales</option>
+              <option>Amatitlán</option>
+              <option>Santa Catarina Pinula</option>
+              <option>San José Pinula</option>
+              <option>Fraijanes</option>
+              <option>Chinautla</option>
+              <option>San Pedro Ayampuc</option>
+              <option>Palencia</option>
+              <option>San Juan Sacatepéquez</option>
+              <option>San Pedro Sacatepéquez</option>
+              <option>San Raymundo</option>
+              <option>Chuarrancho</option>
+            </optgroup>
+            <optgroup label="Otro">
+              <option>Otro (describir en campo de detalles)</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>(Más detalles) Colonias o sectores preferidos</label>
+          <input id="b-ubicacion-detalle" type="text" placeholder="Ej: Cayalá, Vista Hermosa, Los Eucaliptos...">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Presupuesto máximo aproximado <span class="req-mark">*</span></label>
+          <input id="b-presupuesto" type="text" placeholder="Ej: Q5,000/mes o Q800,000">
+        </div>
+        <div class="form-group">
+          <label>Mínimo de metros cuadrados <span class="req-mark" id="req-metros">*</span></label>
+          <input id="b-metros" type="text" placeholder="Ej: 80 m²">
+        </div>
+      </div>
+      <div class="form-row" id="grp-habitaciones-parqueos">
+        <div class="form-group">
+          <label id="lbl-habitaciones">Habitaciones <span class="req-mark">*</span></label>
+          <select id="b-habitaciones">
+            <option value="">Seleccionar...</option>
+            <option>1 habitación</option>
+            <option>2 habitaciones</option>
+            <option>3 habitaciones</option>
+            <option>4 habitaciones</option>
+            <option>5 o más habitaciones</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Parqueos <span class="req-mark">*</span></label>
+          <select id="b-parqueos">
+            <option value="">Seleccionar...</option>
+            <option>Sin parqueo</option>
+            <option>1 parqueo</option>
+            <option>2 parqueos</option>
+            <option>3 parqueos</option>
+            <option>4 parqueos</option>
+            <option>5 parqueos</option>
+            <option>6 o más parqueos</option>
+            <option>Parqueo para moto</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" id="grp-banos-integrantes">
+        <div class="form-group">
+          <label>Baños <span class="req-mark">*</span></label>
+          <select id="b-banos">
+            <option value="">Seleccionar...</option>
+            <option>1 baño</option>
+            <option>2 baños</option>
+            <option>3 baños</option>
+            <option>4 o más baños</option>
+          </select>
+        </div>
+        <div class="form-group" id="grp-integrantes">
+          <label>Total de integrantes de la familia</label>
+          <input id="b-integrantes" type="number" min="1" placeholder="Ej: 4">
+        </div>
+      </div>
+
+      <div class="horarios-group">
+        <label class="main-label">Características deseadas <span style="font-size:0.65rem; color:rgba(255,255,255,0.35); font-weight:400; text-transform:none; letter-spacing:0;">— seleccione una o más opciones</span></label>
+        <div class="dias-checks">
+          <div class="dia-option caract-no-terreno caract-no-local"><input type="checkbox" id="balcon" name="caract-adic" value="Balcón"><label for="balcon">Balcón</label></div>
+          <div class="dia-option caract-no-terreno caract-no-local"><input type="checkbox" id="jardin-adic" name="caract-adic" value="Jardín"><label for="jardin-adic">Jardín</label></div>
+          <div class="dia-option caract-no-terreno caract-no-local"><input type="checkbox" id="terraza" name="caract-adic" value="Terraza"><label for="terraza">Terraza</label></div>
+          <div class="dia-option caract-no-local"><input type="checkbox" id="residencial" name="caract-adic" value="Dentro de residencial"><label for="residencial">Dentro de residencial</label></div>
+          <div class="dia-option caract-no-terreno caract-no-casa caract-no-local"><input type="checkbox" id="primer-nivel" name="caract-adic" value="Primer nivel"><label for="primer-nivel">Primer nivel</label></div>
+          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="dorm-servicio" name="caract-adic" value="Dormitorio de servicio"><label for="dorm-servicio">Dormitorio de servicio</label></div>
+          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="estudio" name="caract-adic" value="Estudio"><label for="estudio">Estudio</label></div>
+          <div class="dia-option caract-no-terreno caract-no-casa caract-no-local"><input type="checkbox" id="gimnasio-adic" name="caract-adic" value="Gimnasio"><label for="gimnasio-adic">Gimnasio</label></div>
+          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="cd-amueblado" name="caract-adic" value="Amueblado"><label for="cd-amueblado">Amueblado</label></div>
+          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="cd-linea" name="caract-adic" value="Solo línea blanca"><label for="cd-linea">Solo línea blanca</label></div>
+          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="cd-sin-linea" name="caract-adic" value="Sin línea blanca"><label for="cd-sin-linea">Sin línea blanca</label></div>
+          <div class="dia-option caract-solo-casa"><input type="checkbox" id="parqueo-techado" name="caract-adic" value="Parqueo techado"><label for="parqueo-techado">Parqueo techado</label></div>
+          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="recepcion" name="caract-adic" value="Recepción en oficina"><label for="recepcion">Recepción en oficina</label></div>
+          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="no-tabicada" name="caract-adic" value="No tabicada"><label for="no-tabicada">No tabicada</label></div>
+          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="cocina-of" name="caract-adic" value="Cocina"><label for="cocina-of">Cocina</label></div>
+          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="sala-reunion-of" name="caract-adic" value="Sala de reuniones dentro de oficinas"><label for="sala-reunion-of">Sala de reuniones dentro de oficinas</label></div>
+          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="sala-reunion-ed" name="caract-adic" value="Sala de reuniones en edificio"><label for="sala-reunion-ed">Sala de reuniones en edificio</label></div>
+          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="casa-oficina" name="caract-adic" value="Casa como oficina"><label for="casa-oficina">Casa como oficina</label></div>
+          <div class="dia-option caract-solo-local"><input type="checkbox" id="recepcion-local" name="caract-adic" value="Recepción dentro de local"><label for="recepcion-local">Recepción dentro de local</label></div>
+          <div class="dia-option caract-solo-local"><input type="checkbox" id="tabicado" name="caract-adic" value="Tabicado"><label for="tabicado">Tabicado</label></div>
+          <div class="dia-option caract-solo-local"><input type="checkbox" id="no-tabicado-local" name="caract-adic" value="No tabicado"><label for="no-tabicado-local">No tabicado</label></div>
+          <div class="dia-option caract-solo-local"><input type="checkbox" id="centro-comercial" name="caract-adic" value="Dentro de centro comercial"><label for="centro-comercial">Dentro de centro comercial</label></div>
+          <div class="dia-option caract-solo-local"><input type="checkbox" id="calle-principal" name="caract-adic" value="Sobre calle principal"><label for="calle-principal">Sobre calle principal</label></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Descripción adicional (opcional)</label>
+        <textarea id="b-desc-adic" placeholder="Indique cualquier detalle importante: piso preferido, vista, tamaño aproximado, fecha de ingreso, etc."></textarea>
+      </div>
+
+      <div class="form-row" id="grp-giro" style="display:none;">
+        <div class="form-group">
+          <label>Giro de negocio</label>
+          <input type="text" placeholder="Ej: Restaurante, Consultorio, Tienda de ropa...">
+        </div>
+        <div class="form-group">
+          <label>Descripción del giro de negocio</label>
+          <input type="text" placeholder="Describa brevemente su actividad comercial">
+        </div>
+      </div>
+
+      <div class="horarios-group" id="grp-mascota">
+        <label class="main-label">¿Tiene mascota?</label>
+        <div class="horarios-checks" style="grid-template-columns: repeat(2, 1fr); max-width: 260px;">
+          <div class="horario-option"><input type="radio" id="mascota-si" name="tiene-mascota" value="Sí" onchange="toggleDetalleMascota()"><label for="mascota-si">Sí</label></div>
+          <div class="horario-option"><input type="radio" id="mascota-no" name="tiene-mascota" value="No" onchange="toggleDetalleMascota()"><label for="mascota-no">No</label></div>
+        </div>
+      </div>
+
+      <div class="form-group" id="grp-desc-mascota">
+        <label>Descripción de mascota(s)</label>
+        <textarea id="b-desc-mascota" placeholder="Indique cantidad, raza y peso aproximado de cada mascota. Ej: 1 Golden Retriever, 30 kg / 1 gato doméstico, 4 kg"></textarea>
+      </div>
+
+      <div class="form-group" id="grp-fotos-mascota">
+        <label>Fotografías de mascota(s) (Importante)</label>
+        <input id="b-fotos-mascota" type="file" accept="image/*" multiple style="padding: 0.6rem 1rem; cursor: pointer;">
+      </div>
+
+      <button type="submit" class="form-submit" style="margin-top:1.5rem">Enviar búsqueda personalizada →</button>
+      </div><!-- /busqueda-extra -->
+    </form>
+  </div>
+
+  <div class="cita-form animate" style="display:none;">
+    <form id="cita-form" onsubmit="enviarCita(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre y apellido</label>
+          <input type="text" placeholder="Su nombre" required>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <input type="tel" placeholder="+502 0000-0000" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de propiedad</label>
+          <select required>
+            <option value="">Seleccionar...</option>
+            <option>Apartamento en renta</option>
+            <option>Casa en renta</option>
+            <option>Apartamento en venta</option>
+            <option>Casa en venta</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Zona de interés</label>
+          <select>
+            <option>Cualquier zona</option>
+            <option>Zona 10</option>
+            <option>Zona 14</option>
+            <option>Zona 15</option>
+            <option>Zona 16 / Cayalá</option>
+            <option>Mixco</option>
+            <option>Villa Nueva</option>
+          </select>
+        </div>
+      </div>
+ 
+      <div class="horarios-group">
+        <label class="main-label">Días disponibles para visita</label>
+        <div class="dias-checks">
+          <div class="dia-option"><input type="checkbox" id="lun" name="dias" value="Lunes"><label for="lun">Lunes</label></div>
+          <div class="dia-option"><input type="checkbox" id="mar" name="dias" value="Martes"><label for="mar">Martes</label></div>
+          <div class="dia-option"><input type="checkbox" id="mie" name="dias" value="Miércoles"><label for="mie">Miércoles</label></div>
+          <div class="dia-option"><input type="checkbox" id="jue" name="dias" value="Jueves"><label for="jue">Jueves</label></div>
+          <div class="dia-option"><input type="checkbox" id="vie" name="dias" value="Viernes"><label for="vie">Viernes</label></div>
+          <div class="dia-option"><input type="checkbox" id="sab" name="dias" value="Sábado"><label for="sab">Sábado</label></div>
+          <div class="dia-option"><input type="checkbox" id="dom" name="dias" value="Domingo"><label for="dom">Domingo</label></div>
+          <div class="dia-option"><input type="checkbox" id="flex" name="dias" value="Flexible"><label for="flex">Flexible</label></div>
+        </div>
+      </div>
+ 
+      <div class="horarios-group">
+        <label class="main-label">Rango horario preferido</label>
+        <div class="horarios-checks">
+          <div class="horario-option"><input type="checkbox" id="manana" name="horario" value="Mañana (8am–12pm)"><label for="manana">Mañana<br><small>8am – 12pm</small></label></div>
+          <div class="horario-option"><input type="checkbox" id="tarde" name="horario" value="Tarde (12pm–5pm)"><label for="tarde">Tarde<br><small>12pm – 5pm</small></label></div>
+          <div class="horario-option"><input type="checkbox" id="noche" name="horario" value="Tarde-noche (5pm–7pm)"><label for="noche">Tarde-noche<br><small>5pm – 7pm</small></label></div>
+        </div>
+      </div>
+ 
+      <div class="nota-cita">
+        Su cita está sujeta a confirmación por parte del propietario. Le notificaremos por WhatsApp a la brevedad.
+      </div>
+ 
+      <div class="form-group">
+        <label>Comentario adicional (opcional)</label>
+        <textarea placeholder="Indique número de habitaciones, presupuesto, o cualquier detalle relevante..."></textarea>
+      </div>
+ 
+      <button type="submit" class="form-submit">Solicitar visita →</button>
+    </form>
+  </div>
+  </div><!-- /visita-row -->
+</section>
+ 
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="section-header animate">
+    <div class="section-badge">Lo que ofrecemos</div>
+    <h2 class="section-title">Nuestros <em>servicios</em></h2>
+  </div>
+  <div class="servicios-grid">
+    <div class="servicio-card animate">
+      <svg class="servicio-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15v-6H9v6H3.75A.75.75 0 013 21V9.75z"/></svg>
+      <h3 class="servicio-title">Casas y apartamentos en renta</h3>
+      <p class="servicio-desc">Encuentre el espacio perfecto para vivir con opciones verificadas en las mejores zonas de Guatemala. Le acompañamos hasta la entrega de llaves.</p>
+    </div>
+    <div class="servicio-card animate">
+      <svg class="servicio-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M12 15h9M17 13v4"/></svg>
+      <h3 class="servicio-title">Compra y venta de propiedades</h3>
+      <p class="servicio-desc">Asesoría integral para comprar o vender con seguridad. Evaluamos, negociamos y le acompañamos en cada paso del proceso legal y financiero.</p>
+    </div>
+    <div class="servicio-card animate">
+      <svg class="servicio-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-6 7 6v12M9 21V13h6v8"/></svg>
+      <h3 class="servicio-title">Asesoría de inversión</h3>
+      <p class="servicio-desc">Identifique oportunidades con alto rendimiento. Analizamos el mercado para que su inversión inmobiliaria maximice su retorno.</p>
+    </div>
+    <div class="servicio-card animate">
+      <svg class="servicio-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      <h3 class="servicio-title">Gestión de contratos</h3>
+      <p class="servicio-desc">Redactamos y revisamos contratos de arrendamiento y compraventa con claridad y transparencia para proteger sus intereses.</p>
+    </div>
+    <div class="servicio-card animate">
+      <svg class="servicio-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 7h2v6H7zM11 10h2v3h-2zM15 8h2v5h-2z"/></svg>
+      <h3 class="servicio-title">Desarrollos y proyectos nuevos</h3>
+      <p class="servicio-desc">Conectamos compradores e inversionistas con los mejores proyectos de desarrollo inmobiliario en Guatemala.</p>
+    </div>
+    <div class="servicio-card animate">
+      <svg class="servicio-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 10h8M8 14h5"/></svg>
+      <h3 class="servicio-title">Atención personalizada</h3>
+      <p class="servicio-desc">Nuestro equipo está disponible para responder sus consultas por WhatsApp en cualquier momento. Respuesta rápida garantizada.</p>
+    </div>
+  </div>
+</section>
+ 
+<!-- TESTIMONIOS -->
+<section id="testimonios">
+  <div class="section-header animate">
+    <div class="section-badge">Testimonios</div>
+    <h2 class="section-title">Lo que dicen<br><em>nuestros clientes</em></h2>
+  </div>
+  <div class="testimonios-grid">
+    <div class="testimonio-card animate">
+      <div class="testimonio-stars">★★★★★</div>
+      <p class="testimonio-text">"En menos de 48 horas ya tenía tres opciones de apartamentos que se ajustaban exactamente a lo que buscaba. El proceso fue increíblemente ágil."</p>
+      <div class="testimonio-author">
+        <div class="testimonio-avatar">MR</div>
+        <div>
+          <div class="testimonio-name">María Rodríguez</div>
+          <div class="testimonio-zona">Zona 10, Guatemala</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonio-card animate">
+      <div class="testimonio-stars">★★★★★</div>
+      <p class="testimonio-text">"Me ayudaron a vender mi casa en tiempo récord y al mejor precio. El acompañamiento fue profesional desde el primer contacto hasta la firma."</p>
+      <div class="testimonio-author">
+        <div class="testimonio-avatar">CA</div>
+        <div>
+          <div class="testimonio-name">Carlos Aldana</div>
+          <div class="testimonio-zona">Vista Hermosa, Zona 15</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonio-card animate">
+      <div class="testimonio-stars">★★★★★</div>
+      <p class="testimonio-text">"Lo mejor fue que coordinaron todo por WhatsApp. La confirmación de la visita llegó el mismo día y el asesor fue puntual y muy amable."</p>
+      <div class="testimonio-author">
+        <div class="testimonio-avatar">LP</div>
+        <div>
+          <div class="testimonio-name">Lucía Pérez</div>
+          <div class="testimonio-zona">Cayalá, Zona 16</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="footer-logo"><span class="logo-inmob">Inmob</span><span class="logo-ia">IA<span style="font-size:0.38em;font-weight:400;vertical-align:super;letter-spacing:0.05em">GT</span></span></span>
+      <p class="footer-desc">Asesoría inmobiliaria profesional en Guatemala. Propiedades verificadas, proceso transparente y acompañamiento experto en cada paso.</p>
+      <div class="footer-social">
+        <a href="https://facebook.com/urbainmueble" class="social-link" target="_blank">f</a>
+        <a href="https://instagram.com/urba.inmueble/" class="social-link" target="_blank">in</a>
+        <a href="https://wa.me/50247073915" class="social-link" target="_blank">w</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Propiedades</h4>
+      <ul class="footer-links">
+        <li><a href="#propiedades" onclick="activarFiltroDesdeFooter('apartamento','renta')">Apartamentos en renta</a></li>
+        <li><a href="#propiedades" onclick="activarFiltroDesdeFooter('casa','renta')">Casas en renta</a></li>
+        <li><a href="#propiedades" onclick="activarFiltroDesdeFooter('apartamento','venta')">Apartamentos en venta</a></li>
+        <li><a href="#propiedades" onclick="activarFiltroDesdeFooter('casa','venta')">Casas en venta</a></li>
+        <li><a href="#propiedades" onclick="activarFiltroDesdeFooter('todos',null)">Desarrollos nuevos</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Servicios</h4>
+      <ul class="footer-links">
+        <li><a href="#servicios">Asesoría de inversión</a></li>
+        <li><a href="#servicios">Gestión de contratos</a></li>
+        <li><a href="#servicios">Valuación de propiedades</a></li>
+        <li><a href="#servicios">Consultoría legal</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <ul class="footer-links">
+        <li><a href="https://wa.me/50247073915" target="_blank">+502 4707-3915</a></li>
+        <li><a href="mailto:propiedades@inmobia.site">propiedades@inmobia.site</a></li>
+        <li><a href="https://facebook.com/urbainmueble" target="_blank">Facebook</a></li>
+        <li><a href="https://instagram.com/urba.inmueble/" target="_blank">Instagram</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 InmobIA — Todos los derechos reservados</span>
+    <span class="footer-copy">Guatemala, C.A.</span>
+  </div>
+</footer>
+ 
+<!-- WHATSAPP FLOAT -->
+<a href="https://wa.me/50247073915?text=Hola,%20me%20interesa%20una%20propiedad" class="whatsapp-float" target="_blank" title="Contactar por WhatsApp">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 0C5.373 0 0 5.373 0 12c0 2.117.554 4.105 1.523 5.824L0 24l6.335-1.502C8.01 23.449 9.963 24 11.999 24 18.626 24 18.627 24 24 12c0-6.628-5.374-12-12.001-12zm0 21.818c-1.895 0-3.673-.511-5.201-1.403l-.373-.22-3.862.915.959-3.762-.244-.387C2.308 15.387 1.82 13.743 1.82 12c0-5.617 4.564-10.182 10.179-10.182S22.18 6.383 22.18 12c0 5.617-4.563 10.182-10.181 10.182z"/></svg>
+</a>
+ 
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-icon">✅</div>
+    <h3 class="modal-title">¡Solicitud enviada!</h3>
+    <p class="modal-desc">Recibimos su solicitud de visita. En los próximos minutos le contactaremos por WhatsApp para confirmar los detalles de su cita.</p>
+    <button class="modal-close" onclick="cerrarModal()">Entendido</button>
+  </div>
+</div>
+ 
+<script>
+  // ── PRESUPUESTO DINÁMICO
+  const opcionesRenta = [
+    'Sin límite',
+    'Hasta Q3,000/mes',
+    'Hasta Q5,000/mes',
+    'Hasta Q8,000/mes',
+    'Hasta Q10,000/mes',
+    'Hasta Q15,000/mes',
+    'Hasta Q30,000/mes',
+    'Hasta Q50,000/mes',
+    'Hasta Q100,000/mes',
+    'Q100,000+/mes',
+  ];
+  const opcionesCompra = [
+    'Sin límite',
+    'Hasta Q500,000',
+    'Hasta Q1,000,000',
+    'Hasta Q2,000,000',
+    'Hasta Q3,000,000',
+    'Hasta Q4,000,000',
+    'Hasta Q5,000,000',
+    'Hasta Q6,000,000',
+    'Hasta Q10,000,000',
+    'Q10,000,000+',
+  ];
+
+  function actualizarPresupuesto(operacionOverride) {
+    const operacion = operacionOverride
+      || document.getElementById('select-operacion').value;
+    const opciones = operacion === 'Compra / Venta' ? opcionesCompra : opcionesRenta;
+    const html = opciones.map(o => `<option>${o}</option>`).join('');
+    const s1 = document.getElementById('select-presupuesto');
+    const s2 = document.getElementById('fr-presupuesto');
+    if (s1) s1.innerHTML = html;
+    if (s2) s2.innerHTML = html;
+  }
+
+  // ── INTERSECTION OBSERVER ANIMATIONS
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const siblings = [...el.parentElement.querySelectorAll('.animate')];
+        const idx = siblings.indexOf(el);
+        el.style.animationDelay = (idx * 0.08) + 's';
+        el.classList.add('visible');
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+
+  // Exponer observer para que las tarjetas dinámicas también puedan usarlo
+  window._propObserver = observer;
+ 
+  // ── FILTER TABS
+  let filtroActivo = 'todos';
+  let tabsActivos = new Set(['todos']); // Tabs seleccionados
+
+  // Estado persistente de la barra de búsqueda superior
+  let filtrosBarra = { opKeyword: null, propKeyword: null, zonaFiltro: null, maxPrecio: Infinity, minPrecio: 0 };
+  let tipoCambioVenta = 7.75; // fallback GTQ por USD
+
+  // Obtener tipo de cambio USD→GTQ venta (Banco Industrial de Guatemala)
+  (async () => {
+    try {
+      const res = await fetch('/api/tipo-cambio');
+      const data = await res.json();
+      if (data?.venta) tipoCambioVenta = data.venta;
+    } catch {}
+  })();
+
+  function precioEnGTQ(card) {
+    const precio = parseFloat(card.dataset.precio) || 0;
+    return (card.dataset.moneda === 'USD') ? precio * tipoCambioVenta : precio;
+  }
+
+  // Mapa tab → valor del select propiedad en barra oscura
+  const tabAPropiedad = {
+    'todos':       '',
+    'renta':       '',
+    'venta':       '',
+    'apartamento': 'Apartamentos',
+    'casa':        'Casas',
+    'terreno':     'Terrenos',
+    'oficina':     'Oficinas',
+    'local':       'Locales Comerciales',
+  };
+
+  // Mapa tab → valor del select operación en barra oscura
+  const tabAOperacion = {
+    'todos':       null,
+    'renta':       'Renta / Alquiler',
+    'venta':       'Compra / Venta',
+    'apartamento': null,
+    'casa':        null,
+    'terreno':     null,
+    'oficina':     null,
+    'local':       null,
+  };
+
+  function filtrar(tipo, btn) {
+    filtroActivo = tipo;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Mostrar sub-filtros, resetear solo habitaciones y parqueos (mantener orden de precio)
+    document.getElementById('apt-filters').classList.add('visible');
+    document.getElementById('f-habitaciones').value = '';
+    document.getElementById('f-parqueos').value = '';
+
+    // Sincronizar barra oscura con el tab seleccionado
+    const propVal = tabAPropiedad[tipo] ?? '';
+    const opVal   = tabAOperacion[tipo];
+    document.getElementById('fr-propiedad').value = propVal;
+    if (opVal) document.getElementById('fr-operacion').value = opVal;
+
+    // Ocultar opciones ya seleccionadas en los dropdowns
+    document.querySelectorAll('#fr-operacion option').forEach(opt => {
+      opt.style.display = (opVal && opt.value === opVal) ? 'none' : '';
+    });
+    document.querySelectorAll('#fr-propiedad option').forEach(opt => {
+      opt.style.display = (propVal && opt.value === propVal) ? 'none' : '';
+    });
+
+    // También actualizar la barra superior
+    const selectsBar = document.querySelectorAll('.search-bar select');
+    if (selectsBar[1]) selectsBar[1].value = propVal;
+    if (opVal && selectsBar[0]) selectsBar[0].value = opVal;
+
+    // Actualizar filtrosBarra
+    const propInfo = mapaPropiedad[propVal] || null;
+    filtrosBarra.propKeyword = propInfo ? propInfo.keyword : null;
+    if (opVal) {
+      filtrosBarra.opKeyword = opVal === 'Compra / Venta' ? 'venta' : 'renta';
+    } else if (tipo === 'todos') {
+      filtrosBarra.opKeyword = null;
+      filtrosBarra.propKeyword = null;
+      document.getElementById('fr-operacion').selectedIndex = 0;
+      document.getElementById('fr-propiedad').selectedIndex = 0;
+      // Mostrar todas las opciones de nuevo
+      document.querySelectorAll('#fr-operacion option').forEach(opt => {
+        opt.style.display = '';
+      });
+      document.querySelectorAll('#fr-propiedad option').forEach(opt => {
+        opt.style.display = '';
+      });
+      const selectsBar = document.querySelectorAll('.search-bar select');
+      if (selectsBar[0]) selectsBar[0].selectedIndex = 0;
+      if (selectsBar[1]) selectsBar[1].selectedIndex = 0;
+    }
+
+    const { opKeyword, propKeyword, zonaFiltro, maxPrecio, minPrecio } = filtrosBarra;
+
+    document.querySelectorAll('.property-card').forEach(card => {
+      const tipos = card.dataset.tipo  || '';
+      const zona  = card.dataset.zona  || '';
+      const precio= precioEnGTQ(card);
+
+      const okTab    = tipo === 'todos' || tipos.includes(tipo);
+      const okOp     = !opKeyword   || tipos.includes(opKeyword);
+      const okProp   = !propKeyword || tipos.includes(propKeyword);
+      const okZona   = !zonaFiltro  || zona.includes(zonaFiltro);
+      const okPrecio = precio <= maxPrecio && precio >= (minPrecio || 0);
+
+      card.style.display = (okTab && okOp && okProp && okZona && okPrecio) ? '' : 'none';
+    });
+
+    // Aplicar orden de precio si está activo
+    const orden = document.getElementById('f-precio').value;
+    if (orden) {
+      const grid = document.getElementById('properties-grid');
+      const visibles = [...grid.querySelectorAll('.property-card')].filter(c => c.style.display !== 'none');
+      visibles.sort((a, b) => {
+        const pa = parseInt(a.dataset.precio) || 0;
+        const pb = parseInt(b.dataset.precio) || 0;
+        return orden === 'asc' ? pa - pb : pb - pa;
+      });
+      visibles.forEach(card => grid.appendChild(card));
+    }
+  }
+
+  function aplicarFiltrosApt() {
+    const habs  = document.getElementById('f-habitaciones').value;
+    const parq  = document.getElementById('f-parqueos').value;
+    const orden = document.getElementById('f-precio').value;
+    const grid  = document.getElementById('properties-grid');
+
+    const { opKeyword, propKeyword, zonaFiltro, maxPrecio, minPrecio } = filtrosBarra;
+
+    const allCards = [...grid.querySelectorAll('.property-card')];
+
+    allCards.forEach(card => {
+      const tipos    = card.dataset.tipo  || '';
+      const zona     = card.dataset.zona  || '';
+      const precio   = precioEnGTQ(card);
+      const cardHabs = parseInt(card.dataset.habitaciones) || 0;
+      const cardParq = parseInt(card.dataset.parqueos) || 0;
+
+      const okOp     = !opKeyword   || tipos.includes(opKeyword);
+      const okProp   = !propKeyword || tipos.includes(propKeyword);
+      const okZona   = !zonaFiltro  || zona.includes(zonaFiltro);
+      const okPrecio = precio <= maxPrecio && precio >= (minPrecio || 0);
+      const okHabs   = !habs || (habs === '4' ? cardHabs >= 4 : cardHabs === parseInt(habs));
+      const okParq   = !parq || (parq === '6' ? cardParq >= 6 : cardParq === parseInt(parq));
+
+      card.style.display = (okOp && okProp && okZona && okPrecio && okHabs && okParq) ? '' : 'none';
+    });
+
+    // Ordenar todas las visibles por precio
+    if (orden) {
+      const visibles = allCards.filter(c => c.style.display !== 'none');
+      visibles.sort((a, b) => {
+        const pa = parseInt(a.dataset.precio) || 0;
+        const pb = parseInt(b.dataset.precio) || 0;
+        return orden === 'asc' ? pa - pb : pb - pa;
+      });
+      visibles.forEach(card => grid.appendChild(card));
+    }
+  }
+ 
+  // ── SEARCH
+  // Mapa: valor del select de tipo de propiedad → keyword en data-tipo y tab correspondiente
+  const mapaPropiedad = {
+    'Apartamentos':        { keyword: 'apartamento', tab: 'apartamento' },
+    'Casas':               { keyword: 'casa',         tab: 'casa' },
+    'Terrenos':            { keyword: 'terreno',      tab: 'terreno' },
+    'Oficinas':            { keyword: 'oficina',      tab: 'oficina' },
+    'Locales Comerciales': { keyword: 'local',        tab: 'local' },
+  };
+
+  // Mapa: valor del select de zona → texto que debe estar en data-zona
+  const mapaZona = {
+    'Todas las zonas':          null,
+    'Zona 1':                   'zona 1',
+    'Zona 2':                   'zona 2',
+    'Zona 3':                   'zona 3',
+    'Zona 4':                   'zona 4',
+    'Zona 5':                   'zona 5',
+    'Zona 6':                   'zona 6',
+    'Zona 7':                   'zona 7',
+    'Zona 8':                   'zona 8',
+    'Zona 9':                   'zona 9',
+    'Zona 10':                  'zona 10',
+    'Zona 11':                  'zona 11',
+    'Zona 12':                  'zona 12',
+    'Zona 13':                  'zona 13',
+    'Zona 14':                  'zona 14',
+    'Zona 15':                  'zona 15',
+    'Zona 16':                  'zona 16',
+    'Zona 17':                  'zona 17',
+    'Zona 18':                  'zona 18',
+    'Zona 19':                  'zona 19',
+    'Zona 21':                  'zona 21',
+    'Zona 24':                  'zona 24',
+    'Zona 25':                  'zona 25',
+    'Mixco':                    'mixco',
+    'Villa Nueva':              'villa nueva',
+    'San Miguel Petapa':        'san miguel petapa',
+    'Santa Catarina Pinula':    'santa catarina pinula',
+    'San José Pinula':          'san josé pinula',
+    'Amatitlán':                'amatitlán',
+    'Villa Canales':            'villa canales',
+    'Chinautla':                'chinautla',
+    'San Pedro Sacatepéquez':   'san pedro sacatepéquez',
+    'San Juan Sacatepéquez':    'san juan sacatepéquez',
+    'San Raymundo':             'san raymundo',
+    'Chuarrancho':              'chuarrancho',
+    'Fraijanes':                'fraijanes',
+    'Palencia':                 'palencia',
+  };
+
+  // ── FILTRO MÚLTIPLE (TABS CON CATEGORÍAS EXCLUSIVAS)
+  function filtrarMultiple(tipo, event) {
+    // Categorías de operación y tipo
+    const esOperacion = ['renta', 'venta'].includes(tipo);
+    const esTipo = ['apartamento', 'casa', 'terreno', 'oficina', 'local'].includes(tipo);
+
+    if (tipo === 'todos') {
+      // "Todas" deselecciona todo
+      tabsActivos.clear();
+      tabsActivos.add('todos');
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.textContent.trim() === 'Todas');
+      });
+    } else {
+      // Remover "Todas" si estaba seleccionado
+      if (tabsActivos.has('todos')) {
+        tabsActivos.delete('todos');
+        document.querySelector('.filter-tab').classList.remove('active');
+      }
+
+      if (esOperacion) {
+        // Solo una operación a la vez
+        tabsActivos.delete('renta');
+        tabsActivos.delete('venta');
+        tabsActivos.add(tipo);
+        // Actualizar visual
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+          const isRenta = tab.textContent.includes('renta') && tab.textContent.toLowerCase().includes('renta');
+          const isVenta = tab.textContent.includes('venta') && tab.textContent.toLowerCase().includes('venta');
+          if (isRenta || isVenta) {
+            tab.classList.toggle('active', tab === event.target);
+          }
+        });
+      } else if (esTipo) {
+        // Solo un tipo a la vez
+        tabsActivos.delete('apartamento');
+        tabsActivos.delete('casa');
+        tabsActivos.delete('terreno');
+        tabsActivos.delete('oficina');
+        tabsActivos.delete('local');
+        tabsActivos.add(tipo);
+        // Actualizar visual
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+          const tipoBuscado = ['apartamento', 'casa', 'terreno', 'oficina', 'local'].find(t =>
+            tab.textContent.toLowerCase().includes(t === 'local' ? 'comercial' : t)
+          );
+          if (tipoBuscado) {
+            tab.classList.toggle('active', tab === event.target);
+          }
+        });
+      }
+    }
+
+    // Actualizar la barra de filtros (ocultar/mostrar campos)
+    actualizarBarraFiltros();
+
+    // Aplicar filtros
+    aplicarFiltrosMultiples();
+  }
+
+  function actualizarBarraFiltros() {
+    const frOperacionField = document.getElementById('fr-operacion')?.closest('.filtro-activo-field');
+    const frPropiedadField = document.getElementById('fr-propiedad')?.closest('.filtro-activo-field');
+
+    // Ocultar campo operación si un tab ya la define
+    const tieneOperacion = Array.from(tabsActivos).some(t => tabAOperacion[t] !== null);
+    if (frOperacionField) frOperacionField.style.display = tieneOperacion ? 'none' : '';
+
+    // Ocultar campo propiedad si un tab ya la define
+    const tienePropiedad = Array.from(tabsActivos).some(t => tabAPropiedad[t] !== '' && tabAPropiedad[t] !== null);
+    if (frPropiedadField) frPropiedadField.style.display = tienePropiedad ? 'none' : '';
+  }
+
+  function aplicarFiltrosMultiples() {
+    const operaciones = new Set();
+    const propiedades = new Set();
+
+    Array.from(tabsActivos).forEach(tab => {
+      const op = tabAOperacion[tab];
+      const prop = tabAPropiedad[tab];
+      if (op) operaciones.add(op === 'Compra / Venta' ? 'venta' : 'renta');
+      if (prop && mapaPropiedad[prop]) {
+        propiedades.add(mapaPropiedad[prop].keyword);
+      }
+    });
+
+    filtrosBarra.opKeyword = operaciones.size > 0 ? Array.from(operaciones) : null;
+    filtrosBarra.propKeyword = propiedades.size > 0 ? Array.from(propiedades) : null;
+
+    // Filtrar tarjetas
+    document.querySelectorAll('.property-card').forEach(card => {
+      const tipos = card.dataset.tipo || '';
+      const zona = card.dataset.zona || '';
+      const precio = precioEnGTQ(card);
+      const operacion = card.dataset.operacion || '';
+
+      let visible = true;
+
+      if (filtrosBarra.opKeyword && Array.isArray(filtrosBarra.opKeyword)) {
+        visible = visible && filtrosBarra.opKeyword.includes(operacion);
+      }
+
+      if (filtrosBarra.propKeyword && Array.isArray(filtrosBarra.propKeyword)) {
+        visible = visible && filtrosBarra.propKeyword.some(pk => tipos.includes(pk));
+      } else if (filtrosBarra.propKeyword) {
+        visible = visible && tipos.includes(filtrosBarra.propKeyword);
+      }
+
+      if (filtrosBarra.zonaFiltro) visible = visible && zona === filtrosBarra.zonaFiltro;
+      if (filtrosBarra.maxPrecio !== Infinity) visible = visible && precio <= filtrosBarra.maxPrecio;
+      if (filtrosBarra.minPrecio) visible = visible && precio >= filtrosBarra.minPrecio;
+
+      card.style.display = visible ? '' : 'none';
+    });
+  }
+
+  // Extrae el número máximo de presupuesto del texto del option
+  function parsearPresupuesto(texto) {
+    if (!texto || texto === 'Sin límite') return Infinity;
+    if (texto.includes('+')) return Infinity; // "Q100,000+/mes" → sin límite superior
+    const limpio = texto.replace(/\./g, '').replace(/,/g, '').replace(/[^\d]/g, '');
+    return parseInt(limpio) || Infinity;
+  }
+
+  // Extrae el precio mínimo (solo aplica para opciones con "+")
+  function parsearPresupuestoMin(texto) {
+    if (!texto || !texto.includes('+')) return 0;
+    const limpio = texto.replace(/\./g, '').replace(/,/g, '').replace(/[^\d]/g, '');
+    return parseInt(limpio) || 0;
+  }
+
+  function buscarPropiedades() {
+    const operacion  = document.getElementById('select-operacion').value;
+    const propTxt    = document.getElementById('select-presupuesto')?.closest('.search-field')?.previousElementSibling?.querySelector('select')?.value;
+    // Leer selects directamente por posición en .search-bar
+    const selectsBar = document.querySelectorAll('.search-bar select');
+    const selOperacion  = selectsBar[0].value;  // Renta / Alquiler | Compra / Venta
+    const selPropiedad  = selectsBar[1].value;  // Apartamento | Casa | etc.
+    const selZona       = selectsBar[2].value;  // Zona X | Todas
+    const selPresupuesto= selectsBar[3].value;  // Hasta Q...
+
+    const opKeyword  = selOperacion === 'Compra / Venta' ? 'venta' : 'renta';
+    const propInfo   = mapaPropiedad[selPropiedad];
+    const zonaFiltro = mapaZona[selZona] ?? null;
+    const maxPrecio  = parsearPresupuesto(selPresupuesto);
+    const minPrecio  = parsearPresupuestoMin(selPresupuesto);
+
+    // Guardar estado para que filtrar() y aplicarFiltrosApt() lo respeten
+    filtrosBarra = {
+      opKeyword,
+      propKeyword: propInfo ? propInfo.keyword : null,
+      zonaFiltro,
+      maxPrecio,
+      minPrecio
+    };
+
+    // Activar tab del tipo de propiedad
+    const tabTarget = propInfo ? propInfo.tab : 'todos';
+    const tabs = document.querySelectorAll('.filter-tab');
+    tabs.forEach(t => {
+      t.classList.remove('active');
+      const onclick = t.getAttribute('onclick') || '';
+      if (onclick.includes(`'${tabTarget}'`)) t.classList.add('active');
+    });
+    // Si no se encontró coincidencia exacta, activar "Todas"
+    const hayActivo = [...tabs].some(t => t.classList.contains('active'));
+    if (!hayActivo) tabs[0].classList.add('active');
+
+    // Mostrar/ocultar sub-filtros apartamento
+    document.getElementById('apt-filters').classList.add('visible');
+
+    // Filtrar cards
+    document.querySelectorAll('.property-card').forEach(card => {
+      const tipo  = card.dataset.tipo  || '';
+      const zona  = card.dataset.zona  || '';
+      const precio= precioEnGTQ(card);
+
+      const okOp    = tipo.includes(opKeyword);
+      const okProp  = propInfo ? tipo.includes(propInfo.keyword) : true;
+      const okZona  = !zonaFiltro || zona.includes(zonaFiltro);
+      const minP = filtrosBarra.minPrecio || 0;
+      const okPrecio= precio <= maxPrecio && precio >= minP;
+
+      card.style.display = (okOp && okProp && okZona && okPrecio) ? '' : 'none';
+    });
+
+    // Sincronizar y mostrar barra de filtro activo
+    document.getElementById('fr-operacion').value   = selOperacion;
+    document.getElementById('fr-propiedad').value   = selPropiedad || '';
+    document.getElementById('fr-zona').value         = selZona;
+    document.getElementById('fr-presupuesto').value  = selPresupuesto;
+    document.getElementById('filtro-resumen').classList.add('visible');
+
+    // Scroll a propiedades
+    document.querySelector('#propiedades').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function aplicarFiltroActivo() {
+    const selOperacion  = document.getElementById('fr-operacion').value;
+    const prevPresupuesto = document.getElementById('fr-presupuesto').value;
+    actualizarPresupuesto(selOperacion || null);
+    // Restaurar valor de presupuesto si sigue existiendo en las nuevas opciones
+    const frPres = document.getElementById('fr-presupuesto');
+    if ([...frPres.options].some(o => o.value === prevPresupuesto || o.text === prevPresupuesto)) {
+      frPres.value = prevPresupuesto;
+    }
+    const selPropiedad  = document.getElementById('fr-propiedad').value;
+    const selZona       = document.getElementById('fr-zona').value;
+    const selPresupuesto= frPres.value;
+
+    const opKeywordBarra  = selOperacion === 'Compra / Venta' ? 'venta' : selOperacion === 'Renta / Alquiler' ? 'renta' : null;
+    const propInfoBarra   = mapaPropiedad[selPropiedad] || null;
+    const zonaFiltro = mapaZona[selZona] ?? null;
+    const maxPrecio  = parsearPresupuesto(selPresupuesto);
+    const minPrecio  = parsearPresupuestoMin(selPresupuesto);
+
+    // Construir filtros desde tabs (usar la lógica de aplicarFiltrosMultiples)
+    const operaciones = new Set();
+    const propiedades = new Set();
+
+    Array.from(tabsActivos).forEach(tab => {
+      const op = tabAOperacion[tab];
+      const prop = tabAPropiedad[tab];
+      if (op) operaciones.add(op === 'Compra / Venta' ? 'venta' : 'renta');
+      if (prop && mapaPropiedad[prop]) {
+        propiedades.add(mapaPropiedad[prop].keyword);
+      }
+    });
+
+    // Agregar filtros de la barra gris solo si no están seleccionados por los tabs
+    if (opKeywordBarra && !Array.from(tabsActivos).some(t => tabAOperacion[t])) {
+      operaciones.add(opKeywordBarra);
+    }
+    if (propInfoBarra) {
+      propiedades.add(propInfoBarra.keyword);
+    }
+
+    filtrosBarra = {
+      opKeyword: operaciones.size > 0 ? Array.from(operaciones) : null,
+      propKeyword: propiedades.size > 0 ? Array.from(propiedades) : null,
+      zonaFiltro,
+      maxPrecio,
+      minPrecio
+    };
+
+    // Sincronizar barra superior
+    const selectsBar = document.querySelectorAll('.search-bar select');
+    selectsBar[0].value = selOperacion;
+    selectsBar[1].value = selPropiedad;
+    selectsBar[2].value = selZona;
+    selectsBar[3].value = selPresupuesto;
+
+    // Sincronizar tabs con los selects de la barra SOLO si se seleccionó operación o propiedad
+    const opTabMap = { 'Renta / Alquiler': 'renta', 'Compra / Venta': 'venta' };
+    const propTabMap = {
+      'Apartamentos': 'apartamento', 'Casas': 'casa', 'Terrenos': 'terreno',
+      'Oficinas': 'oficina', 'Locales Comerciales': 'local'
+    };
+    const opTab = opTabMap[selOperacion] || null;
+    const propTab = propTabMap[selPropiedad] || null;
+
+    // Actualizar tabsActivos por categoría: solo tocar la categoría que la barra cambió
+    if (selOperacion) {
+      tabsActivos.delete('renta'); tabsActivos.delete('venta');
+      if (opTab) tabsActivos.add(opTab);
+    }
+    if (selPropiedad) {
+      tabsActivos.delete('apartamento'); tabsActivos.delete('casa');
+      tabsActivos.delete('terreno'); tabsActivos.delete('oficina'); tabsActivos.delete('local');
+      if (propTab) tabsActivos.add(propTab);
+    }
+    tabsActivos.delete('todos');
+    if (tabsActivos.size === 0) tabsActivos.add('todos');
+
+    // Actualizar visual de tabs según tabsActivos actual
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      const oc = tab.getAttribute('onclick') || '';
+      const esRenta = oc.includes("'renta'");
+      const esVenta = oc.includes("'venta'");
+      const esTipo  = ['apartamento','casa','terreno','oficina','local'].some(t => oc.includes(`'${t}'`));
+      const esTodos = oc.includes("'todos'");
+
+      if (esRenta) tab.classList.toggle('active', tabsActivos.has('renta'));
+      else if (esVenta) tab.classList.toggle('active', tabsActivos.has('venta'));
+      else if (esTipo) {
+        const match = ['apartamento','casa','terreno','oficina','local'].find(t => oc.includes(`'${t}'`));
+        tab.classList.toggle('active', tabsActivos.has(match));
+      } else if (esTodos) {
+        tab.classList.toggle('active', tabsActivos.has('todos'));
+      }
+    });
+
+    document.querySelectorAll('.property-card').forEach(card => {
+      const tipos = card.dataset.tipo  || '';
+      const zona  = card.dataset.zona  || '';
+      const precio= precioEnGTQ(card);
+      const operacion = card.dataset.operacion || '';
+
+      let visible = true;
+
+      // Filtro operación (desde tabs o barra)
+      if (filtrosBarra.opKeyword && Array.isArray(filtrosBarra.opKeyword)) {
+        visible = visible && filtrosBarra.opKeyword.includes(operacion);
+      }
+
+      // Filtro propiedad (desde tabs o barra)
+      if (filtrosBarra.propKeyword && Array.isArray(filtrosBarra.propKeyword)) {
+        visible = visible && filtrosBarra.propKeyword.some(pk => tipos.includes(pk));
+      } else if (filtrosBarra.propKeyword) {
+        visible = visible && tipos.includes(filtrosBarra.propKeyword);
+      }
+
+      // Filtros adicionales
+      if (zonaFiltro) visible = visible && zona === zonaFiltro;
+      if (maxPrecio !== Infinity) visible = visible && precio <= maxPrecio;
+      if (minPrecio) visible = visible && precio >= minPrecio;
+
+      card.style.display = visible ? '' : 'none';
+    });
+  }
+
+  function activarFiltroDesdeFooter(tipoProp, tipoOp) {
+    // 1. Limpiar filtros previos
+    filtrosBarra = { opKeyword: null, propKeyword: null, zonaFiltro: null, maxPrecio: Infinity, minPrecio: 0 };
+    document.getElementById('f-habitaciones').value = '';
+    document.getElementById('f-parqueos').value = '';
+    document.getElementById('f-precio').value = '';
+
+    // 2. Configurar operación
+    const opVal = tipoOp === 'renta' ? 'Renta / Alquiler' : tipoOp === 'venta' ? 'Compra / Venta' : null;
+    if (opVal) {
+      filtrosBarra.opKeyword = tipoOp;
+      document.getElementById('fr-operacion').value = opVal;
+      document.querySelectorAll('.search-bar select')[0].value = opVal;
+    } else {
+      document.getElementById('fr-operacion').selectedIndex = 0;
+    }
+
+    // 3. Configurar tipo de propiedad
+    const propInfo = mapaPropiedad[tipoProp === 'apartamento' ? 'Apartamento' : tipoProp === 'casa' ? 'Casa' : ''] || null;
+    filtrosBarra.propKeyword = propInfo ? propInfo.keyword : null;
+    const propVal = propInfo ? (tipoProp === 'apartamento' ? 'Apartamento' : 'Casa') : '';
+    document.getElementById('fr-propiedad').value = propVal;
+    document.querySelectorAll('.search-bar select')[1].value = propVal;
+
+    // 4. Activar tab correspondiente
+    const tabs = document.querySelectorAll('.filter-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    tabs.forEach(t => {
+      const oc = t.getAttribute('onclick') || '';
+      if (propInfo && oc.includes(`'${propInfo.tab}'`)) t.classList.add('active');
+      else if (!propInfo && tipoOp === 'renta' && oc.includes("'renta'")) t.classList.add('active');
+      else if (!propInfo && tipoOp === 'venta' && oc.includes("'venta'")) t.classList.add('active');
+      else if (!propInfo && !tipoOp && oc.includes("'todos'")) t.classList.add('active');
+    });
+    const hayActivo = [...tabs].some(t => t.classList.contains('active'));
+    if (!hayActivo) tabs[0].classList.add('active');
+
+    // 5. Filtrar tarjetas
+    document.querySelectorAll('.property-card').forEach(card => {
+      const tipos = card.dataset.tipo || '';
+      const okOp   = !filtrosBarra.opKeyword   || tipos.includes(filtrosBarra.opKeyword);
+      const okProp = !filtrosBarra.propKeyword || tipos.includes(filtrosBarra.propKeyword);
+      card.style.display = (okOp && okProp) ? '' : 'none';
+    });
+  }
+
+  // Marca pills como activos cuando tienen valor seleccionado
+  function actualizarValorPill(sel) {
+    const span = document.getElementById('val-' + sel.id);
+    if (!span) return;
+    span.textContent = sel.value ? sel.options[sel.selectedIndex].text : '';
+  }
+
+  function resetearValoresPills() {
+    ['fr-operacion','fr-propiedad','fr-zona','fr-presupuesto',
+     'f-habitaciones','f-parqueos','f-precio'].forEach(id => {
+      const span = document.getElementById('val-' + id);
+      if (span) span.textContent = '';
+      const sel = document.getElementById(id);
+      if (sel) sel.selectedIndex = 0;
+    });
+  }
+
+  function actualizarPills() {
+    // Barra oscura: activo si no es el índice 0 (default)
+    ['fr-operacion','fr-propiedad','fr-zona','fr-presupuesto'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const pill = sel.closest('.select-pill');
+      if (!pill) return;
+      const esDefault = sel.selectedIndex === 0;
+      pill.classList.toggle('activo', !esDefault);
+    });
+    // Barra clara: activo si tiene valor
+    ['f-habitaciones','f-parqueos','f-precio'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const pill = sel.closest('.select-pill');
+      if (!pill) return;
+      pill.classList.toggle('activo', sel.value !== '');
+    });
+  }
+
+  // Escuchar cambios en todos los selects de filtro
+  document.addEventListener('DOMContentLoaded', () => {
+    ['fr-operacion','fr-propiedad','fr-zona','fr-presupuesto',
+     'f-habitaciones','f-parqueos','f-precio'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (sel) sel.addEventListener('change', actualizarPills);
+    });
+    actualizarPills();
+    actualizarPresupuesto(); // inicializar con opciones de Renta por defecto
+  });
+
+  function limpiarFiltrosBarra() {
+    filtrosBarra = { opKeyword: null, propKeyword: null, zonaFiltro: null, maxPrecio: Infinity, minPrecio: 0 };
+    // Resetear barra superior
+    const selectsBar = document.querySelectorAll('.search-bar select');
+    selectsBar[0].selectedIndex = 0;
+    selectsBar[1].selectedIndex = 0;
+    selectsBar[2].selectedIndex = 0;
+    selectsBar[3].selectedIndex = 0;
+    // Resetear barra de filtro activo
+    document.getElementById('fr-operacion').selectedIndex  = 0;
+    document.getElementById('fr-propiedad').selectedIndex  = 0;
+    document.getElementById('fr-zona').selectedIndex       = 0;
+    document.getElementById('fr-presupuesto').selectedIndex= 0;
+    // Mostrar todas las cards (barra siempre visible)
+    document.getElementById('filtro-resumen').classList.add('visible');
+    document.querySelectorAll('.property-card').forEach(card => card.style.display = '');
+    // Resetear tabs
+    const tabs = document.querySelectorAll('.filter-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    tabs[0].classList.add('active');
+    document.getElementById('apt-filters').classList.add('visible');
+    actualizarPills();
+  }
+
+  function limpiarFiltrosApt() {
+    document.getElementById('f-habitaciones').selectedIndex = 0;
+    document.getElementById('f-parqueos').selectedIndex = 0;
+    document.getElementById('f-precio').selectedIndex = 0;
+    aplicarFiltrosApt();
+  }
+
+  // ── CAMPOS OBLIGATORIOS SEGÚN OPERACIÓN + TIPO
+  function actualizarObligatoriosRenta() {
+    const operacion = document.getElementById('b-operacion').value;
+    const tipo = document.getElementById('b-tipo').value;
+    const esRenta = operacion === 'Renta';
+    const esCompraApto = operacion === 'Compra' && tipo === 'Apartamento';
+    const form = document.getElementById('busqueda-form');
+
+    const esRentaCasa = esRenta && tipo === 'Casa';
+    const esRentaApto = esRenta && tipo === 'Apartamento';
+    const esRentaOficina = esRenta && tipo === 'Oficina';
+    const esRentaLocal = esRenta && tipo === 'Local comercial';
+    const esCompraOficina = operacion === 'Compra' && tipo === 'Oficina';
+    const esCompraLocal = operacion === 'Compra' && tipo === 'Local comercial';
+    const esOficina = esRentaOficina || esCompraOficina;
+    const esLocal = esRentaLocal || esCompraLocal;
+    const sinMetros = esRentaCasa || esRentaApto || esRentaOficina || esRentaLocal || esCompraApto || esCompraOficina || esCompraLocal;
+    const idsRenta = sinMetros
+      ? ['b-email','b-fecha','b-tipo','b-ubicacion','b-presupuesto','b-habitaciones','b-parqueos','b-banos','b-integrantes']
+      : ['b-email','b-fecha','b-tipo','b-ubicacion','b-presupuesto','b-metros','b-habitaciones','b-parqueos','b-banos','b-integrantes'];
+    const idsCompraApto = ['b-email','b-ubicacion','b-presupuesto','b-habitaciones','b-parqueos','b-banos'];
+    const sinMetrosCompraApto = esCompraApto;
+    const esRentaTerreno = esRenta && tipo === 'Terreno';
+    const camposOcultarCompraApto = ['grp-fecha','grp-integrantes','grp-mascota','grp-desc-mascota','grp-fotos-mascota'];
+    const camposOcultarRentaTerreno = ['grp-fecha','grp-habitaciones-parqueos','grp-banos-integrantes','grp-mascota','grp-desc-mascota','grp-fotos-mascota'];
+
+    // Limpiar todos los required
+    const todosIds = [...new Set([...idsRenta, ...idsCompraApto])];
+    todosIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.removeAttribute('required');
+    });
+
+    // Activar required según condición
+    let idsActivos = [];
+    if (esRenta) idsActivos = idsRenta;
+    else if (esCompraApto) idsActivos = idsCompraApto;
+    idsActivos.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('required','');
+    });
+
+    // Mostrar todos primero
+    [...new Set([...camposOcultarCompraApto, ...camposOcultarRentaTerreno])].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
+    });
+
+    // Ocultar fecha prevista de mudanza y total de integrantes siempre en Compra
+    const grpFecha = document.getElementById('grp-fecha');
+    if (grpFecha) grpFecha.style.display = (operacion === 'Compra') ? 'none' : '';
+    const grpInteg = document.getElementById('grp-integrantes');
+    if (grpInteg) grpInteg.style.display = (operacion === 'Compra') ? 'none' : '';
+    ['grp-mascota','grp-desc-mascota','grp-fotos-mascota'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = (operacion === 'Compra') ? 'none' : '';
+    });
+
+    // Ocultar según condición
+    if (esCompraApto) {
+      camposOcultarCompraApto.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+    } else if (esRentaTerreno) {
+      camposOcultarRentaTerreno.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+    }
+
+    form.classList.toggle('renta-activa', esRenta || esCompraApto);
+
+    // Asterisco de metros cuadrados: ocultar si no es obligatorio
+    const reqMetros = document.getElementById('req-metros');
+    if (reqMetros) reqMetros.style.display = sinMetros ? 'none' : '';
+
+    // Características deseadas: solo mostrar "Dentro de residencial" en Renta+Terreno
+    document.querySelectorAll('.caract-no-terreno').forEach(el => {
+      el.style.display = esRentaTerreno ? 'none' : '';
+    });
+
+    // Renta+Casa: ocultar gimnasio/primer nivel, mostrar parqueo techado
+    document.querySelectorAll('.caract-no-casa').forEach(el => {
+      if (!esRentaTerreno && !esOficina) el.style.display = esRentaCasa ? 'none' : '';
+    });
+    document.querySelectorAll('.caract-solo-casa').forEach(el => {
+      el.style.display = esRentaCasa ? 'block' : 'none';
+    });
+
+    // Renta+Oficina / Compra+Oficina: ocultar opciones residenciales, mostrar opciones de oficina
+    document.querySelectorAll('.caract-no-oficina').forEach(el => {
+      if (!esRentaTerreno) el.style.display = esOficina ? 'none' : '';
+    });
+    document.querySelectorAll('.caract-solo-oficina').forEach(el => {
+      el.style.display = esOficina ? 'block' : 'none';
+    });
+
+    // Cambiar label y opciones Habitaciones ↔ Oficinas
+    const lblHab = document.getElementById('lbl-habitaciones');
+    if (lblHab) lblHab.childNodes[0].textContent = esOficina ? 'Oficinas ' : 'Habitaciones ';
+    const selHab = document.getElementById('b-habitaciones');
+    if (selHab) {
+      const opts = esOficina
+        ? ['Seleccionar...','1 oficina','2 oficinas','3 oficinas','4 oficinas','5 o más oficinas']
+        : ['Seleccionar...','1 habitación','2 habitaciones','3 habitaciones','4 habitaciones','5 o más habitaciones'];
+      [...selHab.options].forEach((opt, i) => { if (opts[i]) opt.text = opts[i]; });
+    }
+
+    // Ocultar mascota e integrantes en Oficina (Renta o Compra) o Compra+Apartamento
+    const camposOcultarOficina = ['grp-mascota','grp-desc-mascota','grp-fotos-mascota','grp-integrantes'];
+    camposOcultarOficina.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = (esOficina || esCompraApto) ? 'none' : '';
+    });
+
+    // Renta+Local / Compra+Local comercial
+    document.querySelectorAll('.caract-no-local').forEach(el => {
+      if (!esRentaTerreno && !esOficina) el.style.display = esLocal ? 'none' : '';
+    });
+    document.querySelectorAll('.caract-solo-local').forEach(el => {
+      el.style.display = esLocal ? 'block' : 'none';
+    });
+
+    // Campos exclusivos de Local y Oficina
+    const grpGiro = document.getElementById('grp-giro');
+    if (grpGiro) grpGiro.style.display = (esLocal || esOficina) ? '' : 'none';
+
+    // Ocultar habitaciones en Local (Renta o Compra)
+    const grpHabParq = document.getElementById('grp-habitaciones-parqueos');
+    if (grpHabParq) grpHabParq.style.display = esLocal ? 'none' : '';
+
+    const camposOcultarLocal = ['grp-integrantes','grp-mascota','grp-desc-mascota','grp-fotos-mascota'];
+    camposOcultarLocal.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !esOficina && !esCompraApto) el.style.display = esLocal ? 'none' : '';
+    });
+
+    // SIEMPRE al final: en Compra ocultar fecha, integrantes y mascota sin excepción
+    if (operacion === 'Compra') {
+      ['grp-fecha','grp-integrantes','grp-mascota','grp-desc-mascota','grp-fotos-mascota'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+    }
+
+    // Compra+Terreno: ocultar habitaciones, parqueos y baños
+    const esCompraTerreno = operacion === 'Compra' && tipo === 'Terreno';
+    const grpHabParqEl = document.getElementById('grp-habitaciones-parqueos');
+    const grpBanosEl = document.getElementById('grp-banos-integrantes');
+    if (grpHabParqEl) grpHabParqEl.style.display = (esCompraTerreno || esLocal) ? 'none' : '';
+    if (grpBanosEl) grpBanosEl.style.display = esCompraTerreno ? 'none' : '';
+
+    // Compra+Terreno: en características deseadas solo mostrar "Dentro de residencial"
+    document.querySelectorAll('.dias-checks .dia-option').forEach(el => {
+      if (esCompraTerreno) {
+        const val = el.querySelector('input') ? el.querySelector('input').value : '';
+        el.style.display = val === 'Dentro de residencial' ? '' : 'none';
+      }
+    });
+  }
+
+  // ── MASCOTA: ocultar detalles si selecciona "No"
+  let busquedaExtraAbierto = false;
+  function toggleBusquedaExtra() {
+    busquedaExtraAbierto = !busquedaExtraAbierto;
+    const extra = document.getElementById('busqueda-extra');
+    const icon  = document.getElementById('ver-mas-b-icon');
+    const btn   = document.getElementById('btn-ver-mas-b');
+    if (busquedaExtraAbierto) {
+      extra.style.maxHeight = (extra.scrollHeight + 2000) + 'px';
+      extra.style.opacity   = '1';
+      btn.innerHTML = 'Ver menos <span id="ver-mas-b-icon" style="font-size:1rem;line-height:1;transition:transform 0.3s;transform:rotate(180deg)">▼</span>';
+      btn.style.borderColor = 'var(--gold)';
+      btn.style.color       = 'var(--gold)';
+      btn.style.background  = 'rgba(201,168,76,0.25)';
+    } else {
+      extra.style.maxHeight = '0';
+      extra.style.opacity   = '0';
+      btn.innerHTML = 'Ver más <span id="ver-mas-b-icon" style="font-size:1rem;line-height:1;transition:transform 0.3s">▼</span>';
+      btn.style.borderColor = 'var(--gold)';
+      btn.style.color       = 'var(--gold)';
+      btn.style.background  = 'rgba(201,168,76,0.15)';
+    }
+  }
+
+  function toggleDetalleMascota() {
+    const si = document.getElementById('mascota-si');
+    const mostrar = si && si.checked;
+    ['grp-desc-mascota','grp-fotos-mascota'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = mostrar ? '' : 'none';
+    });
+  }
+
+  // ── BÚSQUEDA PERSONALIZADA SUBMIT
+  async function enviarBusqueda(e) {
+    e.preventDefault();
+    const form = e.target;
+    const val = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+    const nombre          = val('b-nombre');
+    const pais            = val('b-codigo-pais');
+    const tel             = pais + ' ' + val('b-whatsapp');
+    const email           = val('b-email');
+    const fecha           = val('b-fecha');
+    const operacion       = val('b-operacion');
+    const tipo            = val('b-tipo');
+    const zona            = val('b-ubicacion');
+    const zona_detalle    = val('b-ubicacion-detalle');
+    const presup          = val('b-presupuesto');
+    const metros          = val('b-metros');
+    const hab             = val('b-habitaciones');
+    const parq            = val('b-parqueos');
+    const banos           = val('b-banos');
+    const integrantes     = val('b-integrantes');
+    const caract          = [...form.querySelectorAll('input[name="caract-adic"]:checked')].map(i => i.value).join(', ');
+    const desc            = val('b-desc-adic');
+    const mascota         = document.querySelector('input[name="tiene-mascota"]:checked')?.value || '';
+    const desc_mascota    = val('b-desc-mascota');
+    const fotos_mascota   = document.getElementById('b-fotos-mascota')?.files?.length
+      ? `${document.getElementById('b-fotos-mascota').files.length} foto(s) adjunta(s)` : '';
+
+    // Enviar correo vía backend (FormData para incluir fotos)
+    let fotosUrls = [];
+    try {
+      const fd = new FormData();
+      fd.append('nombre', nombre);
+      fd.append('telefono', tel);
+      fd.append('email', email);
+      fd.append('fecha', fecha);
+      fd.append('operacion', operacion);
+      fd.append('tipo', tipo);
+      fd.append('zona', zona);
+      fd.append('zona_detalle', zona_detalle);
+      fd.append('presupuesto', presup);
+      fd.append('metros', metros);
+      fd.append('habitaciones', hab);
+      fd.append('banos', banos);
+      fd.append('parqueos', parq);
+      fd.append('integrantes', integrantes);
+      fd.append('caracteristicas', caract);
+      fd.append('detalle', desc);
+      fd.append('mascota', mascota);
+      fd.append('desc_mascota', desc_mascota);
+      const fotosInput = document.getElementById('b-fotos-mascota');
+      if (fotosInput && fotosInput.files.length) {
+        for (const file of fotosInput.files) fd.append('fotos', file);
+      }
+      const res = await fetch('https://inmobia.site/api/email/busqueda', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (json.fotosUrls && json.fotosUrls.length) fotosUrls = json.fotosUrls;
+    } catch {}
+
+
+    // WhatsApp
+    let msg = `*Busqueda Personalizada — InmobIA*\n\n`;
+    msg += `*Nombre:* ${nombre}\n`;
+    msg += `*WhatsApp:* ${tel}\n`;
+    if (email)         msg += `*Correo:* ${email}\n`;
+    if (fecha)         msg += `*Fecha de mudanza:* ${fecha}\n`;
+    msg += `*Operacion:* ${operacion}\n`;
+    msg += `*Tipo:* ${tipo}\n`;
+    msg += `*Zona:* ${zona}\n`;
+    if (zona_detalle)  msg += `*Sector/Colonia:* ${zona_detalle}\n`;
+    if (presup)        msg += `*Presupuesto:* ${presup}\n`;
+    if (metros)        msg += `*Minimo m2:* ${metros}\n`;
+    if (hab)           msg += `*Habitaciones:* ${hab}\n`;
+    if (banos)         msg += `*Banos:* ${banos}\n`;
+    if (parq)          msg += `*Parqueos:* ${parq}\n`;
+    if (integrantes)   msg += `*Integrantes:* ${integrantes}\n`;
+    if (caract)        msg += `*Caracteristicas:* ${caract}\n`;
+    if (desc)          msg += `*Descripcion:* ${desc}\n`;
+    if (mascota)       msg += `*Tiene mascota:* ${mascota}\n`;
+    if (desc_mascota)  msg += `*Desc. mascota:* ${desc_mascota}\n`;
+    if (fotosUrls.length) {
+      msg += `*Fotos de mascota:*\n`;
+      fotosUrls.forEach((url, i) => { msg += `Foto ${i + 1}: ${url}\n`; });
+    } else if (fotos_mascota) {
+      msg += `*Fotos mascota:* ${fotos_mascota} — enviadas al correo\n`;
+    }
+
+    const numero = '50247073915';
+    window.open(`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`, '_blank');
+    document.getElementById('modal').classList.add('active');
+    form.reset();
+  }
+
+  // ── FORM SUBMIT
+  function enviarCita(e) {
+    e.preventDefault();
+    const form = e.target;
+    const nombre = form.querySelector('input[type="text"]').value;
+    const tel = form.querySelector('input[type="tel"]').value;
+    const tipo = form.querySelector('select').value;
+    const dias = [...form.querySelectorAll('input[name="dias"]:checked')].map(i => i.value).join(', ');
+    const horarios = [...form.querySelectorAll('input[name="horario"]:checked')].map(i => i.value).join(', ');
+    const comentario = form.querySelector('textarea').value;
+ 
+    const msg = encodeURIComponent(
+      `🏠 *Nueva solicitud de visita — InmobIA*\n\n` +
+      `*Nombre:* ${nombre}\n` +
+      `*WhatsApp:* ${tel}\n` +
+      `*Tipo de propiedad:* ${tipo}\n` +
+      `*Días disponibles:* ${dias || 'No especificado'}\n` +
+      `*Horario preferido:* ${horarios || 'No especificado'}\n` +
+      `*Comentario:* ${comentario || 'Ninguno'}\n\n` +
+      `_Enviado desde urbainmueble.com_`
+    );
+ 
+    window.open(`https://wa.me/50247073915?text=${msg}`, '_blank');
+    document.getElementById('modal').classList.add('active');
+    form.reset();
+  }
+ 
+  function cerrarModal() {
+    document.getElementById('modal').classList.remove('active');
+  }
+ 
+  // ── NAV SCROLL SHADOW
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.boxShadow = window.scrollY > 20 ? '0 2px 20px rgba(0,0,0,0.08)' : 'none';
+  });
+
+  // ── CARGA DE PROPIEDADES DESDE API ────────────────────────────
+  const API_URL = 'https://inmobia.site';
+
+  function formatearPrecio(precio, moneda, operacion) {
+    const sym  = moneda === 'USD' ? '$' : 'Q';
+    const num  = new Intl.NumberFormat('es-GT', { maximumFractionDigits: 0 }).format(precio);
+    const sfx  = operacion === 'renta' ? '/mes' : '';
+    return `${sym}${num}${sfx}`;
+  }
+
+  function crearTarjeta(p) {
+    const tipoData = `${p.tipo} ${p.operacion}`.toLowerCase();
+    const zonaData = (p.zona || '').toLowerCase();
+    const img      = p.imagen_principal
+      ? `${API_URL}${p.imagen_principal}`
+      : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80';
+    const badgeClass = p.operacion === 'venta' ? 'property-badge venta' : 'property-badge';
+    const badgeText  = p.operacion === 'venta' ? 'Venta' : 'Renta';
+    const precio     = formatearPrecio(p.precio, p.moneda, p.operacion);
+    const ubicacion  = [p.colonia, p.zona, p.municipio].filter(Boolean).join(', ') || 'Guatemala';
+    const tipoLabel  = p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1);
+    const esPendiente = p.estado === 'pendiente';
+    const statusTag = esPendiente
+      ? `<span class="property-status-tag pendiente">Pendiente</span>`
+      : `<span class="property-status-tag disponible">Disponible</span>`;
+
+    const specs = [];
+    if (p.habitaciones) specs.push(`<div class="spec"><strong>${p.habitaciones}</strong><span>Habs</span></div>`);
+    if (p.banos)        specs.push(`<div class="spec"><strong>${p.banos}</strong><span>Baños</span></div>`);
+    if (p.parqueos)     specs.push(`<div class="spec"><strong>${p.parqueos}</strong><span>${p.parqueos === 1 ? 'Parqueo' : 'Parqueos'}</span></div>`);
+    if (p.metros)       specs.push(`<div class="spec"><strong>${p.metros}</strong><span>m²</span></div>`);
+
+    const tags = [];
+    const dot = '<span style="font-size:1rem;line-height:1;vertical-align:middle">•</span>';
+    if (p.dormitorio_servicio) tags.push(`${dot} Dorm. Servicio`);
+    if (p.mascota)             tags.push(`${dot} Pet Friendly`);
+    if (p.bodega)              tags.push(`${dot} Bodega`);
+    if (p.jardin)              tags.push(`${dot} Jardín`);
+    if (p.patio)               tags.push(`${dot} Patio`);
+    const tagsHtml = tags.length
+      ? `<div class="card-tags">${tags.join('&nbsp;&nbsp;&nbsp;')}</div>`
+      : '';
+
+    const card = document.createElement('a');
+    card.href    = `/propiedad.html?id=${p.id}`;
+    card.style.textDecoration = 'none';
+    card.style.color = 'inherit';
+    card.className   = 'property-card';
+    card.dataset.operacion    = p.operacion || '';
+    card.dataset.tipo         = tipoData;
+    card.dataset.zona         = zonaData;
+    card.dataset.precio       = String(Math.round(p.precio));
+    card.dataset.moneda       = p.moneda || 'GTQ';
+    card.dataset.habitaciones = String(p.habitaciones || 0);
+    card.dataset.parqueos     = String(p.parqueos || 0);
+
+    card.innerHTML = `
+      <div class="property-img">
+        <img src="${img}" alt="${p.titulo}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80'">
+        <span class="${badgeClass}">${badgeText}</span>
+        ${statusTag}
+        <span class="property-price-tag">${precio}</span>
+      </div>
+      <div class="property-body">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem">
+          <div class="property-type">${tipoLabel}</div>
+          ${p.codigo ? `<span style="font-size:0.68rem;color:#888;letter-spacing:0.03em;white-space:nowrap;flex-shrink:0">${p.codigo}</span>` : ''}
+        </div>
+        <h3 class="property-name">${p.titulo}</h3>
+        <p class="property-location">${p.nombre_proyecto ? `<span style="color:var(--charcoal);font-weight:500">${p.nombre_proyecto}</span><span style="margin:0 0.35rem;opacity:0.35">|</span>` : ''}${ubicacion}</p>
+        ${tagsHtml}
+        <div class="property-specs">${specs.join('')}</div>
+      </div>`;
+    return card;
+  }
+
+  async function cargarPropiedadesAPI() {
+    const grid    = document.getElementById('properties-grid');
+    const loading = document.getElementById('props-loading');
+    const empty   = document.getElementById('props-empty');
+
+    try {
+      const r = await fetch(`${API_URL}/api/propiedades?limit=100`);
+      if (!r.ok) throw new Error('API no disponible');
+      const { propiedades } = await r.json();
+
+      loading.style.display = 'none';
+
+      if (!propiedades || propiedades.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+
+      propiedades.forEach((p, i) => {
+        const card = crearTarjeta(p);
+        // Animación escalonada directa (sin depender del IntersectionObserver)
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        grid.appendChild(card);
+        setTimeout(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, i * 80 + 50);
+      });
+
+      // Re-aplicar filtros activos según el tab seleccionado
+      const tabActiva = document.querySelector('.filter-tab.active');
+      if (tabActiva) {
+        const m = tabActiva.getAttribute('onclick')?.match(/filtrar\('(\w+)'/);
+        if (m) filtrar(m[1], tabActiva);
+        else aplicarFiltrosApt();
+      }
+    } catch (e) {
+      loading.innerHTML = `
+        <div style="color:#c0a060;font-size:0.9rem">
+          ⚠️ No se pudo conectar al servidor.<br>
+          <small style="color:#bbb">Asegúrate de que el backend esté corriendo en el puerto 3001.</small>
+        </div>`;
+    }
+  }
+
+  // ── HERO SLIDESHOW ──────────────────────────────────────────
+  let heroSlideIndex = 0;
+  let heroSlideTimer = null;
+
+  async function iniciarHeroSlideshow() {
+    try {
+      // 1. Destacados premium (tabla destacados_hero)
+      let premiumItems = [];
+      try {
+        const rd = await fetch(`${API_URL}/api/destacados`);
+        if (rd.ok) {
+          const { destacados } = await rd.json();
+          premiumItems = (destacados || []).map(d => ({
+            id: d.propiedad_id, destacado_id: d.id,
+            imagen_principal: d.imagen_url,
+            titulo: d.titulo, nombre_proyecto: d.nombre_proyecto,
+            tipo: d.tipo, operacion: d.operacion,
+            metros: d.metros, zona: d.zona, precio: d.precio, moneda: d.moneda
+          }));
+        }
+      } catch {}
+
+      // 2. Propiedades marcadas como destacadas por el admin (destacado=1)
+      let adminItems = [];
+      try {
+        const rp = await fetch(`${API_URL}/api/propiedades?limit=20`);
+        if (rp.ok) {
+          const { propiedades } = await rp.json();
+          // Solo las que tienen destacado=1 e imagen
+          adminItems = (propiedades || [])
+            .filter(p => p.destacado && p.imagen_principal)
+            // excluir las que ya están en premium (misma propiedad_id)
+            .filter(p => !premiumItems.some(d => d.id === p.id));
+        }
+      } catch {}
+
+      // 3. Si no hay nada de ninguna fuente, usar cualquier propiedad con imagen
+      let items = [...premiumItems, ...adminItems];
+      if (!items.length) {
+        try {
+          const rp = await fetch(`${API_URL}/api/propiedades?limit=12`);
+          if (rp.ok) {
+            const { propiedades } = await rp.json();
+            items = (propiedades || []).filter(p => p.imagen_principal);
+          }
+        } catch {}
+      }
+      if (!items.length) return;
+
+      const wrap      = document.getElementById('hero-image-wrap');
+      const staticImg = document.getElementById('hero-static-img');
+      const dotsEl    = document.getElementById('hero-dots');
+
+      function buildSlide(p, i) {
+        const slide = document.createElement('div');
+        slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
+        if (p.destacado_id) slide.dataset.destacadoId = p.destacado_id;
+
+        const img = document.createElement('img');
+        img.src = `${API_URL}${p.imagen_principal}`;
+        img.alt = p.titulo || 'Propiedad destacada';
+        img.loading = i === 0 ? 'eager' : 'lazy';
+        slide.appendChild(img);
+
+        const label = document.createElement('div');
+        label.className = 'hero-slide-label';
+        const tituloTexto = p.nombre_proyecto || p.titulo || '';
+        const tipoLabel   = p.tipo ? p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1) : '';
+        const opLabel     = p.operacion === 'venta' ? 'Venta' : p.operacion === 'renta' ? 'Renta' : (p.operacion || '');
+        const areaLabel   = p.metros ? `${p.metros} m²` : '';
+        const zonaLabel   = p.zona || '';
+        const precioLabel = p.precio
+          ? `${p.moneda === 'USD' ? '$' : 'Q'}${new Intl.NumberFormat('es-GT',{maximumFractionDigits:0}).format(p.precio)}${p.operacion==='renta'?'/mes':''}`
+          : '';
+        const metaParts = [tipoLabel, opLabel, areaLabel, zonaLabel, precioLabel].filter(Boolean);
+        const metaHtml  = metaParts.map((m, j) =>
+          `<span>${m}</span>${j < metaParts.length-1 ? '<span class="sep">·</span>' : ''}`
+        ).join('');
+        label.innerHTML = `<span class="hero-slide-titulo">${tituloTexto}</span><div class="hero-slide-meta">${metaHtml}</div>`;
+        slide.appendChild(label);
+
+        const btn = document.createElement('a');
+        btn.className = 'hero-slide-btn';
+        btn.href = `/propiedad.html?id=${p.id}`;
+        btn.textContent = 'Ver →';
+        slide.appendChild(btn);
+
+        // Overlay clickeable sobre la imagen (debajo del label y btn)
+        const overlay = document.createElement('a');
+        overlay.href = `/propiedad.html?id=${p.id}`;
+        overlay.style.cssText = 'position:absolute;inset:0;z-index:2;cursor:pointer;';
+        overlay.setAttribute('aria-label', `Ver propiedad: ${tituloTexto}`);
+        slide.appendChild(overlay);
+
+        return slide;
+      }
+
+      items.forEach((p, i) => wrap.insertBefore(buildSlide(p, i), dotsEl));
+
+      dotsEl.innerHTML = items.map((_, i) =>
+        `<span class="hero-dot${i === 0 ? ' active' : ''}" onclick="heroGoTo(${i})"></span>`
+      ).join('');
+
+      if (staticImg) staticImg.style.display = 'none';
+      heroSlideTimer = setInterval(heroNextSlide, 5500);
+
+      // Touch / swipe — cancelar navegación si fue swipe
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let isSwiping = false;
+      wrap.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        isSwiping = false;
+      }, { passive: true });
+      wrap.addEventListener('touchmove', e => {
+        const dx = Math.abs(e.touches[0].clientX - touchStartX);
+        const dy = Math.abs(e.touches[0].clientY - touchStartY);
+        if (dx > 10 && dx > dy) isSwiping = true;
+      }, { passive: true });
+      wrap.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (isSwiping && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+          heroGoTo(dx < 0 ? heroSlideIndex + 1 : heroSlideIndex - 1);
+          // Evitar que el overlay navegue tras el swipe
+          wrap.querySelectorAll('.hero-slide a[style]').forEach(a => {
+            a.style.pointerEvents = 'none';
+            setTimeout(() => { a.style.pointerEvents = ''; }, 400);
+          });
+        }
+      }, { passive: true });
+    } catch {}
+  }
+
+  function heroGoTo(idx) {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots   = document.querySelectorAll('.hero-dot');
+    if (!slides.length) return;
+    slides[heroSlideIndex].classList.remove('active');
+    dots[heroSlideIndex]?.classList.remove('active');
+    heroSlideIndex = (idx + slides.length) % slides.length;
+    const nextSlide = slides[heroSlideIndex];
+    nextSlide.classList.add('active');
+    dots[heroSlideIndex]?.classList.add('active');
+    // Notificar al backend que este slide fue mostrado
+    if (nextSlide.dataset.destacadoId) {
+      fetch(`${API_URL}/api/destacados/marcar-mostrado/${nextSlide.dataset.destacadoId}`, { method: 'POST' }).catch(() => {});
+    }
+    clearInterval(heroSlideTimer);
+    heroSlideTimer = setInterval(heroNextSlide, 5500);
+  }
+
+  function heroNextSlide() {
+    const slides = document.querySelectorAll('.hero-slide');
+    if (!slides.length) return;
+    heroGoTo(heroSlideIndex + 1);
+  }
+
+  // Iniciar carga al cargar la página
+  cargarPropiedadesAPI();
+  iniciarHeroSlideshow();
+
+  // Botón "Iniciar sesión" — lleva al tab de login en asesores.html
+  function irAlLogin(e) {
+    e.preventDefault();
+    // Si ya tiene sesión activa, ir directo al panel
+    const token = localStorage.getItem('inmobia_asesor_token');
+    if (token) {
+      window.location.href = '/panel-asesor.html';
+    } else {
+      sessionStorage.setItem('inmobia_open_login', '1');
+      window.location.href = '/asesores.html';
+    }
+  }
+</script>
+</body>
+</html>

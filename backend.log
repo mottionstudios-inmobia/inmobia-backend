@@ -1,0 +1,7 @@
+(node:13016) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Base de datos inicializada: C:\Users\jrosales\proyectos\urbainmueble\database\inmobia.db
+Scheduler de notificaciones de agendamiento iniciado
+Scheduler de recordatorios de pago 5RA iniciado
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Servidor InmobIA corriendo en http://localhost:3001

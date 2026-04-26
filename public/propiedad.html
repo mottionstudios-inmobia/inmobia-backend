@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detalle de propiedad — InmobIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200;300;400;500;600;700&family=DM+Sans:wght@300;400;500&family=Comfortaa:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8d9b5;
+    --charcoal: #1e2d4a;
+    --gray: #6B6B6B;
+    --gray-light: #f8f7f5;
+    --gray-border: #E5E2DA;
+    --white: #FEFEFE;
+    --font-display: 'Urbanist', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --transition: 0.3s ease;
+    --radius: 10px;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: var(--white); color: var(--charcoal); line-height: 1.6; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 4rem; height: 68px;
+    background: var(--white); border-bottom: 1px solid var(--gray-border);
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo-text { display: inline-flex; align-items: baseline; }
+  .logo-inmob { font-family: 'Comfortaa', sans-serif; font-size: 1.7rem; font-weight: 300; color: var(--charcoal); }
+  .logo-ia    { font-family: 'Century Gothic', 'Trebuchet MS', sans-serif; font-size: 2rem; font-weight: 400; color: var(--gold); }
+  .nav-back {
+    display: flex; align-items: center; gap: 0.5rem;
+    text-decoration: none; color: var(--gray);
+    font-size: 0.82rem; letter-spacing: 0.05em; text-transform: uppercase;
+    transition: color var(--transition);
+  }
+  .nav-back:hover { color: var(--charcoal); }
+  .nav-back svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  /* ── ESTADO DE CARGA ── */
+  .page-loader {
+    display: flex; align-items: center; justify-content: center;
+    min-height: calc(100vh - 68px); flex-direction: column; gap: 1rem; color: var(--gray);
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--gray-border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-msg { text-align: center; padding: 4rem; color: var(--gray); }
+  .error-msg a { color: var(--gold); }
+
+  /* ── GALERÍA ── */
+  .galeria-wrap {
+    width: 100%;
+    background: #1a1a1a;
+    position: relative;
+  }
+
+  .galeria {
+    display: grid;
+    grid-template-columns: 60% 1fr;
+    grid-template-rows: 520px;
+    gap: 3px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .galeria-principal {
+    position: relative;
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+
+  /* Degradado + título sobre la foto principal */
+  .galeria-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 3.5rem 2.5rem 2rem;
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.80) 0%,
+      rgba(0,0,0,0.45) 50%,
+      transparent 100%
+    );
+    z-index: 10;
+    pointer-events: none;
+  }
+  .galeria-badge {
+    position: absolute;
+    top: 1.25rem; left: 1.25rem;
+    z-index: 20;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+    color: #fff;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 0.45rem 1.1rem; border-radius: 30px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: none;
+  }
+  .galeria-badge .badge-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--gold); flex-shrink: 0;
+  }
+  .galeria-titulo {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 0.55rem;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  .galeria-ubicacion {
+    display: flex; align-items: center; gap: 0.4rem;
+    color: rgba(255,255,255,0.8); font-size: 0.84rem;
+  }
+  .galeria-ubicacion svg {
+    width: 13px; height: 13px;
+    stroke: var(--gold); fill: none; stroke-width: 1.8; flex-shrink: 0;
+  }
+  .prop-codigo {
+    position: absolute;
+    bottom: 1rem; right: 1rem;
+    z-index: 20;
+    font-family: var(--font-body);
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.75);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    pointer-events: none;
+  }
+  .galeria-secundarias {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .galeria img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    display: block;
+  }
+  .galeria img:hover { transform: scale(1.04); }
+
+  .galeria-thumb { position: relative; overflow: hidden; cursor: pointer; }
+  .galeria-mas {
+    position: relative; overflow: hidden; cursor: pointer;
+  }
+  .galeria-mas::after {
+    content: attr(data-label);
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1rem; font-weight: 500;
+    font-family: var(--font-display);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92); z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox-img { max-width: 90vw; max-height: 88vh; object-fit: contain; border-radius: 4px; }
+  .lightbox-close {
+    position: absolute; top: 1.5rem; right: 2rem;
+    color: white; font-size: 2rem; cursor: pointer;
+    background: rgba(255,255,255,0.1); border: none;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1; transition: background 0.2s;
+  }
+  .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+  .lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.1); border: none;
+    color: white; font-size: 2rem; padding: 0.5rem 1rem;
+    cursor: pointer; transition: background 0.2s; border-radius: 6px;
+  }
+  .lightbox-nav:hover { background: rgba(255,255,255,0.2); }
+  .lightbox-prev { left: 1.5rem; }
+  .lightbox-next { right: 1.5rem; }
+  .lightbox-count {
+    position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.7); font-size: 0.82rem; background: rgba(0,0,0,0.4);
+    padding: 0.3rem 0.8rem; border-radius: 20px;
+  }
+
+  /* ── CONTENIDO PRINCIPAL ── */
+  .pagina-contenido {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* ── LAYOUT INFO + SIDEBAR ── */
+  .detalle-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 3rem;
+    padding: 2rem 0 4rem;
+    align-items: start;
+  }
+
+  /* ── INFO ── */
+
+  .prop-precio-wrap {
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--gray-border);
+    margin-bottom: 2rem;
+  }
+  .prop-precio-top {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .prop-precio-left { display: flex; flex-direction: column; gap: 0; }
+  .prop-precio-row {
+    display: flex; align-items: baseline; gap: 0.7rem;
+  }
+  .prop-precio {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 200; color: var(--charcoal);
+    letter-spacing: -0.02em;
+  }
+  .prop-precio-periodo {
+    font-size: 0.82rem; color: var(--gray);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .prop-mantenimiento {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    margin-top: 0.55rem;
+    font-size: 0.8rem; font-weight: 500;
+    padding: 0.28rem 0.8rem; border-radius: 20px;
+  }
+  .prop-mantenimiento.si {
+    color: #2e7d32; background: #e8f5e9; border: 1px solid #a5d6a7;
+  }
+  .prop-mantenimiento.no {
+    color: #8a6d3b; background: #fff8e1; border: 1px solid #ffe082;
+  }
+  .prop-mantenimiento svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
+
+  .prop-caract {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    padding: 0;
+    margin-bottom: 0;
+  }
+  .caract-item { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+  .caract-icon { width: 42px; height: 42px; stroke: var(--gold); fill: none; stroke-width: 1.3; }
+  .caract-icon-img { width: 42px; height: 42px; object-fit: contain; filter: grayscale(1) brightness(0.55); }
+  .caract-valor { font-family: var(--font-display); font-size: 1.15rem; font-weight: 500; }
+  .caract-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray); }
+
+  .section-label {
+    font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin-bottom: 0.85rem;
+  }
+  .section-label-proyecto {
+    font-size: 1.7rem; letter-spacing: 0.03em; text-transform: none;
+    color: var(--gold); font-weight: 600; margin-bottom: 0.85rem;
+    font-family: var(--font-display);
+    text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 4px; text-decoration-thickness: 1px;
+  }
+  .prop-tipo-label {
+    font-size: 0.95rem; color: #98c94c; margin-bottom: 0.3rem;
+  }
+  .desc-amenidades-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;
+    margin-top: 0;
+  }
+  .inc-req-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+    margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-border);
+  }
+  @media (max-width: 640px) {
+    .desc-amenidades-grid { grid-template-columns: 1fr; }
+    .inc-req-grid { grid-template-columns: 1fr; }
+  }
+  .prop-descripcion {
+    font-size: 0.9rem; line-height: 1.9; color: var(--gray);
+    margin-bottom: 2.5rem; white-space: pre-line;
+  }
+
+  .caract-unicas {
+    display: flex; flex-wrap: wrap; gap: 0.85rem 1.5rem; margin-bottom: 0;
+  }
+  .caract-unica-item {
+    display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+    font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--gray); text-align: center; max-width: 64px;
+  }
+  .caract-unica-item img { width: 42px; height: 42px; object-fit: contain; filter: grayscale(1) brightness(0.55); }
+
+  .amenidades {
+    display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2.5rem;
+  }
+  .amenidad {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.83rem; color: var(--charcoal);
+  }
+  .amenidad svg { width: 15px; height: 15px; stroke: var(--gold); fill: none; stroke-width: 1.8; flex-shrink: 0; }
+  .amenidades-compact { gap: 0.05rem; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { position: sticky; top: 88px; height: fit-content; }
+
+  .sidebar-card {
+    background: var(--gray-light);
+    border: 1px solid var(--gray-border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+  }
+  .sidebar-card.cta {
+    background: var(--white);
+    border: 1px solid var(--gray-border);
+    border-top: 3px solid var(--gold);
+    box-shadow: 0 4px 24px rgba(30,45,74,0.07);
+    padding: 0;
+    overflow: hidden;
+  }
+  .sidebar-card.cta .cta-header {
+    background: linear-gradient(135deg, var(--charcoal) 0%, #2a3f6b 100%);
+    background-size: cover;
+    background-position: center;
+    padding: 1rem 1.5rem 1rem;
+    border-bottom: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .sidebar-card.cta .cta-header .cta-header-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(26,37,58,0.62) 0%, rgba(20,35,72,0.55) 100%);
+    z-index: 0;
+  }
+  .sidebar-card.cta .cta-header::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    background: rgba(201,168,76,0.15);
+    border-radius: 50%;
+  }
+  .sidebar-card.cta .cta-header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; left: 20px;
+    width: 60px; height: 60px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+  .sidebar-card.cta .cta-header h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem; font-weight: 700;
+    color: #fff; margin-bottom: 0.2rem;
+    letter-spacing: -0.02em;
+    position: relative; z-index: 1;
+  }
+  .sidebar-card.cta .cta-header .cta-header-sub {
+    font-size: 0.72rem; color: rgba(255,255,255,0.65);
+    font-weight: 400; position: relative; z-index: 1;
+    line-height: 1.4;
+  }
+  .sidebar-card.cta .cta-header .cta-header-icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center;
+    justify-content: center; margin-bottom: 0.45rem;
+    position: relative; z-index: 1;
+  }
+  .sidebar-card.cta .cta-body {
+    padding: 0.85rem 1.25rem 1.25rem;
+  }
+  .sidebar-card.cta p {
+    color: var(--gray) !important;
+    font-size: 0.82rem !important;
+    line-height: 1.55 !important;
+  }
+  .sidebar-card.cta .form-label {
+    color: var(--gray);
+    font-size: 0.67rem;
+  }
+  .sidebar-card.cta .form-field input,
+  .sidebar-card.cta .form-field textarea,
+  .sidebar-card.cta .form-field select {
+    background: var(--white);
+    border: 1px solid var(--gray-border);
+    border-radius: 8px;
+    color: var(--charcoal);
+    font-size: 0.83rem;
+    padding: 0.48rem 0.8rem;
+    transition: border-color 0.2s;
+  }
+  .sidebar-card.cta .form-field input::placeholder,
+  .sidebar-card.cta .form-field textarea::placeholder { color: #b0bac8; }
+  .sidebar-card.cta .form-field input:focus,
+  .sidebar-card.cta .form-field textarea:focus,
+  .sidebar-card.cta .form-field select:focus {
+    outline: none; border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  }
+  /* Propiedad de interés box */
+  #c-prop-box {
+    background: var(--gray-light) !important;
+    border: 1px solid var(--gray-border) !important;
+    border-left: 3px solid var(--gold) !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 0.8rem !important;
+    margin-bottom: 0.6rem !important;
+  }
+  .sidebar-card.cta .form-field { margin-bottom: 0.55rem; }
+  .sidebar-card.cta .form-row-2 { margin-bottom: 0.55rem; gap: 0.55rem; }
+  .sidebar-card.cta .toggle-group { margin-bottom: 0.5rem; gap: 0.3rem; }
+  .sidebar-card.cta .btn-consulta { padding: 0.7rem; font-size: 0.82rem; }
+  .sidebar-card.cta #c-prop-titulo { color: var(--charcoal); font-size: 0.88rem; font-weight: 600; }
+  .sidebar-card.cta #c-prop-proyecto { color: var(--gold); font-weight: 600; font-size: 0.75rem; }
+  .sidebar-card.cta #c-prop-specs { color: var(--gray); font-size: 0.72rem; }
+  /* Toggles */
+  .sidebar-card.cta .toggle-btn {
+    background: var(--white);
+    border: 1px solid var(--gray-border);
+    color: var(--charcoal);
+    border-radius: 6px;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+    transition: all 0.18s;
+  }
+  .sidebar-card.cta .toggle-btn:hover:not(.active) {
+    border-color: var(--gold); color: var(--gold);
+  }
+  .sidebar-card.cta .toggle-btn.active {
+    background: var(--charcoal); border-color: var(--charcoal); color: #fff; font-weight: 600;
+  }
+  /* Nota */
+  .sidebar-card.cta .form-note {
+    background: #fffbf2;
+    color: var(--gray);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.68rem;
+    line-height: 1.45;
+    padding: 0.4rem 0.65rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .sidebar-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  }
+  /* Botón principal */
+  .sidebar-card.cta .btn-consulta {
+    background: var(--charcoal); color: #fff;
+    font-weight: 600; letter-spacing: 0.06em;
+    border-radius: 8px; font-size: 0.84rem;
+    padding: 0.9rem;
+  }
+  .sidebar-card.cta .btn-consulta:hover { background: #2a3f6b; }
+  /* Botón WhatsApp */
+  .sidebar-card.cta .btn-wa {
+    background: #f0fdf4; color: #166534;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px; font-size: 0.82rem;
+    letter-spacing: 0.04em; font-weight: 500;
+  }
+  .sidebar-card.cta .btn-wa svg path { fill: #16a34a; }
+  .sidebar-card.cta .btn-wa:hover { background: #dcfce7; opacity: 1; }
+  .mapa-preview {
+    border-radius: var(--radius); overflow: hidden;
+    margin-bottom: 1rem; border: 1px solid var(--gray-border);
+  }
+  .mapa-preview a {
+    display: block; text-align: center;
+    font-size: 0.75rem; color: var(--gray);
+    padding: 0.5rem; background: var(--gray-light);
+    text-decoration: none; border-top: 1px solid var(--gray-border);
+  }
+  .mapa-preview a:hover { color: var(--gold); }
+  .mapa-preview iframe { display: block; width: 100%; height: 180px; border: none; }
+
+  .form-field {
+    margin-bottom: 0.75rem;
+  }
+  .form-field input,
+  .form-field textarea {
+    width: 100%; padding: 0.7rem 0.9rem;
+    border: 1px solid var(--gray-border);
+    border-radius: 7px;
+    background: var(--white);
+    font-family: var(--font-body); font-size: 0.85rem;
+    color: var(--charcoal); outline: none;
+    transition: border-color var(--transition);
+  }
+  .form-field input:focus,
+  .form-field textarea:focus { border-color: var(--gold); }
+  .form-field textarea { resize: vertical; min-height: 85px; }
+
+  .btn-consulta {
+    width: 100%; padding: 0.85rem;
+    background: var(--charcoal); color: var(--white);
+    border: none; border-radius: 7px;
+    font-family: var(--font-body); font-size: 0.82rem;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    cursor: pointer; transition: background var(--transition);
+    margin-bottom: 0.6rem;
+  }
+  .btn-consulta:hover { background: #162039; }
+
+  .btn-wa {
+    width: 100%; padding: 0.85rem;
+    background: #25D366; color: white;
+    border: none; border-radius: 7px;
+    font-family: var(--font-body); font-size: 0.82rem;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    cursor: pointer; transition: opacity var(--transition);
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  }
+  .btn-wa:hover { opacity: 0.88; }
+
+  .form-label {
+    display: block; font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--gray); margin-bottom: 0.35rem;
+  }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .form-field select {
+    width: 100%; padding: 0.7rem 0.9rem;
+    border: 1px solid var(--gray-border);
+    border-radius: 7px;
+    background: var(--white);
+    font-family: var(--font-body); font-size: 0.85rem;
+    color: var(--charcoal); outline: none;
+    transition: border-color var(--transition); cursor: pointer;
+  }
+  .form-field select:focus { border-color: var(--gold); }
+  .toggle-group { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
+  .toggle-btn {
+    padding: 0.45rem 0.8rem; border-radius: 6px;
+    border: 1px solid var(--gray-border);
+    background: var(--white); color: var(--charcoal);
+    font-family: var(--font-body); font-size: 0.78rem;
+    cursor: pointer; transition: all var(--transition);
+    flex: 1 1 calc(25% - 0.4rem); text-align: center;
+  }
+  .toggle-btn.active { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 600; }
+  .toggle-btn-hora { flex: 1 1 auto; }
+  .form-note {
+    font-size: 0.78rem; color: var(--gray); line-height: 1.5;
+    border-left: 3px solid var(--gold); padding: 0.6rem 0.75rem;
+    background: rgba(193,160,98,0.07); border-radius: 0 6px 6px 0;
+    margin-bottom: 0.75rem;
+  }
+
+  .asesor-info { display: flex; align-items: center; gap: 0.85rem; }
+  .asesor-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--gray-border);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .asesor-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .asesor-avatar svg { width: 22px; height: 22px; stroke: var(--gray); fill: none; stroke-width: 1.5; }
+  .asesor-nombre { font-size: 0.88rem; font-weight: 500; }
+  .asesor-tel { font-size: 0.78rem; color: var(--gray); margin-top: 1px; }
+
+  /* ── PROPIEDADES RELACIONADAS ── */
+  .relacionadas-wrap {
+    border-top: 1px solid var(--gray-border);
+    padding: 2.5rem 0 4rem;
+  }
+  .relacionadas-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .relacionadas-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.3rem; font-weight: 300;
+  }
+  .carousel-nav { display: flex; gap: 0.5rem; }
+  .carousel-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--gray-border); background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all var(--transition); color: var(--charcoal);
+    flex-shrink: 0;
+  }
+  .carousel-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .carousel-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .carousel-track-wrap { overflow: hidden; }
+  .relacionadas-carousel {
+    display: flex; gap: 1.2rem;
+    transition: transform 0.4s ease;
+    will-change: transform;
+  }
+  .rel-card {
+    flex: 0 0 260px;
+    border: 1px solid var(--gray-border); border-radius: var(--radius);
+    overflow: hidden; text-decoration: none; color: inherit; display: block;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .rel-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+  .rel-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+  .rel-card-body { padding: 0.85rem 1rem 1rem; }
+  .rel-tipo { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 0.3rem; }
+  .rel-titulo { font-size: 0.88rem; font-weight: 500; margin-bottom: 0.4rem; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .rel-precio { font-family: var(--font-display); font-size: 1rem; font-weight: 400; color: var(--charcoal); margin-bottom: 0.5rem; }
+  .rel-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .rel-chip {
+    font-size: 0.6rem; padding: 2px 7px; border-radius: 20px;
+    background: var(--gray-light); color: var(--gray); border: 1px solid var(--gray-border);
+    white-space: nowrap;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    nav { padding: 0 1.5rem; }
+    .pagina-contenido { padding: 0 1.5rem; }
+    .detalle-layout { grid-template-columns: 1fr; gap: 2rem; padding: 2rem 0 3rem; }
+    .sidebar { position: static; }
+    .galeria { grid-template-columns: 1fr; grid-template-rows: 300px; }
+    .galeria-secundarias { display: none; }
+    .relacionadas-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .galeria { grid-template-rows: 240px; }
+    .relacionadas-grid { grid-template-columns: 1fr; }
+    .prop-caract { gap: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo" id="nav-logo">
+    <span class="nav-logo-text" id="nav-logo-inmobia"><span class="logo-inmob">Inmob</span><span class="logo-ia">IA</span></span>
+    <img id="nav-logo-custom" src="" alt="Logo" style="display:none;max-height:40px;max-width:150px;object-fit:contain">
+  </a>
+  <a href="/index.html#propiedades" class="nav-back" id="nav-back">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Volver a propiedades
+  </a>
+</nav>
+
+<!-- LOADER -->
+<div class="page-loader" id="loader">
+  <div class="spinner"></div>
+  <span>Cargando propiedad...</span>
+</div>
+
+<!-- CONTENIDO (oculto hasta cargar) -->
+<div id="pagina" style="display:none">
+
+  <!-- GALERÍA full-width -->
+  <div class="galeria-wrap">
+    <div class="galeria" id="galeria"></div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" onclick="cerrarLightbox()">×</button>
+    <button class="lightbox-nav lightbox-prev" onclick="navLightbox(-1)">‹</button>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="">
+    <button class="lightbox-nav lightbox-next" onclick="navLightbox(1)">›</button>
+    <div class="lightbox-count" id="lightbox-count"></div>
+  </div>
+
+  <!-- INFO + SIDEBAR -->
+  <div class="pagina-contenido">
+    <div class="detalle-layout">
+
+      <!-- COLUMNA INFO -->
+      <div class="prop-info">
+        <div class="prop-precio-wrap">
+          <div id="prop-disponible" style="display:none;margin-bottom:0.4rem">
+            <span style="font-size:0.8rem;font-weight:600;color:#98c94c;letter-spacing:0.06em;text-transform:uppercase">● Disponible</span>
+          </div>
+          <div class="prop-precio-top">
+            <div class="prop-precio-left">
+              <div class="prop-precio-row">
+                <div class="prop-precio" id="prop-precio"></div>
+                <span class="prop-precio-periodo" id="prop-precio-periodo"></span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem">
+                <div id="prop-mantenimiento"></div>
+                <div id="prop-iva"></div>
+                <div id="prop-impuestos"></div>
+              </div>
+            </div>
+            <div class="prop-caract" id="prop-caract"></div>
+          </div>
+        </div>
+        <div id="caract-unicas-wrap" style="display:none;padding-top:0.6rem;margin-bottom:1.75rem;margin-top:-25px">
+          <div class="section-label" style="margin-bottom:0.5rem">Características únicas</div>
+          <div class="caract-unicas" id="caract-unicas-grid"></div>
+        </div>
+        <div id="precio-sin-lb-wrap" style="display:none;margin-bottom:1.75rem">
+          <div style="margin-bottom:0.4rem">
+            <span style="font-size:0.72rem;font-weight:600;color:#98c94c;letter-spacing:0.06em;text-transform:uppercase">● Disponible también sin línea blanca</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:0.7rem">
+            <div style="font-family:var(--font-display);font-size:clamp(1.4rem,2.2vw,1.9rem);font-weight:200;color:var(--charcoal);letter-spacing:-0.02em" id="precio-sin-lb-valor"></div>
+            <span style="font-size:0.72rem;color:var(--gray);letter-spacing:0.06em;text-transform:uppercase" id="precio-sin-lb-periodo"></span>
+          </div>
+        </div>
+        <div class="prop-tipo-label" id="prop-tipo-label"></div>
+        <div class="section-label" id="label-descripcion">Descripción</div>
+        <div id="prop-desc-persuasiva" style="display:none;margin-bottom:1.5rem;font-size:0.95rem;line-height:1.8;color:var(--gray)"></div>
+        <div class="desc-amenidades-grid">
+          <div>
+            <div class="section-label" style="margin-bottom:0.6rem">Características</div>
+            <div class="prop-descripcion" id="prop-descripcion"></div>
+            <!-- Requisitos — columna izquierda, debajo de características -->
+            <div id="req-section-wrap" style="display:none;margin-top:1.5rem">
+              <div id="requisitos-wrap" style="display:none">
+                <div class="section-label">Requisitos</div>
+                <div class="amenidades amenidades-compact" id="prop-requisitos"></div>
+              </div>
+              <div id="req-valor-wrap" style="display:none;margin-top:1rem">
+                <div class="section-label" style="margin-bottom:0.25rem">Valor de Honorarios del notario/contrato</div>
+                <div id="prop-req-valor" style="font-size:0.83rem;color:var(--charcoal)"></div>
+              </div>
+              <div id="req-adicionales-wrap" style="display:none;margin-top:1rem">
+                <div class="section-label" style="margin-bottom:0.25rem">Requisitos adicionales</div>
+                <div id="prop-req-adicionales" style="font-size:0.83rem;color:var(--charcoal);white-space:pre-line"></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div id="amenidades-wrap" style="display:none">
+              <div class="section-label">Amenidades</div>
+              <div class="amenidades" id="prop-amenidades"></div>
+              <div id="mant-incluye-wrap" style="display:none;margin-top:1.5rem">
+                <div class="section-label">Mantenimiento incluye</div>
+                <div class="amenidades" id="prop-mant-incluye"></div>
+              </div>
+              <div id="que-incluye-wrap" style="display:none;margin-top:1.5rem">
+                <div class="section-label" style="margin-bottom:0.6rem">Línea blanca incluye:</div>
+                <div class="amenidades" id="prop-que-incluye"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Agendar visita -->
+        <div style="margin-top:1.5rem;text-align:center">
+          <button onclick="abrirModalVisita()" style="background:#e5a50d;color:#fff;border:none;border-radius:8px;padding:0.85rem 2rem;font-size:0.95rem;font-weight:700;cursor:pointer;letter-spacing:0.03em;width:100%;transition:background 0.2s" onmouseover="this.style.background='#1e2d4a'" onmouseout="this.style.background='#e5a50d'">
+            Quiero conocer esta propiedad →
+          </button>
+        </div>
+
+        <!-- Botón de consulta -->
+        <div style="margin-top:1.5rem">
+          <button onclick="abrirModalConsulta()" style="width:100%;background:#fff;color:var(--charcoal);border:2px solid var(--charcoal);border-radius:8px;padding:0.85rem 2rem;font-size:0.95rem;font-weight:700;cursor:pointer;letter-spacing:0.03em;transition:background 0.2s,color 0.2s" onmouseover="this.style.background='var(--charcoal)';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='var(--charcoal)'">
+            Tengo una consulta sobre esta propiedad
+          </button>
+        </div>
+      </div>
+
+      <!-- COLUMNA SIDEBAR -->
+      <aside class="sidebar">
+        <div id="mapa-wrap" style="display:none;margin-bottom:0.75rem">
+          <iframe id="mapa-iframe-sidebar" src="" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="display:block;width:100%;height:180px;border:none;border-radius:8px 8px 0 0"></iframe>
+          <button onclick="abrirModalMapa()" style="width:100%;background:#e5a50d;color:#fff;border:none;border-radius:0 0 8px 8px;padding:0.7rem 1rem;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:background 0.2s" onmouseover="this.style.background='#1e2d4a'" onmouseout="this.style.background='#e5a50d'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Ver ubicación en Google Maps
+          </button>
+        </div>
+        <div class="sidebar-card cta">
+          <div class="cta-header" id="cta-header-bg">
+            <div class="cta-header-overlay"></div>
+            <div class="cta-header-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <h3>Agendar una visita a esta propiedad</h3>
+            <div class="cta-header-sub">Complete el formulario y le contactaremos por WhatsApp para coordinar su visita.</div>
+          </div>
+          <div class="cta-body">
+          <form id="form-contacto" onsubmit="enviarContacto(event)">
+            <div class="form-row-2">
+              <div class="form-field">
+                <label class="form-label" for="c-nombre">Nombre</label>
+                <input type="text" id="c-nombre" placeholder="Tu nombre" required>
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="c-apellido">Apellido</label>
+                <input type="text" id="c-apellido" placeholder="Tu apellido" required>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="c-telefono">WhatsApp</label>
+              <div style="display:flex">
+                <select id="c-pais" style="width:88px;flex-shrink:0;border-radius:6px 0 0 6px;border-right:none;background:#f4f6fb;font-size:0.82rem;padding:0.55rem 0;border:1px solid var(--gray-border);cursor:pointer;outline:none">
+                  <option value="+502">🇬🇹 +502</option>
+                  <option value="+52">🇲🇽 +52</option>
+                  <option value="+503">🇸🇻 +503</option>
+                  <option value="+504">🇭🇳 +504</option>
+                  <option value="+505">🇳🇮 +505</option>
+                  <option value="+506">🇨🇷 +506</option>
+                  <option value="+507">🇵🇦 +507</option>
+                  <option value="+53">🇨🇺 +53</option>
+                  <option value="+1-809">🇩🇴 +1-809</option>
+                  <option value="+57">🇨🇴 +57</option>
+                  <option value="+58">🇻🇪 +58</option>
+                  <option value="+593">🇪🇨 +593</option>
+                  <option value="+51">🇵🇪 +51</option>
+                  <option value="+591">🇧🇴 +591</option>
+                  <option value="+56">🇨🇱 +56</option>
+                  <option value="+54">🇦🇷 +54</option>
+                  <option value="+598">🇺🇾 +598</option>
+                  <option value="+595">🇵🇾 +595</option>
+                  <option value="+34">🇪🇸 +34</option>
+                  <option value="+1">🇺🇸 +1</option>
+                </select>
+                <input type="tel" id="c-telefono" placeholder="5555 0000" required style="flex:1;border-left:none;border-radius:0 6px 6px 0">
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="c-email">Correo electrónico</label>
+              <input type="email" id="c-email" placeholder="su@correo.com">
+            </div>
+            <div id="c-prop-box" style="margin-bottom:0.75rem;padding:0.7rem 0.9rem;background:#fff;border:1px solid #cdd5e3;border-radius:7px">
+              <div style="font-size:0.68rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:0.25rem">Propiedad de interés</div>
+              <div id="c-prop-titulo" style="font-size:0.85rem;font-weight:600;color:var(--charcoal);line-height:1.3"></div>
+              <div id="c-prop-proyecto" style="font-size:0.78rem;color:var(--gray);margin-top:0.15rem;display:none"></div>
+              <div id="c-prop-specs" style="font-size:0.72rem;color:var(--gray);margin-top:0.3rem;display:none"></div>
+              <div id="c-prop-codigo" style="font-size:0.65rem;margin-top:0.4rem;text-align:right;display:none"><span style="color:var(--gold);font-weight:700">COD:</span> <span id="c-prop-codigo-val" style="font-weight:300;color:#5a6a82"></span></div>
+            </div>
+            <div style="margin-bottom:0.4rem">
+              <label class="form-label">Días disponibles para visita</label>
+              <div class="toggle-group" id="dias-group">
+                <button type="button" class="toggle-btn" data-val="Lunes">Lunes</button>
+                <button type="button" class="toggle-btn" data-val="Martes">Martes</button>
+                <button type="button" class="toggle-btn" data-val="Miércoles">Miércoles</button>
+                <button type="button" class="toggle-btn" data-val="Jueves">Jueves</button>
+                <button type="button" class="toggle-btn" data-val="Viernes">Viernes</button>
+                <button type="button" class="toggle-btn" data-val="Sábado">Sábado</button>
+                <button type="button" class="toggle-btn" data-val="Domingo">Domingo</button>
+                <button type="button" class="toggle-btn" data-val="Flexible">Flexible</button>
+              </div>
+            </div>
+            <div style="margin-bottom:0.4rem">
+              <label class="form-label">Rango horario preferido</label>
+              <div class="toggle-group" id="horario-group">
+                <button type="button" class="toggle-btn toggle-btn-hora" data-val="Mañana">Mañana<br><small style="font-weight:400;opacity:0.8">8am – 12pm</small></button>
+                <button type="button" class="toggle-btn toggle-btn-hora" data-val="Tarde">Tarde<br><small style="font-weight:400;opacity:0.8">12pm – 5pm</small></button>
+                <button type="button" class="toggle-btn toggle-btn-hora" data-val="Tarde-noche">Tarde-noche<br><small style="font-weight:400;opacity:0.8">5pm – 7pm</small></button>
+              </div>
+            </div>
+            <div class="form-field" style="margin-bottom:0.4rem">
+              <label class="form-label" for="c-dia-hora">Fecha y hora preferidas</label>
+              <input type="datetime-local" id="c-dia-hora">
+            </div>
+            <div class="form-note">Su cita está sujeta a confirmación por parte del propietario. Le notificaremos por WhatsApp a la brevedad posible el propietario nos confirme su disponibilidad.</div>
+            <div class="form-field">
+              <label class="form-label" for="c-mensaje">Comentario adicional (opcional)</label>
+              <textarea id="c-mensaje" placeholder="Indique cualquier detalle relevante para su visita." style="min-height:56px;resize:none"></textarea>
+            </div>
+            <button type="submit" class="btn-consulta">Agendar visita →</button>
+          </form>
+
+          <!-- Estado de éxito sidebar -->
+          <div id="form-contacto-exito" style="display:none;text-align:center;padding:2rem 1rem">
+            <div style="font-size:2.2rem;margin-bottom:0.65rem">✅</div>
+            <div style="font-size:1rem;font-weight:700;color:var(--charcoal);margin-bottom:0.4rem">¡Solicitud enviada!</div>
+            <div style="font-size:0.82rem;color:var(--gray);line-height:1.6;margin-bottom:0.4rem">El asesor te contactará por WhatsApp a la brevedad para confirmar la visita.</div>
+            <div style="font-size:0.8rem;color:var(--gray);line-height:1.6;margin-bottom:1.25rem">Te enviamos un correo con acceso a tu panel de seguimiento donde puedes ver el estado de tu solicitud y contactar al asesor.</div>
+            <a id="sidebar-btn-panel" href="#" target="_blank"
+              style="display:none;align-items:center;justify-content:center;gap:0.5rem;background:#c9a84c;color:#fff;text-decoration:none;border-radius:8px;padding:0.7rem 1.5rem;font-size:0.88rem;font-weight:700;margin-bottom:0.75rem;width:100%;box-sizing:border-box">
+              Ver mi panel de cliente →
+            </a>
+            <button id="sidebar-btn-cerrar" onclick="document.getElementById('form-contacto-exito').style.display='none';document.getElementById('form-contacto').style.display='block'" style="display:none;background:var(--charcoal);color:#fff;border:none;border-radius:7px;padding:0.6rem 1.25rem;font-size:0.85rem;font-weight:600;cursor:pointer">Cerrar</button>
+          </div>
+
+          </div><!-- /cta-body -->
+        </div>
+
+        <!-- TARJETA DEL ASESOR -->
+        <div id="asesor-card" style="display:none;margin-top:1rem;background:#fff;border:1px solid var(--gray-border);border-radius:12px;overflow:hidden">
+          <!-- Header con logo empresa -->
+          <div id="asesor-header-logo" style="display:none;padding:0.75rem 1.25rem 0;border-bottom:1px solid var(--gray-border)">
+            <img id="asesor-logo-img" src="" alt="" style="max-height:36px;max-width:140px;object-fit:contain;display:block">
+          </div>
+          <!-- Info principal -->
+          <div style="padding:1rem 1.25rem">
+            <div style="font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.7rem">Asesor responsable</div>
+            <div style="display:flex;align-items:center;gap:0.85rem">
+              <!-- Avatar -->
+              <a id="asesor-avatar-link" href="#" style="flex-shrink:0;text-decoration:none">
+                <div class="asesor-avatar" style="width:52px;height:52px">
+                  <img id="asesor-foto-img" src="" alt="" style="display:none;width:52px;height:52px;object-fit:cover;border-radius:50%">
+                  <svg id="asesor-avatar-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+              </a>
+              <!-- Datos -->
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap">
+                  <a id="asesor-nombre-link" href="#" style="font-size:0.9rem;font-weight:600;color:var(--charcoal);text-decoration:none;line-height:1.2">—</a>
+                  <span id="asesor-badge-verificado" style="display:none;font-size:0.6rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:20px;padding:2px 7px">✓ Verificado</span>
+                </div>
+                <div id="asesor-empresa-label" style="display:none;font-size:0.75rem;color:var(--gray);margin-top:2px"></div>
+                <div id="asesor-tel-label" style="font-size:0.75rem;color:var(--gray);margin-top:1px"></div>
+              </div>
+            </div>
+            <!-- Bio -->
+            <div id="asesor-bio" style="display:none;font-size:0.78rem;color:var(--gray);line-height:1.55;margin-top:0.7rem;padding-top:0.7rem;border-top:1px solid var(--gray-border)"></div>
+          </div>
+          <!-- Botón WhatsApp -->
+          <div style="padding:0 1.25rem 1rem">
+            <a id="asesor-wa-btn" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;background:#25d366;color:#fff;font-size:0.8rem;font-weight:600;letter-spacing:0.04em;padding:0.6rem 1rem;border-radius:8px;text-decoration:none;transition:background 0.2s" onmouseover="this.style.background='#1ebe5d'" onmouseout="this.style.background='#25d366'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+              Contactar al asesor
+            </a>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+    <!-- PROPIEDADES SIMILARES -->
+    <div class="relacionadas-wrap" id="relacionadas" style="display:none">
+      <div class="relacionadas-header">
+        <h2>Propiedades similares</h2>
+        <div class="carousel-nav">
+          <button class="carousel-btn" id="carousel-prev" onclick="moverCarousel(-1)" aria-label="Anterior">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="carousel-btn" id="carousel-next" onclick="moverCarousel(1)" aria-label="Siguiente">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="carousel-track-wrap">
+        <div class="relacionadas-carousel" id="relacionadas-carousel"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pagina -->
+
+<footer style="background:#1a1f2e;border-top:1px solid rgba(255,255,255,0.08);padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;">
+  <span style="font-size:0.78rem;color:rgba(255,255,255,0.35)">© 2026 InmobIA — Todos los derechos reservados</span>
+  <span style="font-size:0.78rem;color:rgba(255,255,255,0.35)">Guatemala, C.A.</span>
+</footer>
+
+<script>
+  const API    = 'https://inmobia.site/api';
+  const API_BASE = 'https://inmobia.site';
+  let WA_NUM = '50247073915'; // fallback — se reemplaza con el teléfono del asesor
+
+  const params = new URLSearchParams(window.location.search);
+  const propId  = params.get('id');
+  // 'from=asesor' indica que el usuario llegó desde el portal del asesor
+  const desdeAsesor = params.get('from') === 'asesor';
+
+  let imagenes = [];
+  let lightboxIdx = 0;
+  let propData = null;
+  let propCodigoGlobal = '';
+
+  // ── CARGA ──────────────────────────────────────────────────
+  async function cargarPropiedad() {
+    if (!propId) { mostrarError('No se especificó una propiedad.'); return; }
+    try {
+      const res = await fetch(`${API}/propiedades/${propId}`);
+      if (!res.ok) throw new Error('No encontrada');
+      propData = await res.json();
+      imagenes = (propData.imagenes || []).map(img => ({
+        ...img,
+        url: img.url.startsWith('http') ? img.url : `${API_BASE}${img.url}`
+      }));
+      renderGaleria();
+      renderDetalle();
+      cargarRelacionadas();
+      if (propData.usuario_id) cargarLogoAsesor(propData.usuario_id);
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('pagina').style.display = 'block';
+    } catch (e) {
+      mostrarError('No se pudo cargar la propiedad. <a href="/">Volver al inicio</a>');
+    }
+  }
+
+  function mostrarError(msg) {
+    document.getElementById('loader').innerHTML = `<div class="error-msg">${msg}</div>`;
+  }
+
+  async function cargarLogoAsesor(usuarioId) {
+    try {
+      const r = await fetch(`${API}/auth/asesor/${usuarioId}/logo`);
+      if (!r.ok) return;
+      const data = await r.json();
+      window.__captorInfo = data;
+
+      // Solo desde el portal del asesor: redirigir WhatsApp y nav al asesor
+      // Solo cambiar el logo y los links de navegación si el usuario llegó desde el portal del asesor
+      if (desdeAsesor) {
+        if (data.telefono) WA_NUM = data.telefono.replace(/\D/g, '');
+        if (data.logo && data.slug) {
+          document.getElementById('nav-logo-inmobia').style.display = 'none';
+          const imgNav = document.getElementById('nav-logo-custom');
+          imgNav.src = `${API_BASE}${data.logo}`;
+          imgNav.style.display = 'block';
+          document.getElementById('nav-logo').href = `/asesor.html?slug=${data.slug}`;
+          document.getElementById('nav-back').href = `/asesor.html?slug=${data.slug}#propiedades`;
+        }
+      }
+
+      // La tarjeta del asesor solo aparece cuando se viene desde el portal del asesor.
+      // Desde InmobIA, la propiedad compartida es de InmobIA — no se expone al asesor.
+      if (!desdeAsesor) return;
+      document.getElementById('asesor-card').style.display = 'block';
+
+      // Nombre (clickeable al portal si tiene slug)
+      const nombreEl = document.getElementById('asesor-nombre-link');
+      nombreEl.textContent = data.nombre || '—';
+      const portalUrl = data.slug ? `/asesor.html?slug=${data.slug}` : null;
+      if (portalUrl) {
+        nombreEl.href = portalUrl;
+        document.getElementById('asesor-avatar-link').href = portalUrl;
+      }
+
+      // Foto de perfil
+      if (data.foto) {
+        const fotoImg = document.getElementById('asesor-foto-img');
+        fotoImg.src = `${API_BASE}${data.foto}`;
+        fotoImg.style.display = 'block';
+        document.getElementById('asesor-avatar-svg').style.display = 'none';
+      }
+
+      // Teléfono
+      if (data.telefono) {
+        document.getElementById('asesor-tel-label').textContent = data.telefono;
+      }
+
+      // Empresa
+      if (data.empresa) {
+        const empEl = document.getElementById('asesor-empresa-label');
+        empEl.textContent = data.empresa;
+        empEl.style.display = 'block';
+      }
+
+      // Logo de empresa/inmobiliaria
+      if (data.logo) {
+        const hdr = document.getElementById('asesor-header-logo');
+        document.getElementById('asesor-logo-img').src = `${API_BASE}${data.logo}`;
+        hdr.style.display = 'block';
+      }
+
+      // Badge verificado — asesores Premium están verificados
+      if (data.plan === 'premium') {
+        document.getElementById('asesor-badge-verificado').style.display = 'inline-flex';
+      }
+
+      // Bio
+      if (data.bio) {
+        const bioEl = document.getElementById('asesor-bio');
+        bioEl.textContent = data.bio;
+        bioEl.style.display = 'block';
+      }
+
+      // Botón WhatsApp
+      if (data.telefono) {
+        const waNum = data.telefono.replace(/\D/g, '');
+        const waTxt = encodeURIComponent(`Hola ${data.nombre || ''}, vi su propiedad en InmobIA y me gustaría obtener más información.`);
+        document.getElementById('asesor-wa-btn').href = `https://wa.me/${waNum}?text=${waTxt}`;
+      }
+    } catch { /* sin datos de asesor */ }
+  }
+
+  // ── GALERÍA ─────────────────────────────────────────────────
+  function renderGaleria() {
+    const galeria = document.getElementById('galeria');
+    if (!imagenes.length) {
+      galeria.style.background = '#f0ede8';
+      galeria.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;color:#999;font-size:0.9rem;height:100%;grid-column:1/-1">Sin imágenes disponibles</div>';
+      return;
+    }
+
+    const principal = imagenes.find(i => i.principal) || imagenes[0];
+    const resto = imagenes.filter(i => i.id !== principal.id);
+
+    const ctaHeaderEl = document.getElementById('cta-header-bg');
+    if (ctaHeaderEl && principal?.url) {
+      ctaHeaderEl.style.backgroundImage = `url('${principal.url}')`;
+    }
+
+    const tipoLabel = propData.tipo.charAt(0).toUpperCase() + propData.tipo.slice(1);
+    const opLabel   = propData.operacion === 'renta' ? 'En renta' : 'En venta';
+    const ubicacion = [propData.zona, propData.municipio, propData.direccion].filter(Boolean).join(', ');
+
+    // ── Código único de propiedad (viene del backend)
+    const propCodigo = propData.codigo || '';
+
+    let html = `
+      <div class="galeria-principal" onclick="abrirLightbox(0)">
+        <img src="${principal.url}" alt="${propData.titulo}" loading="eager">
+        <div class="galeria-badge">
+          <span class="badge-dot"></span>
+          ${tipoLabel} · ${opLabel}
+        </div>
+        <div class="galeria-overlay">
+          <div class="galeria-titulo">${propData.titulo}</div>
+          <div style="display:flex;align-items:center;gap:0.55rem;flex-wrap:wrap;margin-top:0.2rem">
+            ${propData.nombre_proyecto ? `<span style="font-size:0.85rem;font-weight:400;color:#fff;letter-spacing:0.02em">${propData.nombre_proyecto}</span>` : ''}
+            ${propData.nombre_proyecto && ubicacion ? `<span style="color:rgba(255,255,255,0.45);font-size:0.8rem;line-height:1">|</span>` : ''}
+            ${ubicacion ? `<div class="galeria-ubicacion" style="margin:0">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              ${ubicacion}
+            </div>` : ''}
+          </div>
+        </div>
+        ${propCodigo ? `<div class="prop-codigo"><span style="color:var(--gold);font-weight:700;letter-spacing:0.04em">COD:</span> <span style="font-weight:600;font-size:0.65rem;letter-spacing:0.06em">${propCodigo}</span></div>` : ''}
+      </div>`;
+
+    if (resto.length) {
+      html += '<div class="galeria-secundarias">';
+      const maximo = Math.min(resto.length, 4);
+      for (let i = 0; i < maximo; i++) {
+        const esUltima = i === 3 && imagenes.length > 5;
+        if (esUltima) {
+          html += `<div class="galeria-mas" data-label="+ ${imagenes.length - 4} fotos" onclick="abrirLightbox(${i + 1})">
+            <img src="${resto[i].url}" alt="">
+          </div>`;
+        } else {
+          html += `<div class="galeria-thumb" onclick="abrirLightbox(${i + 1})">
+            <img src="${resto[i].url}" alt="">
+          </div>`;
+        }
+      }
+      html += '</div>';
+    } else {
+      // Solo hay 1 imagen, la galería toma todo el ancho
+      galeria.style.gridTemplateColumns = '1fr';
+    }
+
+    galeria.innerHTML = html;
+  }
+
+  // ── DETALLE ─────────────────────────────────────────────────
+  function renderDetalle() {
+    document.title = `${propData.titulo} — InmobIA`;
+
+    // Identificador de propiedad en el formulario de visita
+    document.getElementById('c-prop-titulo').textContent = propData.titulo;
+    if (propData.nombre_proyecto) {
+      const el = document.getElementById('c-prop-proyecto');
+      el.textContent = propData.nombre_proyecto;
+      el.style.display = 'block';
+    }
+    const specs = [];
+    if (propData.habitaciones) specs.push(`${propData.habitaciones} hab.`);
+    if (propData.banos)        specs.push(`${propData.banos} baños`);
+    if (propData.parqueos)     specs.push(`${propData.parqueos} parq.`);
+    if (propData.metros)       specs.push(`${propData.metros} m²`);
+    if (specs.length) {
+      const sp = document.getElementById('c-prop-specs');
+      sp.textContent = specs.join('  ·  ');
+      sp.style.display = 'block';
+    }
+
+    // Código en el formulario
+    propCodigoGlobal = propData.codigo || '';
+    if (propCodigoGlobal) {
+      document.getElementById('c-prop-codigo-val').textContent = propCodigoGlobal;
+      document.getElementById('c-prop-codigo').style.display = 'block';
+    }
+
+    const sym = propData.moneda === 'USD' ? '$' : 'Q';
+    const num = Number(propData.precio).toLocaleString('es-GT');
+    // Estado de disponibilidad
+    const dispEl = document.getElementById('prop-disponible');
+    dispEl.style.display = 'block';
+    if (propData.estado === 'pendiente') {
+      dispEl.innerHTML = '<span style="font-size:0.8rem;font-weight:700;color:#f0c040;letter-spacing:0.08em;text-transform:uppercase">● Pendiente</span>';
+    } else {
+      dispEl.innerHTML = '<span style="font-size:0.8rem;font-weight:600;color:#98c94c;letter-spacing:0.06em;text-transform:uppercase">● Disponible</span>';
+    }
+
+    // Tipo + operación label (ej. "Casa en renta")
+    const tipoLabel = (propData.tipo || '').charAt(0).toUpperCase() + (propData.tipo || '').slice(1);
+    const opLabel   = (propData.operacion || '').charAt(0).toUpperCase() + (propData.operacion || '').slice(1);
+    document.getElementById('prop-tipo-label').textContent = `● ${tipoLabel} en ${propData.operacion || ''}`;
+
+    // Mapa
+    if (propData.mapa_url) {
+      document.getElementById('mapa-wrap').style.display = 'block';
+      document.getElementById('mapa-iframe-sidebar').src = propData.mapa_url;
+      const mapaLink = propData.mapa_url.replace('https://www.google.com/maps/embed', 'https://www.google.com/maps');
+      document.getElementById('mapa-link').href = mapaLink;
+    }
+
+    document.getElementById('prop-precio').textContent = `${sym}${num}`;
+    document.getElementById('prop-precio-periodo').textContent =
+      propData.operacion === 'renta' ? 'por mes' : 'precio de venta';
+
+    const esVenta = propData.operacion === 'venta';
+
+    // Mantenimiento e IVA — solo para renta
+    const mantEl = document.getElementById('prop-mantenimiento');
+    const ivaEl  = document.getElementById('prop-iva');
+    if (!esVenta) {
+      mantEl.innerHTML = propData.mantenimiento
+        ? `<span class="prop-mantenimiento si"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Incluye mantenimiento</span>`
+        : `<span class="prop-mantenimiento no"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>No incluye mantenimiento</span>`;
+      ivaEl.innerHTML = propData.iva
+        ? `<span class="prop-mantenimiento si"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Incluye IVA</span>`
+        : `<span class="prop-mantenimiento no"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>No incluye IVA</span>`;
+    }
+
+    // Impuestos — solo para venta
+    const impEl = document.getElementById('prop-impuestos');
+    if (esVenta) {
+      impEl.innerHTML = propData.impuestos
+        ? `<span class="prop-mantenimiento si"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Incluye impuestos</span>`
+        : `<span class="prop-mantenimiento no"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>No incluye impuestos</span>`;
+    }
+
+    // Características
+    const defs = [
+      { cond: propData.habitaciones, img: '/public/Habitaciones.png', val: propData.habitaciones,    label: 'Habitaciones' },
+      { cond: propData.banos,        img: '/public/banos.png',        val: propData.banos,           label: 'Baños' },
+      { cond: propData.parqueos,     img: '/public/parqueos.png',     val: propData.parqueos,        label: 'Parqueos' },
+      { cond: propData.metros,       img: '/public/m2.png',           val: `${propData.metros}m²`,   label: 'Área' },
+    ];
+    document.getElementById('prop-caract').innerHTML = defs.filter(d => d.cond).map(d => `
+      <div class="caract-item">
+        <img src="${d.img}" class="caract-icon-img" alt="${d.label}">
+        <span class="caract-valor">${d.val}</span>
+        <span class="caract-label">${d.label}</span>
+      </div>`).join('');
+
+    // Descripción persuasiva
+    if (propData.descripcion_persuasiva) {
+      const el = document.getElementById('prop-desc-persuasiva');
+      el.textContent = propData.descripcion_persuasiva;
+      el.style.display = 'block';
+    }
+
+    // Nombre proyecto como label de descripción
+    if (propData.nombre_proyecto) {
+      const lbl = document.getElementById('label-descripcion');
+      lbl.textContent = propData.nombre_proyecto;
+      lbl.classList.replace('section-label', 'section-label-proyecto');
+    }
+    // Descripción (preservar saltos de línea)
+    document.getElementById('prop-descripcion').textContent = propData.descripcion || 'Sin descripción disponible.';
+
+    // Amenidades
+    // ── Características Únicas (iconos)
+    const unicasArr = [
+      { cond: propData.bodega,             img: '/public/bodega.png',             label: 'Bodega' },
+      { cond: propData.dormitorio_servicio,img: '/public/dormitorio-servicio.png',label: 'Dorm. de servicio' },
+      { cond: propData.sala_familiar,      img: '/public/sala-familiar.png',      label: 'Sala familiar' },
+      { cond: propData.amueblado,          img: '/public/amueblado.png',          label: 'Amueblado' },
+      { cond: propData.mascota,            img: '/public/mascotas.png',           label: 'Acepta mascotas' },
+      { cond: propData.no_mascota,         img: '/public/no-mascota.png',         label: 'No se acepta mascota' },
+      { cond: propData.linea_blanca,       img: '/public/linea-blanca.png',       label: 'Línea blanca' },
+      { cond: propData.no_linea_blanca,    img: '/public/no-linea-blanca.png',    label: 'No incluye línea blanca' },
+      { cond: propData.jardin,             img: '/public/jardin.png',             label: 'Jardín' },
+      { cond: propData.patio,              img: '/public/patio.png',              label: 'Patio' },
+      { cond: propData.garita,             img: '/public/garita.png',             label: 'Garita de seguridad' },
+      { cond: propData.estudio,            img: '/public/estudio.png',            label: 'Estudio' },
+    ].filter(u => u.cond);
+
+    if (unicasArr.length) {
+      document.getElementById('caract-unicas-wrap').style.display = 'block';
+      document.getElementById('caract-unicas-grid').innerHTML = unicasArr.map(u => `
+        <div class="caract-unica-item">
+          <img src="${u.img}" alt="${u.label}">
+          <span>${u.label}</span>
+        </div>`).join('');
+    }
+
+    // ── Precio alternativo sin línea blanca
+    const precioSinLB = Number(propData.precio_sin_linea_blanca) || 0;
+    if (precioSinLB > 0) {
+      const sym = propData.moneda === 'USD' ? '$' : 'Q';
+      document.getElementById('precio-sin-lb-wrap').style.display = 'block';
+      document.getElementById('precio-sin-lb-valor').textContent  = `${sym}${precioSinLB.toLocaleString('es-GT')}`;
+      document.getElementById('precio-sin-lb-periodo').textContent = document.getElementById('prop-precio-periodo').textContent;
+    }
+
+    // ── ¿Qué incluye?
+    const incluyeArr = [];
+    if (propData.inc_estufa)         incluyeArr.push('Estufa');
+    if (propData.inc_refrigeradora)  incluyeArr.push('Refrigeradora');
+    if (propData.inc_torre_lavadora) incluyeArr.push('Torre de lavadora y secadora');
+    if (propData.inc_lavadora)       incluyeArr.push('Solo lavadora');
+    if (propData.inc_lamparas)       incluyeArr.push('Lámparas');
+    if (propData.inc_cortinas)       incluyeArr.push('Cortinas en ventanas');
+    if (propData.inc_espejos)        incluyeArr.push('Espejos en baños');
+    if (propData.inc_calentador)     incluyeArr.push('Calentador eléctrico general');
+
+    if (incluyeArr.length) {
+      document.getElementById('amenidades-wrap').style.display = 'block';
+      document.getElementById('que-incluye-wrap').style.display = 'block';
+      document.getElementById('prop-que-incluye').innerHTML = incluyeArr.map(a => `
+        <div class="amenidad">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          ${a}
+        </div>`).join('');
+    }
+
+    // ── Amenidades
+    const amenArr = [];
+    if (propData.gimnasio)            amenArr.push('Gimnasio');
+    if (propData.seguridad)           amenArr.push('Seguridad 24H');
+    if (propData.piscina)             amenArr.push('Piscina');
+    if (propData.piscina_techada)     amenArr.push('Piscina techada');
+    if (propData.piscina_climatizada) amenArr.push('Piscina climatizada');
+    if (propData.salon_social)        amenArr.push('Salón social');
+    if (propData.business_center)     amenArr.push('Business center');
+    if (propData.juegos_ninos)        amenArr.push('Juegos para niños');
+    if (propData.pergola)             amenArr.push('Pérgola');
+    if (propData.area_social)         amenArr.push('Área social');
+    if (propData.sala_reuniones)      amenArr.push('Sala de reuniones');
+    if (propData.churrasqueras)       amenArr.push('Churrasqueras');
+    if (propData.tiendas)             amenArr.push('Tiendas');
+    if (propData.coworking)           amenArr.push('Coworking');
+    if (propData.yoga_deck)           amenArr.push('Yoga deck');
+    if (propData.sky_lounge)          amenArr.push('Sky lounge');
+    if (propData.terraza_panoramica)  amenArr.push('Terraza panorámica');
+    if (propData.firepit)             amenArr.push('Firepit');
+    if (propData.senderos)            amenArr.push('Senderos');
+    if (propData.bosque)              amenArr.push('Bosque');
+    if (propData.parque)              amenArr.push('Parque');
+    if (propData.bbq_lounge)          amenArr.push('BBQ Lounge');
+    if (propData.bistro_lounge)       amenArr.push('Bistro lounge');
+    if (propData.terraza_jardin)      amenArr.push('Terraza jardín');
+    if (propData.salon_lounge)        amenArr.push('Salón lounge');
+    if (propData.areas_verdes)        amenArr.push('Áreas verdes');
+    if (propData.parqueo_visitas)     amenArr.push('Parqueo de visitas');
+    if (propData.otra_amenidad)       amenArr.push(propData.otra_amenidad);
+
+    if (amenArr.length) {
+      document.getElementById('amenidades-wrap').style.display = 'block';
+      document.getElementById('prop-amenidades').innerHTML = amenArr.map(a => `
+        <div class="amenidad">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          ${a}
+        </div>`).join('');
+    }
+
+    // ── Mantenimiento incluye
+    const mantArr = [];
+    if (propData.mant_agua)          mantArr.push('Agua');
+    if (propData.mant_basura)        mantArr.push('Extracción de basura');
+    if (propData.mant_seguridad)     mantArr.push('Seguridad');
+    if (propData.mant_areas_comunes) mantArr.push('Mantenimiento de áreas comunes');
+    if (propData.mant_areas_verdes)  mantArr.push('Mantenimiento de áreas verdes');
+
+    if (mantArr.length) {
+      document.getElementById('amenidades-wrap').style.display = 'block';
+      document.getElementById('mant-incluye-wrap').style.display = 'block';
+      document.getElementById('prop-mant-incluye').innerHTML = mantArr.map(a => `
+        <div class="amenidad">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          ${a}
+        </div>`).join('');
+    }
+
+    // ── Requisitos
+    const reqArr = [];
+    if (propData.req_dpi)            reqArr.push('DPI o pasaporte');
+    if (propData.req_constancia)     reqArr.push('Constancia laboral');
+    if (propData.req_estados_cuenta) reqArr.push('Últimos 3 estados de cuenta bancarios');
+    if (propData.req_formulario)     reqArr.push('Formulario de solicitud con referencias personales y comerciales');
+    if (propData.req_fiador)         reqArr.push('<strong>Fiador con los mismos requisitos del inquilino</strong>');
+    if (propData.req_antecedentes)   reqArr.push('Antecedentes penales y policiacos');
+    if (propData.req_renas)          reqArr.push('Renas');
+    if (propData.req_infornet)       reqArr.push('Autorización de Infornet');
+    if (propData.req_deposito)       reqArr.push('Depósito equivalente al valor de una renta');
+    if (propData.req_contrato_1ano)  reqArr.push('Firma de contrato por 1 año');
+    if (propData.req_notario)        reqArr.push('Honorarios del notario');
+
+    if (reqArr.length || propData.req_valor_contrato || propData.req_adicionales) {
+      document.getElementById('req-section-wrap').style.display = 'block';
+      document.getElementById('requisitos-wrap').style.display = 'block';
+    }
+    if (reqArr.length) {
+      document.getElementById('prop-requisitos').innerHTML = reqArr.map(a => `
+        <div class="amenidad">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          ${a}
+        </div>`).join('');
+    }
+    if (propData.req_valor_contrato) {
+      document.getElementById('req-valor-wrap').style.display = 'block';
+      document.getElementById('prop-req-valor').textContent = propData.req_valor_contrato;
+    }
+    if (propData.req_adicionales) {
+      document.getElementById('req-adicionales-wrap').style.display = 'block';
+      document.getElementById('prop-req-adicionales').textContent = propData.req_adicionales;
+    }
+  }
+
+  // ── RELACIONADAS ─────────────────────────────────────────────
+  // ── SIMILITUD ────────────────────────────────────────────────
+  function calcularSimilitud(base, c) {
+    // tipo y operación deben coincidir siempre (prerequisito, no chip)
+    if (base.tipo !== c.tipo || base.operacion !== c.operacion) return [];
+
+    const chips = [];
+
+    // Precio: dentro del ±35%
+    if (base.precio && c.precio) {
+      const diff = Math.abs(base.precio - c.precio) / base.precio;
+      if (diff <= 0.35) chips.push('Precio similar');
+    }
+
+    // Zona igual
+    if (base.zona && c.zona && base.zona === c.zona) chips.push(c.zona);
+
+    // Habitaciones: igual o ±1
+    if (base.habitaciones && c.habitaciones && Math.abs(base.habitaciones - c.habitaciones) <= 1)
+      chips.push(`${c.habitaciones} hab.`);
+
+    // Baños: igual o ±1
+    if (base.banos && c.banos && Math.abs(base.banos - c.banos) <= 1)
+      chips.push(`${c.banos} baños`);
+
+    // Metros: dentro del ±35%
+    if (base.metros && c.metros) {
+      const diff = Math.abs(base.metros - c.metros) / base.metros;
+      if (diff <= 0.35) chips.push(`${c.metros} m²`);
+    }
+
+    // Parqueos: igual
+    if (base.parqueos && c.parqueos && base.parqueos === c.parqueos)
+      chips.push(`${c.parqueos} parqueo${c.parqueos > 1 ? 's' : ''}`);
+
+    // Acepta mascotas
+    if (base.mascota && c.mascota) chips.push('Acepta mascotas');
+
+    return chips;
+  }
+
+  let carouselIdx = 0;
+  let carouselCards = 0;
+  const CARD_W = 272; // 260px card + 12px gap
+
+  function moverCarousel(dir) {
+    const track = document.getElementById('relacionadas-carousel');
+    const visible = Math.floor(track.parentElement.offsetWidth / CARD_W);
+    const max = Math.max(0, carouselCards - visible);
+    carouselIdx = Math.min(Math.max(carouselIdx + dir, 0), max);
+    track.style.transform = `translateX(-${carouselIdx * CARD_W}px)`;
+    document.getElementById('carousel-prev').style.opacity = carouselIdx === 0 ? '0.3' : '1';
+    document.getElementById('carousel-next').style.opacity = carouselIdx >= max ? '0.3' : '1';
+  }
+
+  async function cargarRelacionadas() {
+    if (!propData) return;
+    try {
+      const res = await fetch(`${API}/propiedades?tipo=${encodeURIComponent(propData.tipo)}&operacion=${encodeURIComponent(propData.operacion)}&limit=80`);
+      const data = await res.json();
+      let candidatos = (data.propiedades || []).filter(p => p.id !== propData.id);
+      if (desdeAsesor && propData.usuario_id) {
+        candidatos = candidatos.filter(p => p.usuario_id === propData.usuario_id);
+        // Modelo tripartito: si el asesor permite propiedades similares de otros asesores,
+        // agregamos candidatos compartidos de otros asesores (marcados con bandera)
+        if (propData.asesor_permitir_similares) {
+          try {
+            const qs = new URLSearchParams({ tipo: propData.tipo, operacion: propData.operacion, excluir_asesor: propData.usuario_id });
+            const rT = await fetch(`${API}/propiedades/tripartito?${qs}`);
+            const dT = await rT.json();
+            (dT.propiedades || []).forEach(p => { p._tripartito = true; candidatos.push(p); });
+          } catch {}
+        }
+      }
+
+      // Puntuar y filtrar: tipo siempre coincide + mínimo 2 características adicionales
+      const puntuadas = candidatos
+        .map(p => ({ p, chips: calcularSimilitud(propData, p) }))
+        .filter(({ chips }) => chips.length >= 2)
+        .sort((a, b) => b.chips.length - a.chips.length)
+        .slice(0, 10);
+
+      if (!puntuadas.length) return;
+
+      carouselCards = puntuadas.length;
+      document.getElementById('relacionadas').style.display = 'block';
+      document.getElementById('carousel-prev').style.opacity = '0.3';
+
+      document.getElementById('relacionadas-carousel').innerHTML = puntuadas.map(({ p, chips }) => {
+        const imgUrl = p.imagen_principal
+          ? (p.imagen_principal.startsWith('http') ? p.imagen_principal : `${API_BASE}${p.imagen_principal}`)
+          : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=60';
+        const precio = Number(p.precio).toLocaleString('es-GT');
+        const sym = p.moneda === 'USD' ? '$' : 'Q';
+        const chipsHtml = chips.slice(0, 3).map(c => `<span class="rel-chip">${c}</span>`).join('');
+        const badge = p._tripartito
+          ? `<span style="position:absolute;top:8px;left:8px;background:#8b5cf6;color:#fff;font-size:0.62rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:4px;letter-spacing:0.04em;text-transform:uppercase;z-index:2">🤝 Red asesores</span>`
+          : '';
+        const hrefRel = p._tripartito
+          ? `/propiedad.html?id=${p.id}&ref=${propData.asesor_slug || ''}&via=tripartito`
+          : `/propiedad.html?id=${p.id}${desdeAsesor ? '&from=asesor' : ''}`;
+        return `
+          <a href="${hrefRel}" class="rel-card" style="position:relative">
+            ${badge}
+            <img src="${imgUrl}" alt="${p.titulo}" loading="lazy">
+            <div class="rel-card-body">
+              <div class="rel-tipo">${p.tipo} · ${p.operacion}</div>
+              <div class="rel-titulo">${p.titulo}</div>
+              <div class="rel-precio">${sym}${precio}</div>
+              <div class="rel-chips">${chipsHtml}</div>
+            </div>
+          </a>`;
+      }).join('');
+    } catch {}
+  }
+
+  // ── LIGHTBOX ─────────────────────────────────────────────────
+  function abrirLightbox(idx) {
+    lightboxIdx = idx;
+    actualizarLightbox();
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function cerrarLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function navLightbox(dir) {
+    lightboxIdx = (lightboxIdx + dir + imagenes.length) % imagenes.length;
+    actualizarLightbox();
+  }
+  function actualizarLightbox() {
+    document.getElementById('lightbox-img').src = imagenes[lightboxIdx]?.url || '';
+    document.getElementById('lightbox-count').textContent = `${lightboxIdx + 1} / ${imagenes.length}`;
+  }
+  document.getElementById('lightbox').addEventListener('click', e => {
+    if (e.target === e.currentTarget) cerrarLightbox();
+  });
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    if (e.key === 'ArrowLeft')  navLightbox(-1);
+    if (e.key === 'ArrowRight') navLightbox(1);
+    if (e.key === 'Escape')     cerrarLightbox();
+  });
+
+  // ── CONSULTA SOBRE LA PROPIEDAD ──────────────────────────────
+  function abrirModalMapa() {
+    document.getElementById('mapa-iframe').src = propData?.mapa_url || '';
+    document.getElementById('modal-mapa').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function cerrarModalMapa() {
+    document.getElementById('modal-mapa').style.display = 'none';
+    document.getElementById('mapa-iframe').src = '';
+    document.body.style.overflow = '';
+  }
+
+  function abrirModalConsulta() {
+    document.getElementById('consulta-exito').style.display = 'none';
+    document.getElementById('consulta-form-wrap').style.display = 'block';
+    document.getElementById('form-consulta').reset();
+    document.getElementById('modal-consulta').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function cerrarModalConsulta() {
+    document.getElementById('modal-consulta').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  async function enviarConsulta(e) {
+    e.preventDefault();
+    const nombre   = (document.getElementById('cq-nombre').value || '').trim();
+    const apellido = (document.getElementById('cq-apellido').value || '').trim();
+    const nombreCompleto = [nombre, apellido].filter(Boolean).join(' ');
+    const telefono = ((document.getElementById('cq-pais').value || '+502') + ' ' + (document.getElementById('cq-telefono').value || '')).trim();
+    const mensaje  = (document.getElementById('cq-mensaje').value || '').trim();
+    if (!nombre || !apellido || !telefono || !mensaje) return;
+
+    const btn = e.target.querySelector('button[type=submit]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    try {
+      await fetch(`${API}/contactos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          propiedad_id: propId,
+          asesor_id:    propData?.usuario_id || null,
+          nombre: nombreCompleto, telefono, mensaje,
+          tipo: 'consulta', origen: 'inmobia',
+          propiedad_url: window.location.href,
+        }),
+      });
+      document.getElementById('consulta-form-wrap').style.display = 'none';
+      document.getElementById('consulta-exito').style.display = 'block';
+    } catch {
+      if (btn) { btn.disabled = false; btn.textContent = 'Enviar consulta →'; }
+      alert('Error al enviar consulta. Intenta de nuevo.');
+    }
+  }
+
+  // ── CONTACTO ─────────────────────────────────────────────────
+  function contactarWhatsApp() {
+    const titulo = propData?.titulo || 'una propiedad';
+    const msg = `Hola, me interesa obtener más información sobre: *${titulo}* (ID: ${propId}).\n¿Podrían contactarme?`;
+    window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  // Toggle buttons (días / horario) — event delegation
+  function attachPageToggleListeners() {
+    const diasGroup = document.getElementById('dias-group');
+    const horarioGroup = document.getElementById('horario-group');
+
+    if (diasGroup) {
+      diasGroup.addEventListener('click', (e) => {
+        const btn = e.target.closest('.toggle-btn');
+        if (btn) {
+          e.preventDefault();
+          e.stopPropagation();
+          btn.classList.toggle('active');
+        }
+      });
+    }
+
+    if (horarioGroup) {
+      horarioGroup.addEventListener('click', (e) => {
+        const btn = e.target.closest('.toggle-btn');
+        if (btn) {
+          e.preventDefault();
+          e.stopPropagation();
+          horarioGroup.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        }
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachPageToggleListeners);
+  } else {
+    attachPageToggleListeners();
+  }
+
+  async function enviarContacto(e) {
+    e.preventDefault();
+    const nombre   = (document.getElementById('c-nombre').value + ' ' + document.getElementById('c-apellido').value).trim();
+    const telefono = (document.getElementById('c-pais').value + ' ' + document.getElementById('c-telefono').value).trim();
+    const email    = document.getElementById('c-email').value;
+    const mensaje  = document.getElementById('c-mensaje').value;
+    const dias     = [...document.querySelectorAll('#dias-group .toggle-btn.active')].map(b => b.dataset.val).join(', ') || 'No especificado';
+    const horario  = document.querySelector('#horario-group .toggle-btn.active')?.dataset.val || 'No especificado';
+    const diaHoraRaw = document.getElementById('c-dia-hora').value;
+    const diaHora    = diaHoraRaw
+      ? new Date(diaHoraRaw).toLocaleString('es-GT', { weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true })
+      : '';
+
+    const btn = e.target.querySelector('button[type=submit]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    try {
+      const resp = await fetch(`${API}/contactos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propiedad_id: propId, asesor_id: propData?.usuario_id || null, nombre, telefono, email, mensaje, tipo: 'visita', origen: 'inmobia', referente_slug: params.get('via') === 'tripartito' ? (params.get('ref') || '') : '', dias, horario, dia_hora: diaHora, propiedad_url: window.location.href }),
+      });
+      const respData = await resp.json().catch(() => ({}));
+      const magicUrl = respData.magic_url || null;
+
+      // Mostrar botón panel o cerrar según magic link
+      const btnPanel  = document.getElementById('sidebar-btn-panel');
+      const btnCerrar = document.getElementById('sidebar-btn-cerrar');
+      if (magicUrl && btnPanel) {
+        btnPanel.href = magicUrl;
+        btnPanel.style.display = 'flex';
+        if (btnCerrar) btnCerrar.style.display = 'none';
+      } else {
+        if (btnPanel)  btnPanel.style.display  = 'none';
+        if (btnCerrar) btnCerrar.style.display = 'inline-block';
+      }
+
+      document.getElementById('form-contacto').style.display = 'none';
+      document.getElementById('form-contacto-exito').style.display = 'block';
+      if (btn) { btn.disabled = false; btn.textContent = 'Agendar visita →'; }
+    } catch {
+      if (btn) { btn.disabled = false; btn.textContent = 'Agendar visita →'; }
+    }
+  }
+
+  // ── ICONOS SVG ───────────────────────────────────────────────
+  const iconHabs = '<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>';
+  const iconBanos = '<path d="M4 12h16M4 12V7a3 3 0 016 0v5M4 12v5a2 2 0 002 2h12a2 2 0 002-2v-5"/>';
+  const iconParq  = '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>';
+  const iconM2    = '<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>';
+
+  cargarPropiedad();
+
+  // ── MODAL AGENDAR VISITA ─────────────────────────────────────
+  function abrirModalVisita() {
+    document.getElementById('modal-visita').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    // Pre-rellenar propiedad en el modal
+    const tit = propData?.titulo || '';
+    const proj = propData?.nombre_proyecto || '';
+    document.getElementById('mv-prop-titulo').textContent = tit;
+    document.getElementById('mv-prop-proyecto').textContent = proj;
+    document.getElementById('mv-prop-proyecto').style.display = proj ? '' : 'none';
+  }
+  function cerrarModalVisita() {
+    document.getElementById('modal-visita').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Toggle días y horario del modal — attach after DOM ready
+  function attachModalToggleListeners() {
+    const diasGroup = document.getElementById('mv-dias-group');
+    const horarioGroup = document.getElementById('mv-horario-group');
+
+    if (diasGroup) {
+      diasGroup.addEventListener('click', (e) => {
+        const btn = e.target.closest('.toggle-btn');
+        if (btn) {
+          e.preventDefault();
+          e.stopPropagation();
+          btn.classList.toggle('active');
+        }
+      });
+    }
+
+    if (horarioGroup) {
+      horarioGroup.addEventListener('click', (e) => {
+        const btn = e.target.closest('.toggle-btn');
+        if (btn) {
+          e.preventDefault();
+          e.stopPropagation();
+          horarioGroup.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        }
+      });
+    }
+  }
+
+  // Attach immediately if DOM is ready, otherwise wait
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachModalToggleListeners);
+  } else {
+    attachModalToggleListeners();
+  }
+
+  async function enviarContactoModal(e) {
+    e.preventDefault();
+    const nombre   = ((document.getElementById('mv-nombre').value||'') + ' ' + (document.getElementById('mv-apellido').value||'')).trim();
+    const telefono = (document.getElementById('mv-pais').value + ' ' + document.getElementById('mv-telefono').value).trim();
+    const email    = document.getElementById('mv-email').value;
+    const mensaje  = document.getElementById('mv-mensaje').value;
+    const dias     = [...document.querySelectorAll('#mv-dias-group .toggle-btn.active')].map(b => b.dataset.val).join(', ') || 'No especificado';
+    const horario  = document.querySelector('#mv-horario-group .toggle-btn.active')?.dataset.val || 'No especificado';
+    const diaHoraRaw = document.getElementById('mv-dia-hora').value;
+    const diaHora = diaHoraRaw ? new Date(diaHoraRaw).toLocaleString('es-GT', { weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true }) : '';
+
+    const btn = e.target.querySelector('button[type=submit]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    try {
+      const resp = await fetch(`${API}/contactos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propiedad_id: propId, asesor_id: propData?.usuario_id || null, nombre, telefono, email, mensaje, tipo: 'visita', origen: 'inmobia', referente_slug: params.get('via') === 'tripartito' ? (params.get('ref') || '') : '', dias, horario, dia_hora: diaHora, propiedad_url: window.location.href }),
+      });
+      const respData = await resp.json().catch(() => ({}));
+      const magicUrl = respData.magic_url || null;
+
+      // Actualizar el botón del modal según si hay magic link
+      const btnPanel = document.getElementById('mv-btn-panel');
+      const btnCerrar = document.getElementById('mv-btn-cerrar');
+      if (magicUrl && btnPanel) {
+        btnPanel.href = magicUrl;
+        btnPanel.style.display = 'inline-flex';
+        if (btnCerrar) btnCerrar.style.display = 'none';
+      } else {
+        if (btnPanel) btnPanel.style.display = 'none';
+        if (btnCerrar) btnCerrar.style.display = 'inline-block';
+      }
+
+      document.getElementById('mv-form-wrap').style.display = 'none';
+      document.getElementById('mv-exito').style.display = 'block';
+    } catch {
+      if (btn) { btn.disabled = false; btn.textContent = 'Agendar visita →'; }
+    }
+  }
+</script>
+
+<!-- MODAL AGENDAR VISITA -->
+<!-- MODAL MAPA -->
+<div id="modal-mapa" onclick="if(event.target===this)cerrarModalMapa()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:700px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="background:#1e2d4a;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span style="color:#fff;font-size:0.95rem;font-weight:700">Ubicación de la propiedad</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <a id="mapa-link" href="" target="_blank" style="color:#e5a50d;font-size:0.78rem;font-weight:600;text-decoration:none">Abrir en Google Maps ↗</a>
+        <button onclick="cerrarModalMapa()" style="background:rgba(255,255,255,0.12);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+    </div>
+    <iframe id="mapa-iframe" src="" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="display:block;width:100%;height:420px;border:none"></iframe>
+  </div>
+</div>
+
+<!-- MODAL CONSULTA -->
+<div id="modal-consulta" onclick="if(event.target===this)cerrarModalConsulta()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:500px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="background:var(--charcoal);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="color:#fff;font-size:1rem;font-weight:700;margin-bottom:0.15rem">Haz una consulta sobre esta propiedad</div>
+        <div style="color:rgba(255,255,255,0.65);font-size:0.75rem">El asesor le responderá por WhatsApp</div>
+      </div>
+      <button onclick="cerrarModalConsulta()" style="background:rgba(255,255,255,0.12);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="padding:1.5rem">
+      <div id="consulta-exito" style="display:none;text-align:center;padding:1.5rem 0">
+        <div style="font-size:2rem;margin-bottom:0.5rem">✅</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--charcoal);margin-bottom:0.3rem">¡Consulta enviada!</div>
+        <div style="font-size:0.85rem;color:var(--gray);line-height:1.6">El asesor responderá a tu consulta. Te contactaremos al WhatsApp que indicaste.</div>
+        <button onclick="cerrarModalConsulta()" style="margin-top:1rem;padding:0.6rem 1.5rem;background:var(--charcoal);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Cerrar</button>
+      </div>
+      <div id="consulta-form-wrap">
+        <form id="form-consulta" onsubmit="enviarConsulta(event)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:0.6rem">
+            <div class="form-field" style="margin-bottom:0">
+              <label class="form-label" for="cq-nombre">Nombre *</label>
+              <input type="text" id="cq-nombre" placeholder="Nombre" required>
+            </div>
+            <div class="form-field" style="margin-bottom:0">
+              <label class="form-label" for="cq-apellido">Apellido *</label>
+              <input type="text" id="cq-apellido" placeholder="Apellido" required>
+            </div>
+          </div>
+          <div class="form-field" style="margin-bottom:0.6rem">
+            <label class="form-label" for="cq-telefono">Teléfono *</label>
+            <div style="display:flex">
+              <select id="cq-pais" style="width:80px;flex-shrink:0;border-radius:6px 0 0 6px;border-right:none;background:#f4f6fb;font-size:0.75rem;padding:0.55rem 0;border:1px solid var(--gray-border);cursor:pointer;outline:none">
+                <option value="+502">🇬🇹 +502</option>
+                <option value="+52">🇲🇽 +52</option>
+                <option value="+503">🇸🇻 +503</option>
+                <option value="+504">🇭🇳 +504</option>
+                <option value="+1">🇺🇸 +1</option>
+              </select>
+              <input type="tel" id="cq-telefono" placeholder="5555 0000" required style="flex:1;border-left:none;border-radius:0 6px 6px 0;min-width:0">
+            </div>
+          </div>
+          <div class="form-field" style="margin-bottom:0.75rem">
+            <label class="form-label" for="cq-mensaje">Tu consulta *</label>
+            <textarea id="cq-mensaje" placeholder="¿Cuál es el precio de mantenimiento? ¿Se permite mascota? ¿Está disponible?" required style="min-height:90px;resize:none"></textarea>
+          </div>
+          <p style="font-size:0.72rem;color:var(--gray);margin:0 0 0.75rem;line-height:1.5">🔒 Su número de teléfono es confidencial. Solo se utilizará para la comunicación solicitada.</p>
+          <button type="submit" class="btn-consulta" style="width:100%">Enviar consulta →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-visita" onclick="if(event.target===this)cerrarModalVisita()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+    <!-- Header -->
+    <div style="background:var(--charcoal);padding:1.25rem 1.5rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="color:#fff;font-size:1rem;font-weight:700">Agendar visita</div>
+        <div style="color:rgba(255,255,255,0.6);font-size:0.78rem;margin-top:0.15rem">Le contactaremos por WhatsApp para coordinar</div>
+      </div>
+      <button onclick="cerrarModalVisita()" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.4rem;cursor:pointer;line-height:1;padding:0.2rem">×</button>
+    </div>
+    <!-- Body -->
+    <div style="padding:1.5rem">
+      <div id="mv-exito" style="display:none;text-align:center;padding:2rem 1rem">
+        <div style="font-size:2.5rem;margin-bottom:0.75rem">✅</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--charcoal);margin-bottom:0.4rem">¡Solicitud enviada!</div>
+        <div style="font-size:0.85rem;color:var(--gray);line-height:1.6;margin-bottom:0.5rem">El asesor le contactará por WhatsApp a la brevedad para confirmar la visita.</div>
+        <div style="font-size:0.82rem;color:var(--gray);line-height:1.6;margin-bottom:1.5rem">Te enviamos un correo con acceso a tu panel de seguimiento donde puedes ver el estado de tu solicitud y contactar al asesor.</div>
+        <a id="mv-btn-panel" href="#" target="_blank"
+          style="display:none;align-items:center;justify-content:center;gap:0.5rem;background:#c9a84c;color:#fff;text-decoration:none;border-radius:8px;padding:0.75rem 1.75rem;font-size:0.92rem;font-weight:700;margin-bottom:0.75rem">
+          Ver mi panel de cliente →
+        </a>
+        <button id="mv-btn-cerrar" onclick="cerrarModalVisita()" style="display:none;background:var(--charcoal);color:#fff;border:none;border-radius:7px;padding:0.65rem 1.5rem;font-size:0.88rem;font-weight:600;cursor:pointer">Cerrar</button>
+      </div>
+      <div id="mv-form-wrap">
+        <!-- Propiedad -->
+        <div style="background:#f4f6fb;border:1px solid var(--gray-border);border-left:3px solid var(--gold);border-radius:7px;padding:0.65rem 0.9rem;margin-bottom:1.1rem">
+          <div style="font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:0.2rem">Propiedad de interés</div>
+          <div id="mv-prop-titulo" style="font-size:0.88rem;font-weight:600;color:var(--charcoal);line-height:1.3"></div>
+          <div id="mv-prop-proyecto" style="font-size:0.78rem;color:var(--gray);margin-top:0.1rem"></div>
+        </div>
+        <form onsubmit="enviarContactoModal(event)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:0.65rem">
+            <div class="form-field" style="margin-bottom:0">
+              <label class="form-label">Nombre *</label>
+              <input type="text" id="mv-nombre" placeholder="Tu nombre" required>
+            </div>
+            <div class="form-field" style="margin-bottom:0">
+              <label class="form-label">Apellido *</label>
+              <input type="text" id="mv-apellido" placeholder="Tu apellido" required>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:0.65rem">
+            <div class="form-field" style="margin-bottom:0">
+              <label class="form-label">WhatsApp *</label>
+              <div style="display:flex">
+                <select id="mv-pais" style="width:80px;flex-shrink:0;border-radius:6px 0 0 6px;border-right:none;background:#f4f6fb;font-size:0.78rem;padding:0.55rem 0;border:1px solid var(--gray-border);outline:none">
+                  <option value="+502">🇬🇹 +502</option>
+                  <option value="+52">🇲🇽 +52</option>
+                  <option value="+503">🇸🇻 +503</option>
+                  <option value="+1">🇺🇸 +1</option>
+                </select>
+                <input type="tel" id="mv-telefono" placeholder="5555 0000" required style="flex:1;border-left:none;border-radius:0 6px 6px 0;min-width:0">
+              </div>
+            </div>
+            <div class="form-field" style="margin-bottom:0">
+              <label class="form-label">Correo (opcional)</label>
+              <input type="email" id="mv-email" placeholder="su@correo.com">
+            </div>
+          </div>
+          <div style="margin-bottom:0.5rem">
+            <label class="form-label">Días disponibles</label>
+            <div class="toggle-group" id="mv-dias-group">
+              <button type="button" class="toggle-btn" data-val="Lunes">Lunes</button>
+              <button type="button" class="toggle-btn" data-val="Martes">Martes</button>
+              <button type="button" class="toggle-btn" data-val="Miércoles">Miérc.</button>
+              <button type="button" class="toggle-btn" data-val="Jueves">Jueves</button>
+              <button type="button" class="toggle-btn" data-val="Viernes">Viernes</button>
+              <button type="button" class="toggle-btn" data-val="Sábado">Sábado</button>
+              <button type="button" class="toggle-btn" data-val="Flexible">Flexible</button>
+            </div>
+          </div>
+          <div style="margin-bottom:0.5rem">
+            <label class="form-label">Horario preferido</label>
+            <div class="toggle-group" id="mv-horario-group">
+              <button type="button" class="toggle-btn toggle-btn-hora" data-val="Mañana">Mañana<br><small style="font-weight:400;opacity:0.8">8am–12pm</small></button>
+              <button type="button" class="toggle-btn toggle-btn-hora" data-val="Tarde">Tarde<br><small style="font-weight:400;opacity:0.8">12–5pm</small></button>
+              <button type="button" class="toggle-btn toggle-btn-hora" data-val="Tarde-noche">Tarde-noche<br><small style="font-weight:400;opacity:0.8">5–7pm</small></button>
+            </div>
+          </div>
+          <div class="form-field" style="margin-bottom:0.5rem">
+            <label class="form-label">Fecha y hora preferidas</label>
+            <input type="datetime-local" id="mv-dia-hora">
+          </div>
+          <div class="form-field" style="margin-bottom:1rem">
+            <label class="form-label">Comentario adicional (opcional)</label>
+            <textarea id="mv-mensaje" placeholder="Indique cualquier detalle relevante." style="min-height:50px;resize:none"></textarea>
+          </div>
+          <button type="submit" class="btn-consulta" style="width:100%">Agendar visita →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

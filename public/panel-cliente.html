@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Panel — Inmobia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #c9a84c;
+  --charcoal: #1e2d4a;
+  --gray: #6b7a99;
+  --gray-light: #f4f6fb;
+  --gray-border: #dde3ef;
+  --white: #fff;
+  --green: #16a34a;
+  --red: #dc2626;
+  --font-display: 'Urbanist', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(30,45,74,0.08);
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: #f0f3fa; color: var(--charcoal); min-height: 100vh; }
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--charcoal);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(30,45,74,0.18);
+}
+.topbar-brand { display: flex; align-items: center; gap: 0.6rem; }
+.topbar-brand span { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: #fff; }
+.topbar-brand em { color: var(--gold); font-style: normal; }
+.topbar-user { display: flex; align-items: center; gap: 0.5rem; }
+.topbar-email { font-size: 0.75rem; color: rgba(255,255,255,0.55); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── TABS ── */
+.tabs-wrap { background: var(--white); border-bottom: 1px solid var(--gray-border); position: sticky; top: 57px; z-index: 40; }
+.tabs { display: flex; max-width: 860px; margin: 0 auto; padding: 0 1rem; gap: 0; overflow-x: auto; }
+.tab { padding: 0.9rem 1.25rem; font-size: 0.82rem; font-weight: 500; color: var(--gray); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.18s; }
+.tab:hover { color: var(--charcoal); }
+.tab.active { color: var(--charcoal); border-bottom-color: var(--gold); font-weight: 600; }
+.tab svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 0.35rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── CONTENIDO ── */
+.content { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── CARDS ── */
+.card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); box-shadow: var(--shadow); margin-bottom: 1rem; }
+.card-body { padding: 1.25rem; }
+.section-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--charcoal); margin-bottom: 0.25rem; }
+.section-sub { font-size: 0.82rem; color: var(--gray); margin-bottom: 1.25rem; }
+
+/* ── VISITA CARD ── */
+.visita-card {
+  background: var(--white); border: 1px solid var(--gray-border);
+  border-radius: var(--radius); overflow: hidden;
+  display: flex; gap: 0; margin-bottom: 0.75rem;
+  box-shadow: var(--shadow); transition: box-shadow 0.2s, border-color 0.2s;
+  text-decoration: none; color: inherit;
+}
+.visita-card[href] { cursor: pointer; }
+.visita-card[href]:hover { box-shadow: 0 4px 20px rgba(30,45,74,0.12); border-color: var(--gold); }
+.visita-card:not([href]) { cursor: default; }
+.visita-card:not([href]):hover { box-shadow: 0 4px 20px rgba(30,45,74,0.12); }
+.visita-img { width: 110px; flex-shrink: 0; object-fit: cover; display: block; background: var(--gray-light); }
+.visita-img-placeholder { width: 110px; flex-shrink: 0; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+.visita-body { flex: 1; padding: 0.9rem 1rem; min-width: 0; }
+.visita-titulo { font-size: 0.9rem; font-weight: 600; color: var(--charcoal); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.visita-meta { font-size: 0.72rem; color: var(--gray); margin-bottom: 0.55rem; }
+.visita-asesor { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--gray); margin-bottom: 0.5rem; }
+.visita-asesor img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+.visita-asesor .asesor-iniciales { width: 24px; height: 24px; border-radius: 50%; background: var(--charcoal); color: #fff; font-size: 0.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.etapa-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.65rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 20px; }
+.etapa-nuevo     { background: #e0f2fe; color: #0369a1; }
+.etapa-agendado  { background: #fef9c3; color: #854d0e; }
+.etapa-interesado{ background: #dcfce7; color: #166534; }
+.etapa-negociando{ background: #fce7f3; color: #9d174d; }
+.etapa-cerrado   { background: #d1fae5; color: #065f46; }
+.etapa-inactivo  { background: #f1f5f9; color: #64748b; }
+.btn-calificar { font-size: 0.72rem; font-weight: 600; padding: 0.3rem 0.75rem; border-radius: 6px; border: 1.5px solid var(--gold); color: var(--gold); background: none; cursor: pointer; transition: all 0.15s; }
+.btn-calificar:hover { background: var(--gold); color: #fff; }
+.btn-calificar.ya-calificado { border-color: var(--green); color: var(--green); }
+.btn-calificar.ya-calificado:hover { background: var(--green); color: #fff; }
+
+/* ── FEED CARD ── */
+.feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.feed-card { background: var(--white); border: 1px solid var(--gray-border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; transition: box-shadow 0.2s, transform 0.2s; text-decoration: none; color: inherit; display: block; }
+.feed-card:hover { box-shadow: 0 6px 24px rgba(30,45,74,0.13); transform: translateY(-2px); }
+.feed-card-img { width: 100%; height: 150px; object-fit: cover; display: block; background: var(--gray-light); }
+.feed-card-img-placeholder { width: 100%; height: 150px; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+.feed-card-body { padding: 0.85rem; }
+.feed-card-tipo { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gold); margin-bottom: 0.25rem; }
+.feed-card-titulo { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.2rem; line-height: 1.3; }
+.feed-card-precio { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--charcoal); }
+.feed-card-zona { font-size: 0.72rem; color: var(--gray); margin-top: 0.2rem; }
+
+/* ── CALIFICACIÓN MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,22,32,0.55); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--white); border-radius: 14px; width: 100%; max-width: 420px; overflow: hidden; box-shadow: 0 20px 60px rgba(15,22,32,0.25); }
+.modal-head { padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gray-border); }
+.modal-head h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--gray); line-height: 1; }
+.modal-body { padding: 1.25rem 1.5rem; }
+.modal-foot { padding: 1rem 1.5rem; border-top: 1px solid var(--gray-border); display: flex; gap: 0.6rem; justify-content: flex-end; }
+
+/* Estrellas */
+.estrellas-row { display: flex; gap: 0.4rem; margin: 0.75rem 0; }
+.estrella { font-size: 2rem; cursor: pointer; color: #d1d9e6; transition: color 0.15s; }
+.estrella.active { color: var(--gold); }
+
+/* Razones chips */
+.razones-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0; }
+.razon-chip { padding: 0.3rem 0.75rem; border-radius: 20px; border: 1.5px solid var(--gray-border); font-size: 0.75rem; cursor: pointer; background: var(--white); transition: all 0.15s; }
+.razon-chip.active { background: var(--charcoal); color: #fff; border-color: var(--charcoal); }
+.form-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--gray); display: block; margin-bottom: 0.35rem; }
+textarea { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--gray-border); border-radius: 8px; font-family: var(--font-body); font-size: 0.82rem; color: var(--charcoal); outline: none; resize: none; min-height: 72px; }
+textarea:focus { border-color: var(--gold); }
+
+/* Botones */
+.btn-primary { padding: 0.65rem 1.4rem; background: var(--charcoal); color: #fff; font-weight: 600; font-size: 0.82rem; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+.btn-primary:hover { background: #2a3f6b; }
+.btn-ghost { padding: 0.65rem 1.1rem; background: none; color: var(--gray); font-weight: 500; font-size: 0.82rem; border: 1px solid var(--gray-border); border-radius: 8px; cursor: pointer; }
+
+/* Loader / vacío */
+.loader-wrap { display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; gap: 0.75rem; color: var(--gray); }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--gray-border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 3rem 1rem; }
+.empty-state svg { width: 48px; height: 48px; stroke: var(--gray-border); fill: none; stroke-width: 1.5; margin-bottom: 1rem; }
+.empty-state h3 { font-size: 1rem; font-weight: 600; color: var(--charcoal); margin-bottom: 0.4rem; }
+.empty-state p { font-size: 0.82rem; color: var(--gray); }
+
+/* Error de acceso */
+.access-error { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
+.access-error-box { max-width: 420px; }
+.access-error-box h1 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+.access-error-box p { color: var(--gray); font-size: 0.88rem; margin-bottom: 1.5rem; line-height: 1.6; }
+.access-error-box a { color: var(--gold); text-decoration: none; font-weight: 600; }
+
+/* Toast */
+#toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--charcoal); color: #fff; padding: 0.7rem 1.4rem; border-radius: 8px; font-size: 0.82rem; box-shadow: 0 4px 16px rgba(0,0,0,0.2); transition: transform 0.3s; z-index: 999; pointer-events: none; border-left: 3px solid var(--gold); }
+#toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Inmo<em>bia</em></span>
+  </div>
+  <div class="topbar-user">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="topbar-email" id="topbar-email">Mi Panel</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="irTab('visitas')" id="tab-visitas">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mis visitas
+    </button>
+    <button class="tab" onclick="irTab('feed')" id="tab-feed">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      Propiedades para mí
+    </button>
+    <button class="tab" onclick="irTab('calificar')" id="tab-calificar">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Calificar
+    </button>
+  </div>
+</div>
+
+<!-- CONTENIDO -->
+<div class="content">
+
+  <!-- LOADER -->
+  <div class="loader-wrap" id="loader">
+    <div class="spinner"></div>
+    <span>Cargando tu panel...</span>
+  </div>
+
+  <!-- ERROR DE ACCESO -->
+  <div id="access-error" style="display:none" class="access-error">
+    <div class="access-error-box">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1.25rem;display:block"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <h1>Link inválido o expirado</h1>
+      <p>El enlace que usaste para acceder a tu panel ya no es válido. Los links expiran a los 30 días por seguridad.</p>
+      <p style="margin-top:0.75rem">Para recibir un nuevo enlace, agenda una visita o contáctanos.<br><a href="/index.html">Ver propiedades →</a></p>
+    </div>
+  </div>
+
+  <!-- SECCIÓN: MIS VISITAS -->
+  <section class="section active" id="s-visitas">
+    <p class="section-title">Mis visitas</p>
+    <p class="section-sub">Historial de propiedades que has visitado o agendado</p>
+    <div id="visitas-list">
+      <div class="loader-wrap"><div class="spinner"></div></div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: FEED -->
+  <section class="section" id="s-feed">
+    <p class="section-title">Propiedades para ti</p>
+    <p class="section-sub">Selección basada en tu búsqueda y preferencias</p>
+    <div class="feed-grid" id="feed-grid">
+      <div class="loader-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: CALIFICAR -->
+  <section class="section" id="s-calificar">
+    <p class="section-title">Califica tu experiencia</p>
+    <p class="section-sub">Tu opinión ayuda a otros clientes y mejora el servicio de los asesores</p>
+    <div id="calificar-list">
+      <div class="loader-wrap"><div class="spinner"></div></div>
+    </div>
+  </section>
+
+</div><!-- /content -->
+
+<!-- MODAL CALIFICACIÓN -->
+<div class="modal-overlay" id="modal-cal" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Calificar visita</h3>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem">Propiedad: <strong id="modal-cal-prop" style="color:var(--charcoal)"></strong></div>
+      <div style="font-size:0.82rem;color:var(--gray)">Asesor: <strong id="modal-cal-asesor" style="color:var(--charcoal)"></strong></div>
+
+      <div style="margin-top:1rem">
+        <label class="form-label">¿Cómo fue tu experiencia?</label>
+        <div class="estrellas-row" id="estrellas-row">
+          <span class="estrella" data-val="1" onclick="selEstrellas(1)">★</span>
+          <span class="estrella" data-val="2" onclick="selEstrellas(2)">★</span>
+          <span class="estrella" data-val="3" onclick="selEstrellas(3)">★</span>
+          <span class="estrella" data-val="4" onclick="selEstrellas(4)">★</span>
+          <span class="estrella" data-val="5" onclick="selEstrellas(5)">★</span>
+        </div>
+      </div>
+
+      <div id="razones-wrap" style="display:none;margin-top:0.75rem">
+        <label class="form-label">¿Por qué? (opcional)</label>
+        <div class="razones-grid" id="razones-grid"></div>
+      </div>
+
+      <div style="margin-top:0.75rem">
+        <label class="form-label" for="cal-comentario">Comentario libre (opcional)</label>
+        <textarea id="cal-comentario" placeholder="Cuéntanos más sobre tu experiencia..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" id="btn-enviar-cal" onclick="enviarCalificacion()">Enviar calificación</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENCUESTA POST-VISITA -->
+<div class="modal-overlay" id="modal-encuesta" style="display:none;z-index:1100" onclick="if(event.target===this)cerrarEncuesta()">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-head" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-bottom:1px solid #8b5cf640">
+      <div>
+        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:#a78bfa;font-weight:700;margin-bottom:0.2rem">InmobIA — Post-Visita</div>
+        <h3 style="color:#f1f5f9;margin:0">¿Cómo fue tu visita?</h3>
+      </div>
+      <button class="modal-close" onclick="cerrarEncuesta()" style="color:#f1f5f9">×</button>
+    </div>
+    <div class="modal-body" style="background:#0f172a;max-height:70vh;overflow-y:auto">
+      <p id="enc-prop-info" style="font-size:0.8rem;color:#94a3b8;margin-bottom:1.25rem"></p>
+
+      <!-- ── SECCIÓN 1: PROPIEDAD ── -->
+      <div style="background:#161c28;border-radius:10px;padding:1rem;margin-bottom:1rem;border:1px solid #1e3a4a">
+        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:#38bdf8;font-weight:700;margin-bottom:0.85rem">🏠 La Propiedad</div>
+
+        <div style="margin-bottom:1rem">
+          <label class="form-label" style="color:#cbd5e1">¿Qué tan buena fue la propiedad?</label>
+          <div style="display:flex;justify-content:center;gap:0.6rem;margin-top:0.4rem">
+            <span class="enc-estrella" data-val="1" onclick="selEncEstrellas(1)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+            <span class="enc-estrella" data-val="2" onclick="selEncEstrellas(2)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+            <span class="enc-estrella" data-val="3" onclick="selEncEstrellas(3)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+            <span class="enc-estrella" data-val="4" onclick="selEncEstrellas(4)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+            <span class="enc-estrella" data-val="5" onclick="selEncEstrellas(5)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:1rem">
+          <label class="form-label" style="color:#cbd5e1">¿Qué tan interesado estás?</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-top:0.4rem">
+            <button class="enc-interes-btn" data-val="muy-interesado" onclick="selEncInteres(this)"
+              style="padding:0.5rem;border-radius:8px;border:1.5px solid #1e3a4a;background:#0f172a;color:#94a3b8;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s">
+              🔥 Muy interesado
+            </button>
+            <button class="enc-interes-btn" data-val="interesado" onclick="selEncInteres(this)"
+              style="padding:0.5rem;border-radius:8px;border:1.5px solid #1e3a4a;background:#0f172a;color:#94a3b8;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s">
+              👍 Interesado
+            </button>
+            <button class="enc-interes-btn" data-val="poco-interesado" onclick="selEncInteres(this)"
+              style="padding:0.5rem;border-radius:8px;border:1.5px solid #1e3a4a;background:#0f172a;color:#94a3b8;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s">
+              🤔 Poco interesado
+            </button>
+            <button class="enc-interes-btn" data-val="no-interesado" onclick="selEncInteres(this)"
+              style="padding:0.5rem;border-radius:8px;border:1.5px solid #1e3a4a;background:#0f172a;color:#94a3b8;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s">
+              ❌ No interesado
+            </button>
+          </div>
+        </div>
+
+        <div id="enc-razones-wrap" style="display:none;margin-bottom:1rem">
+          <label class="form-label" style="color:#cbd5e1">¿Por qué? (opcional)</label>
+          <div id="enc-razones-grid" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.35rem"></div>
+        </div>
+
+        <div>
+          <label class="form-label" style="color:#cbd5e1">Comentario sobre la propiedad (opcional)</label>
+          <textarea id="enc-comentario" placeholder="¿Qué te gustó o qué le faltó?"
+            style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #2d3a4f;border-radius:8px;padding:0.6rem 0.75rem;font-size:0.82rem;color:#e2e8f0;resize:none;height:60px;font-family:inherit;margin-top:0.3rem;outline:none"></textarea>
+        </div>
+      </div>
+
+      <!-- ── SECCIÓN 2: ASESOR ── -->
+      <div style="background:#161c28;border-radius:10px;padding:1rem;border:1px solid #1e3a4a">
+        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:#f59e0b;font-weight:700;margin-bottom:0.85rem">⭐ El Asesor</div>
+
+        <div style="margin-bottom:1rem">
+          <label class="form-label" style="color:#cbd5e1">¿Cómo calificarías al asesor?</label>
+          <div style="display:flex;justify-content:center;gap:0.6rem;margin-top:0.4rem">
+            <span class="enc-asesor-estrella" data-val="1" onclick="selEncAsesorEstrellas(1)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+            <span class="enc-asesor-estrella" data-val="2" onclick="selEncAsesorEstrellas(2)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+            <span class="enc-asesor-estrella" data-val="3" onclick="selEncAsesorEstrellas(3)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+            <span class="enc-asesor-estrella" data-val="4" onclick="selEncAsesorEstrellas(4)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+            <span class="enc-asesor-estrella" data-val="5" onclick="selEncAsesorEstrellas(5)" style="font-size:2rem;cursor:pointer;color:#374151;transition:color 0.1s">★</span>
+          </div>
+        </div>
+
+        <div id="enc-asesor-razones-wrap" style="display:none;margin-bottom:1rem">
+          <label class="form-label" style="color:#cbd5e1">¿Por qué? (opcional)</label>
+          <div id="enc-asesor-razones-grid" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.35rem"></div>
+        </div>
+
+        <div>
+          <label class="form-label" style="color:#cbd5e1">Comentario sobre el asesor (opcional)</label>
+          <textarea id="enc-asesor-comentario" placeholder="¿Cómo fue su atención?"
+            style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #2d3a4f;border-radius:8px;padding:0.6rem 0.75rem;font-size:0.82rem;color:#e2e8f0;resize:none;height:60px;font-family:inherit;margin-top:0.3rem;outline:none"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot" style="background:#0f172a;border-top:1px solid #1e293b">
+      <button class="btn-ghost" onclick="cerrarEncuesta()" style="color:#64748b">Responder luego</button>
+      <button class="btn-primary" id="btn-enviar-encuesta" onclick="enviarEncuesta()" style="background:#8b5cf6;border-color:#8b5cf6">
+        Enviar opinión →
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API   = 'https://inmobia.site/api';
+function parseSQL(s) {
+  if (!s) return null;
+  const str = String(s);
+  if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(str)) return new Date(str);
+  return new Date(str.replace(' ','T') + 'Z');
+}
+const token = new URLSearchParams(location.search).get('token');
+
+let clienteData = null;
+let leadActivo  = null;
+let estrellasVal = 0;
+const razonesSelec = new Set();
+
+// Estado encuesta post-visita
+let encLeadId = null;
+let encEstrellasVal = 0;
+let encInteresVal = null;
+const encRazonesSelec = new Set();
+let encAsesorEstrellasVal = 0;
+const encAsesorRazonesSelec = new Set();
+
+// ── RAZONES por nivel de estrellas ──
+const RAZONES = {
+  bajo: ['Muy pequeño', 'Precio alto', 'Zona lejana', 'Mal estado', 'Asesor tardó', 'No cumplió expectativas'],
+  alto: ['Excelente asesor', 'Muy puntual', 'Propiedad hermosa', 'Precio justo', 'Muy profesional', 'Superó expectativas']
+};
+
+const RAZONES_ENCUESTA = {
+  positivo: ['Me encantó la propiedad', 'Precio justo', 'Excelente zona', 'Buen tamaño', 'Muy bien mantenida', 'Ideal para mí'],
+  negativo: ['Precio alto', 'Zona lejana', 'Muy pequeña', 'Necesita reparaciones', 'No me convenció la distribución', 'No se adapta a mi estilo de vida']
+};
+
+const RAZONES_ASESOR = {
+  positivo: ['Muy puntual', 'Muy profesional', 'Explicó todo claramente', 'Atento y amable', 'Conoce bien la propiedad', 'Respondió rápido'],
+  negativo: ['Llegó tarde', 'Poco profesional', 'No explicó bien la propiedad', 'No conocía los detalles', 'Tardó en responder', 'Actitud de presión']
+};
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!token) { mostrarError(); return; }
+
+  try {
+    const r = await fetch(`${API}/cliente/verify/${token}`);
+    if (!r.ok) { mostrarError(); return; }
+    clienteData = await r.json();
+
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('topbar-email').textContent = clienteData.email;
+    document.querySelectorAll('.section').forEach(s => s.style.display = '');
+
+    renderVisitas();
+    cargarFeed();
+    renderCalificar();
+
+    // Si el link viene con acción específica, scroll al elemento relevante
+    const params = new URLSearchParams(location.search);
+    const accion = params.get('accion');
+    const leadIdParam = params.get('lead');
+    if (accion === 'confirmar-cierre' && leadIdParam) {
+      setTimeout(() => {
+        const el = document.getElementById(`cierre-${leadIdParam}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.style.boxShadow = '0 0 0 3px rgba(201,168,76,0.35)';
+          setTimeout(() => { el.style.boxShadow = ''; }, 2500);
+        }
+      }, 300);
+    } else if (accion === 'confirmar-visita' && leadIdParam) {
+      setTimeout(() => {
+        const el = document.getElementById(`visita-block-${leadIdParam}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.style.boxShadow = '0 0 0 3px rgba(201,168,76,0.35)';
+          setTimeout(() => { el.style.boxShadow = ''; }, 2500);
+        }
+      }, 300);
+    } else if (accion === 'calificar' && leadIdParam) {
+      setTimeout(() => {
+        irTab('calificar');
+        const el = document.getElementById(`calif-card-${leadIdParam}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.style.boxShadow = '0 0 0 3px rgba(201,168,76,0.5)';
+          el.style.transition = 'box-shadow 0.3s';
+          setTimeout(() => { el.style.boxShadow = ''; }, 2500);
+          const btnCalif = el.querySelector('.btn-calificar');
+          if (btnCalif && !btnCalif.classList.contains('ya-calificado')) btnCalif.click();
+        }
+      }, 400);
+    }
+
+    // Si viene con encuesta=1, abrir modal de encuesta post-visita
+    if (params.get('encuesta') === '1') {
+      const magicLeadId = clienteData?.magic_lead_id;
+      const leadEncuesta = (clienteData?.leads || []).find(l =>
+        l.id === magicLeadId && l.encuesta_enviada_en && !l.encuesta_respondida_en
+      ) || (clienteData?.leads || []).find(l =>
+        l.encuesta_enviada_en && !l.encuesta_respondida_en
+      );
+      if (leadEncuesta) {
+        setTimeout(() => abrirEncuesta(leadEncuesta), 500);
+      }
+    }
+  } catch {
+    mostrarError();
+  }
+});
+
+function mostrarError() {
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('access-error').style.display = 'flex';
+  document.querySelector('.tabs-wrap').style.display = 'none';
+}
+
+// ── TABS ──
+function irTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.getElementById(`s-${tab}`).classList.add('active');
+}
+
+// ── RENDER VISITAS ──
+function renderVisitas() {
+  const el = document.getElementById('visitas-list');
+  // Deduplicar: un lead por propiedad+asesor (el más reciente)
+  const vistas = new Map();
+  (clienteData.leads || []).forEach(l => {
+    const key = `${l.propiedad_id || l.id}-${l.asesor_id}`;
+    if (!vistas.has(key)) vistas.set(key, l);
+  });
+  const leads = [...vistas.values()];
+
+  if (!leads.length) {
+    el.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <h3>Sin visitas aún</h3>
+      <p>Cuando agendes una visita aparecerá aquí con toda la información.</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = leads.map(l => {
+    const img = l.prop_imagen
+      ? `<img class="visita-img" src="https://inmobia.site${l.prop_imagen}" alt="${l.propiedad_titulo || ''}" loading="lazy">`
+      : `<div class="visita-img-placeholder">🏠</div>`;
+
+    const etapaLabels = { nuevo:'Contactado', agendado:'Agendado', interesado:'Interesado', negociando:'En negociación', cerrado:'Cerrado', inactivo:'Inactivo' };
+    const etapaLabel = etapaLabels[l.etapa] || l.etapa;
+
+    const precio = l.prop_precio ? `${l.prop_moneda === 'USD' ? '$' : 'Q'}${Number(l.prop_precio).toLocaleString('es-GT')}` : '';
+    const ubicacion = [l.prop_colonia, l.prop_zona, l.prop_municipio].filter(Boolean).join(', ');
+    const fvRaw   = l.visita_coordinada_en || l.fecha_visita;
+    const fvDate  = fvRaw ? parseSQL(fvRaw) : null;
+    const fvFecha = fvDate ? fvDate.toLocaleDateString('es-GT', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : '';
+    const fvHora  = fvDate ? fvDate.toLocaleTimeString('es-GT', { hour:'numeric', minute:'2-digit', hour12:true }) : '';
+    const fecha = l.creado_en ? parseSQL(l.creado_en).toLocaleDateString('es-GT', { day:'numeric', month:'short', year:'numeric' }) : '';
+
+    const asesorAvatar = l.asesor_foto
+      ? `<img src="https://inmobia.site${l.asesor_foto}" alt="${l.asesor_nombre || ''}">`
+      : `<div class="asesor-iniciales">${(l.asesor_nombre||'A').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>`;
+
+    const yaCalificado = !!l.calificacion_estrellas;
+    const visitaRealizada = !!l.visita_realizada_en;
+    const btnCal = (visitaRealizada || yaCalificado)
+      ? `<button class="btn-calificar ${yaCalificado ? 'ya-calificado' : ''}" onclick="abrirCalificar(event, ${l.id})">
+           ${yaCalificado ? `★ ${l.calificacion_estrellas} — Ver` : '★ Calificar'}
+         </button>`
+      : '';
+
+    const tag    = l.propiedad_id ? 'a' : 'div';
+    const hrefAt = l.propiedad_id ? `href="/propiedad.html?id=${l.propiedad_id}&from=cliente"` : '';
+
+    return `<${tag} class="visita-card" ${hrefAt}>
+      ${img}
+      <div class="visita-body">
+        <div class="visita-titulo">${l.propiedad_titulo || 'Búsqueda personalizada'}</div>
+        <div class="visita-meta">
+          ${l.prop_proyecto ? `<strong style="color:var(--charcoal)">${l.prop_proyecto}</strong> · ` : ''}
+          ${ubicacion || ''}${precio ? ` · ${precio}` : ''}${l.prop_tipo ? ` · ${l.prop_tipo}` : ''}
+        </div>
+        <div class="visita-asesor" style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+          ${asesorAvatar}
+          <span>${l.asesor_nombre || 'Asesor'}</span>
+          ${l.asesor_empresa ? `<span>· ${l.asesor_empresa}</span>` : ''}
+          ${l.asesor_telefono ? `<button type="button" onclick="abrirWhatsAppAsesor(event, ${l.id})"
+              style="margin-left:auto;background:#25d366;color:#fff;border:none;border-radius:6px;padding:0.35rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:0.35rem">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+              WhatsApp
+            </button>` : ''}
+        </div>
+        ${fvDate ? `
+        <div id="visita-block-${l.id}" style="background:linear-gradient(135deg,#fffbeb 0%,#fef9e0 100%);border:1px solid #fde68a;border-left:3px solid #d4a017;border-radius:8px;padding:0.55rem 0.8rem;margin-top:0.3rem">
+          <div style="display:flex;align-items:center;gap:0.6rem">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#d4a017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+              <span style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#92733a">${l.visita_cliente_confirmada_en ? '✓ Visita confirmada' : 'Visita agendada'}</span>
+              <span style="font-size:0.82rem;font-weight:700;color:var(--charcoal);text-transform:capitalize">${fvFecha}</span>
+              <span style="font-size:0.75rem;color:#92733a;font-weight:600">${fvHora}</span>
+            </div>
+          </div>
+          ${!l.visita_cliente_confirmada_en ? `
+          <button onclick="confirmarVisita(event, ${l.id})"
+            style="margin-top:0.6rem;width:100%;background:#1e2d4a;color:#fff;border:none;border-radius:6px;padding:0.5rem 1rem;font-size:0.8rem;font-weight:700;cursor:pointer">
+            ✓ Confirmar mi asistencia
+          </button>` : ''}
+        </div>` : ''}
+        ${renderCierreBanner(l)}
+        ${(l.modelo === '2A' || l.origen === 'inmobia') && l.prop_operacion === 'renta' && !['cerrado','inactivo'].includes(l.etapa) ? `
+        <details style="margin-top:0.4rem">
+          <summary style="cursor:pointer;list-style:none;background:#f0fdf4;border:1px solid #bbf7d0;border-left:3px solid #16a34a;border-radius:7px;padding:0.45rem 0.75rem;font-size:0.75rem;font-weight:700;color:#15803d;display:flex;align-items:center;justify-content:space-between">
+            <span>📋 Instrucciones de pago · Cliente InmobIA</span>
+            <span style="font-size:0.65rem;color:#16a34a;font-weight:400">Ver detalle ▼</span>
+          </summary>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-top:none;border-radius:0 0 7px 7px;padding:0.65rem 0.75rem;font-size:0.78rem;color:#444;line-height:1.6">
+            <p style="margin:0 0 8px;color:#15803d;font-weight:600">Al momento de firmar el contrato, recibirá las instrucciones de pago:</p>
+            <div style="display:flex;flex-direction:column;gap:0.3rem;margin-bottom:8px">
+              <div style="background:#dcfce7;border-radius:5px;padding:6px 10px"><strong style="color:#15803d">30% del depósito</strong> → pago a <strong>InmobIA</strong> (link oficial o transferencia)</div>
+              <div style="background:#fff;border:1px solid #d1fae5;border-radius:5px;padding:6px 10px"><strong>70% del depósito</strong> → pago al propietario</div>
+              <div style="background:#fff;border:1px solid #d1fae5;border-radius:5px;padding:6px 10px"><strong>100% primera renta</strong> → pago al propietario</div>
+            </div>
+            <p style="margin:0;font-size:0.72rem;color:#64748b">⚠️ <strong>No realice ningún pago sin recibir instrucciones oficiales de InmobIA.</strong> El link de pago llegará a su correo en el momento indicado.</p>
+          </div>
+        </details>` : ''}
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.4rem">
+          <span class="etapa-badge etapa-${l.etapa}">${etapaLabel}</span>
+          <div style="display:flex;align-items:center;gap:0.6rem">
+            ${fecha ? `<span style="font-size:0.68rem;color:var(--gray)">Solicitado ${fecha}</span>` : ''}
+            ${btnCal}
+          </div>
+        </div>
+      </div>
+    </${tag}>`;
+  }).join('');
+}
+
+// ── FEED ──
+async function cargarFeed() {
+  const grid = document.getElementById('feed-grid');
+  try {
+    const r = await fetch(`${API}/cliente/propiedades-sugeridas?email=${encodeURIComponent(clienteData.email)}`);
+    const data = await r.json();
+    const props = data.propiedades || [];
+
+    if (!props.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        <h3>Sin propiedades disponibles</h3>
+        <p>Pronto encontraremos opciones que se ajusten a tu búsqueda.</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = props.map(p => {
+      const precio = `${p.moneda === 'USD' ? '$' : 'Q'}${Number(p.precio).toLocaleString('es-GT')}${p.operacion === 'renta' ? '/mes' : ''}`;
+      const tipo = p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1);
+      const zona = [p.colonia, p.zona, p.municipio].filter(Boolean).join(', ');
+      const img = p.imagen_principal
+        ? `<img class="feed-card-img" src="https://inmobia.site${p.imagen_principal}" alt="${p.titulo}" loading="lazy">`
+        : `<div class="feed-card-img-placeholder">🏠</div>`;
+
+      return `<a href="/propiedad.html?id=${p.id}" class="feed-card">
+        ${img}
+        <div class="feed-card-body">
+          <div class="feed-card-tipo">${tipo} · ${p.operacion === 'venta' ? 'Venta' : 'Renta'}</div>
+          <div class="feed-card-titulo">${p.titulo}</div>
+          <div class="feed-card-precio">${precio}</div>
+          ${zona ? `<div class="feed-card-zona">${zona}</div>` : ''}
+        </div>
+      </a>`;
+    }).join('');
+  } catch {
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--gray)">No se pudo cargar el feed.</div>`;
+  }
+}
+
+// ── CALIFICAR LIST ──
+function renderCalificar() {
+  const el = document.getElementById('calificar-list');
+  // Solo visitas efectivamente realizadas (el asesor las marcó en su CRM)
+  const vistas = new Map();
+  (clienteData.leads || []).forEach(l => {
+    if (!l.visita_realizada_en) return;
+    const key = `${l.propiedad_id || l.id}-${l.asesor_id}`;
+    if (!vistas.has(key)) vistas.set(key, l);
+  });
+  const leads = [...vistas.values()];
+
+  if (!leads.length) {
+    el.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <h3>Nada que calificar aún</h3>
+      <p>Después de tu primera visita podrás calificar al asesor y la propiedad.</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div style="display:flex;flex-direction:column;gap:0.75rem">` +
+    leads.map(l => {
+      const yaCalificado = !!l.calificacion_estrellas;
+      const estrellasMostrar = yaCalificado
+        ? Array.from({length:5}, (_, i) => `<span style="color:${i < l.calificacion_estrellas ? 'var(--gold)' : '#dde3ef'}">★</span>`).join('')
+        : '';
+      return `<div class="card" id="calif-card-${l.id}">
+        <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+          <div style="min-width:0">
+            <div style="font-size:0.88rem;font-weight:600;color:var(--charcoal)">${l.propiedad_titulo || 'Búsqueda personalizada'}</div>
+            <div style="font-size:0.75rem;color:var(--gray);margin-top:0.2rem">${l.asesor_nombre || 'Asesor'}</div>
+            ${yaCalificado ? `<div style="margin-top:0.35rem;font-size:1rem">${estrellasMostrar}</div>` : ''}
+          </div>
+          <button class="btn-calificar ${yaCalificado ? 'ya-calificado' : ''}" onclick="abrirCalificar(event, ${l.id})">
+            ${yaCalificado ? '✓ Ver calificación' : '★ Calificar'}
+          </button>
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+// ── MODAL CALIFICACIÓN ──
+// ── VERIFICACIÓN DE CIERRE ──
+function renderCierreBanner(l) {
+  if (!l.cierre_declarado_en) return '';
+  const estado = l.cierre_verificacion_estado || 'pendiente';
+  const moneda = l.moneda_cierre || 'GTQ';
+  const simbolo = moneda === 'USD' ? '$' : 'Q';
+  const valor = l.valor_cierre ? `${simbolo}${Number(l.valor_cierre).toLocaleString('es-GT')}` : '';
+  const op = String(l.prop_operacion || '').toLowerCase();
+  const operacionSust = op === 'renta' ? 'la renta' : op === 'venta' ? 'la venta' : 'el cierre';
+  const operacionSustCap = op === 'renta' ? 'Renta' : op === 'venta' ? 'Venta' : 'Cierre';
+  const operacionSustArtFem = op === 'renta' ? 'esta renta' : op === 'venta' ? 'esta venta' : 'este cierre';
+  const labelDisputar = op === 'renta' ? 'No, no alquilé esta propiedad' : op === 'venta' ? 'No, no compré esta propiedad' : 'No, no cerré';
+
+  if (estado === 'confirmado') {
+    return `<div id="cierre-${l.id}" style="background:#e8f5e9;border:1px solid #a5d6a7;border-left:3px solid #2e7d32;border-radius:8px;padding:0.7rem 0.9rem;margin-top:0.3rem;display:flex;align-items:center;gap:0.6rem">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <div style="flex:1;line-height:1.35">
+        <div style="font-size:0.78rem;font-weight:700;color:#1b5e20">${operacionSustCap} confirmada${valor ? ` — ${valor}` : ''}</div>
+        <div style="font-size:0.72rem;color:#2e7d32">Gracias por validar la operación.</div>
+      </div>
+    </div>`;
+  }
+
+  if (estado === 'disputado') {
+    return `<div id="cierre-${l.id}" style="background:#fdecea;border:1px solid #f5c6cb;border-left:3px solid #c62828;border-radius:8px;padding:0.7rem 0.9rem;margin-top:0.3rem">
+      <div style="font-size:0.78rem;font-weight:700;color:#8b1a1a">Reportaste que ${operacionSustArtFem} no ocurrió</div>
+      <div style="font-size:0.72rem;color:#a03030;margin-top:0.15rem">Nuestro equipo revisará el caso con el asesor.</div>
+    </div>`;
+  }
+
+  // pendiente
+  return `<div id="cierre-${l.id}" style="background:linear-gradient(135deg,#fef6e4 0%,#fbeecf 100%);border:1px solid #e8d090;border-left:3px solid #c9a84c;border-radius:8px;padding:0.85rem 0.95rem;margin-top:0.3rem">
+    <div style="display:flex;align-items:center;gap:0.55rem;margin-bottom:0.55rem">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8a6d1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div style="flex:1;line-height:1.3">
+        <div style="font-size:0.78rem;font-weight:700;color:#5a4a1a">El asesor declaró ${operacionSust}${valor ? ` por ${valor}` : ''}</div>
+        <div style="font-size:0.72rem;color:#8a6d1f">¿Confirmas que realizaste esta operación?</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.7rem;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;gap:0.5rem;flex-direction:column;flex-shrink:0">
+        <button type="button" onclick="confirmarCierre(event, ${l.id})"
+          style="background:#2e7d32;color:#fff;border:none;border-radius:6px;padding:0.45rem 0.95rem;font-size:0.75rem;font-weight:700;cursor:pointer">Sí, confirmo</button>
+        <button type="button" onclick="disputarCierre(event, ${l.id})"
+          style="background:#fff;color:#8b1a1a;border:1px solid #f5c6cb;border-radius:6px;padding:0.45rem 0.95rem;font-size:0.75rem;font-weight:700;cursor:pointer">${labelDisputar}</button>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <label for="obs-${l.id}" style="display:block;font-size:0.7rem;color:#8a6d1f;margin-bottom:0.2rem;font-weight:600">Observaciones <span style="font-weight:400;color:#a8915a">(opcional)</span></label>
+        <textarea id="obs-${l.id}" maxlength="1000" rows="2" placeholder="Agrega alguna nota adicional que sirva de referencia…"
+          style="width:100%;box-sizing:border-box;border:1px solid #e0c98a;border-radius:6px;padding:0.4rem 0.55rem;font-size:0.75rem;font-family:inherit;resize:vertical;background:#fffdf6;color:#5a4a1a"></textarea>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function confirmarVisita(e, leadId) {
+  e.preventDefault(); e.stopPropagation();
+  mostrarConfirmCliente({
+    icono: '📅',
+    titulo: '¿Confirmas tu asistencia?',
+    desc: 'Al confirmar, el asesor sabrá que estarás presente en la visita. Podrás cancelar o reagendar si algo cambia.',
+    labelOk: '✓ Sí, confirmo mi asistencia',
+    colorOk: '#16a34a',
+    onOk: async () => {
+      try {
+        const r = await fetch(`${API}/cliente/confirmar-visita`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, lead_id: leadId }),
+        });
+        const data = await r.json();
+        if (!r.ok) { toast(data.error || 'No se pudo confirmar'); return; }
+        const lead = (clienteData.leads || []).find(l => l.id === leadId);
+        if (lead) {
+          lead.visita_cliente_confirmada_en = data.confirmado_en || new Date().toISOString();
+          renderVisitas();
+        }
+      } catch { toast('Error de conexión'); }
+    }
+  });
+}
+
+async function confirmarCierre(e, leadId) {
+  e.preventDefault(); e.stopPropagation();
+  const observacion = (document.getElementById(`obs-${leadId}`)?.value || '').trim();
+  mostrarConfirmCliente({
+    icono: '🏠',
+    titulo: '¿Confirmas el cierre?',
+    desc: 'Al confirmar, validamos que el negocio se realizó correctamente. Esta acción notifica a InmobIA para finalizar el proceso.',
+    labelOk: '✓ Sí, confirmo el cierre',
+    colorOk: '#1e3a5f',
+    onOk: async () => {
+      try {
+        const r = await fetch(`${API}/cliente/confirmar-cierre`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, lead_id: leadId, observacion }),
+        });
+        const data = await r.json();
+        if (!r.ok) { toast(data.error || 'No se pudo confirmar'); return; }
+        const lead = (clienteData.leads || []).find(l => l.id === leadId);
+        if (lead) { lead.cierre_verificacion_estado = 'confirmado'; lead.cierre_verificado_en = data.verificado_en; }
+        renderVisitas();
+      } catch { toast('Error de conexión'); }
+    }
+  });
+}
+
+async function disputarCierre(e, leadId) {
+  e.preventDefault(); e.stopPropagation();
+  const observacion = (document.getElementById(`obs-${leadId}`)?.value || '').trim();
+  mostrarConfirmCliente({
+    icono: '⚠️',
+    titulo: '¿Reportar que el cierre no ocurrió?',
+    desc: 'InmobIA recibirá una alerta y se pondrá en contacto para entender qué pasó. Tu reporte es confidencial.',
+    labelOk: 'Sí, reportar problema',
+    colorOk: '#dc2626',
+    onOk: async () => {
+      try {
+        const r = await fetch(`${API}/cliente/disputar-cierre`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, lead_id: leadId, motivo: '', observacion }),
+        });
+        const data = await r.json();
+        if (!r.ok) { toast(data.error || 'No se pudo registrar'); return; }
+        const lead = (clienteData.leads || []).find(l => l.id === leadId);
+        if (lead) { lead.cierre_verificacion_estado = 'disputado'; }
+        renderVisitas();
+      } catch { toast('Error de conexión'); }
+    }
+  });
+}
+
+function abrirWhatsAppAsesor(e, leadId) {
+  e.preventDefault();
+  e.stopPropagation();
+  const l = (clienteData.leads || []).find(x => x.id === leadId);
+  if (!l || !l.asesor_telefono) return;
+  const tel = String(l.asesor_telefono).replace(/\D/g,'');
+  const msg = encodeURIComponent(`Hola ${l.asesor_nombre || ''}, soy ${l.nombre || 'su cliente'} de InmobIA. Quisiera coordinar sobre la propiedad "${l.propiedad_titulo || ''}".`);
+  window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
+}
+
+function abrirCalificar(e, leadId) {
+  e.preventDefault(); e.stopPropagation();
+  const lead = clienteData.leads.find(l => l.id === leadId);
+  if (!lead) return;
+  leadActivo = lead;
+  estrellasVal = lead.calificacion_estrellas || 0;
+
+  document.getElementById('modal-cal-prop').textContent   = lead.propiedad_titulo || 'Propiedad';
+  document.getElementById('modal-cal-asesor').textContent = lead.asesor_nombre || 'Asesor';
+  document.getElementById('cal-comentario').value = lead.calificacion_comentario || '';
+
+  // Reset razones
+  razonesSelec.clear();
+  if (lead.calificacion_razones) {
+    lead.calificacion_razones.split(',').filter(Boolean).forEach(r => razonesSelec.add(r));
+  }
+
+  actualizarEstrellas();
+  if (estrellasVal > 0) renderRazones();
+
+  document.getElementById('modal-cal').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-cal').classList.remove('open');
+  leadActivo = null;
+}
+
+function selEstrellas(val) {
+  estrellasVal = val;
+  actualizarEstrellas();
+  renderRazones();
+}
+
+function actualizarEstrellas() {
+  document.querySelectorAll('.estrella').forEach(el => {
+    el.classList.toggle('active', Number(el.dataset.val) <= estrellasVal);
+  });
+}
+
+function renderRazones() {
+  const wrap = document.getElementById('razones-wrap');
+  const grid = document.getElementById('razones-grid');
+  wrap.style.display = 'block';
+  const lista = estrellasVal <= 2 ? RAZONES.bajo : RAZONES.alto;
+  grid.innerHTML = lista.map(r => `
+    <span class="razon-chip ${razonesSelec.has(r) ? 'active' : ''}" onclick="toggleRazon(this, '${r}')">${r}</span>
+  `).join('');
+}
+
+function toggleRazon(el, razon) {
+  if (razonesSelec.has(razon)) { razonesSelec.delete(razon); el.classList.remove('active'); }
+  else { razonesSelec.add(razon); el.classList.add('active'); }
+}
+
+async function enviarCalificacion() {
+  if (!estrellasVal) { toast('Selecciona una calificación de 1 a 5 estrellas', 'error'); return; }
+  const btn = document.getElementById('btn-enviar-cal');
+  btn.textContent = 'Enviando...'; btn.disabled = true;
+
+  try {
+    const r = await fetch(`${API}/cliente/calificar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token,
+        lead_id: leadActivo.id,
+        estrellas: estrellasVal,
+        razones: [...razonesSelec],
+        comentario: document.getElementById('cal-comentario').value
+      })
+    });
+    if (!r.ok) throw new Error();
+
+    // Actualizar datos locales
+    const lead = clienteData.leads.find(l => l.id === leadActivo.id);
+    if (lead) {
+      lead.calificacion_estrellas = estrellasVal;
+      lead.calificacion_razones   = [...razonesSelec].join(',');
+      lead.calificacion_comentario = document.getElementById('cal-comentario').value;
+    }
+
+    toast('¡Gracias! Tu calificación fue enviada.');
+    cerrarModal();
+    renderVisitas();
+    renderCalificar();
+  } catch {
+    toast('No se pudo enviar la calificación', 'error');
+  } finally {
+    btn.textContent = 'Enviar calificación'; btn.disabled = false;
+  }
+}
+
+// ── ENCUESTA POST-VISITA ────────────────────────────────────────
+function abrirEncuesta(lead) {
+  encLeadId = lead.id;
+  encEstrellasVal = 0;
+  encInteresVal = null;
+  encRazonesSelec.clear();
+  encAsesorEstrellasVal = 0;
+  encAsesorRazonesSelec.clear();
+
+  const prop = lead.prop_titulo || lead.propiedad_titulo || 'la propiedad visitada';
+  const asesor = lead.asesor_nombre || 'tu asesor';
+  document.getElementById('enc-prop-info').innerHTML =
+    `Tu visita con <strong>${asesor}</strong> ya fue registrada. Cuéntanos cómo te fue.`;
+
+  // Reset propiedad
+  document.querySelectorAll('.enc-estrella').forEach(el => { el.style.color = '#374151'; });
+  document.querySelectorAll('.enc-interes-btn').forEach(el => {
+    el.style.background = '#0f172a'; el.style.borderColor = '#1e3a4a'; el.style.color = '#94a3b8';
+  });
+  document.getElementById('enc-razones-wrap').style.display = 'none';
+  document.getElementById('enc-razones-grid').innerHTML = '';
+  document.getElementById('enc-comentario').value = '';
+
+  // Reset asesor
+  document.querySelectorAll('.enc-asesor-estrella').forEach(el => { el.style.color = '#374151'; });
+  document.getElementById('enc-asesor-razones-wrap').style.display = 'none';
+  document.getElementById('enc-asesor-razones-grid').innerHTML = '';
+  document.getElementById('enc-asesor-comentario').value = '';
+
+  document.getElementById('modal-encuesta').style.display = 'flex';
+}
+
+function cerrarEncuesta() {
+  document.getElementById('modal-encuesta').style.display = 'none';
+  encLeadId = null;
+}
+
+function selEncEstrellas(val) {
+  encEstrellasVal = val;
+  document.querySelectorAll('.enc-estrella').forEach(el => {
+    el.style.color = Number(el.dataset.val) <= val ? '#f59e0b' : '#374151';
+  });
+  renderEncRazones();
+}
+
+function selEncInteres(btn) {
+  encInteresVal = btn.dataset.val;
+  document.querySelectorAll('.enc-interes-btn').forEach(el => {
+    el.style.background = '#0f172a'; el.style.borderColor = '#1e3a4a'; el.style.color = '#94a3b8';
+  });
+  btn.style.background = '#8b5cf620'; btn.style.borderColor = '#8b5cf6'; btn.style.color = '#a78bfa';
+  renderEncRazones();
+}
+
+function renderEncRazones() {
+  if (!encEstrellasVal && !encInteresVal) return;
+  const esPositivo = encEstrellasVal >= 4 || encInteresVal === 'muy-interesado' || encInteresVal === 'interesado';
+  const lista = esPositivo ? RAZONES_ENCUESTA.positivo : RAZONES_ENCUESTA.negativo;
+  document.getElementById('enc-razones-wrap').style.display = '';
+  document.getElementById('enc-razones-grid').innerHTML = lista.map(r => `
+    <button onclick="toggleEncRazon(this,'${r}')"
+      style="padding:0.35rem 0.7rem;border-radius:20px;border:1.5px solid #2d3a4f;background:#0f172a;color:#94a3b8;font-size:0.72rem;cursor:pointer;transition:all 0.15s;font-family:inherit">
+      ${r}
+    </button>`).join('');
+}
+
+function toggleEncRazon(el, razon) {
+  if (encRazonesSelec.has(razon)) {
+    encRazonesSelec.delete(razon);
+    el.style.background = '#0f172a'; el.style.borderColor = '#2d3a4f'; el.style.color = '#94a3b8';
+  } else {
+    encRazonesSelec.add(razon);
+    el.style.background = '#8b5cf620'; el.style.borderColor = '#8b5cf6'; el.style.color = '#a78bfa';
+  }
+}
+
+// ── ASESOR ──
+function selEncAsesorEstrellas(val) {
+  encAsesorEstrellasVal = val;
+  document.querySelectorAll('.enc-asesor-estrella').forEach(el => {
+    el.style.color = Number(el.dataset.val) <= val ? '#f59e0b' : '#374151';
+  });
+  renderEncAsesorRazones();
+}
+
+function renderEncAsesorRazones() {
+  if (!encAsesorEstrellasVal) return;
+  const esPositivo = encAsesorEstrellasVal >= 4;
+  const lista = esPositivo ? RAZONES_ASESOR.positivo : RAZONES_ASESOR.negativo;
+  document.getElementById('enc-asesor-razones-wrap').style.display = '';
+  document.getElementById('enc-asesor-razones-grid').innerHTML = lista.map(r => `
+    <button onclick="toggleEncAsesorRazon(this,'${r}')"
+      style="padding:0.35rem 0.7rem;border-radius:20px;border:1.5px solid #2d3a4f;background:#0f172a;color:#94a3b8;font-size:0.72rem;cursor:pointer;transition:all 0.15s;font-family:inherit">
+      ${r}
+    </button>`).join('');
+}
+
+function toggleEncAsesorRazon(el, razon) {
+  if (encAsesorRazonesSelec.has(razon)) {
+    encAsesorRazonesSelec.delete(razon);
+    el.style.background = '#0f172a'; el.style.borderColor = '#2d3a4f'; el.style.color = '#94a3b8';
+  } else {
+    encAsesorRazonesSelec.add(razon);
+    el.style.background = '#f59e0b20'; el.style.borderColor = '#f59e0b'; el.style.color = '#fbbf24';
+  }
+}
+
+async function enviarEncuesta() {
+  if (!encEstrellasVal && !encInteresVal && !encAsesorEstrellasVal) {
+    toast('Califica la propiedad o el asesor para continuar', 'error'); return;
+  }
+  const btn = document.getElementById('btn-enviar-encuesta');
+  btn.textContent = 'Enviando...'; btn.disabled = true;
+  try {
+    // 1. Guardar encuesta de propiedad
+    const r1 = await fetch(`${API}/leads/${encLeadId}/encuesta-visita`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token,
+        estrellas: encEstrellasVal || null,
+        interes: encInteresVal,
+        razones: [...encRazonesSelec],
+        comentario: document.getElementById('enc-comentario').value.trim()
+      })
+    });
+    if (!r1.ok) throw new Error('Error al guardar encuesta de propiedad');
+
+    // 2. Guardar calificación del asesor (si calificó)
+    if (encAsesorEstrellasVal) {
+      await fetch(`${API}/cliente/calificar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token,
+          lead_id: encLeadId,
+          estrellas: encAsesorEstrellasVal,
+          razones: [...encAsesorRazonesSelec],
+          comentario: document.getElementById('enc-asesor-comentario').value.trim()
+        })
+      });
+    }
+
+    const lead = (clienteData?.leads || []).find(l => l.id === encLeadId);
+    if (lead) {
+      lead.encuesta_respondida_en = new Date().toISOString();
+      if (encAsesorEstrellasVal) lead.calificacion_estrellas = encAsesorEstrellasVal;
+    }
+
+    toast('¡Gracias por tu opinión! 🏠');
+    cerrarEncuesta();
+    renderVisitas();
+    renderCalificar();
+  } catch(e) {
+    toast('No se pudo enviar. Intenta de nuevo.', 'error');
+  } finally {
+    btn.textContent = 'Enviar opinión →'; btn.disabled = false;
+  }
+}
+
+// ── TOAST ──
+let toastT;
+function toast(msg, tipo = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show';
+  el.style.borderLeftColor = tipo === 'error' ? '#dc2626' : 'var(--gold)';
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.className = '', 3500);
+}
+
+// ── Modal de confirmación personalizado ─────────────────────────────────────
+let _clienteConfirmCb = null;
+function mostrarConfirmCliente({ icono = '❓', titulo, desc, labelOk = 'Confirmar', colorOk = '#1e3a5f', onOk }) {
+  document.getElementById('mcc-icono').textContent  = icono;
+  document.getElementById('mcc-titulo').textContent = titulo;
+  document.getElementById('mcc-desc').textContent   = desc;
+  const btnOk = document.getElementById('mcc-btn-ok');
+  btnOk.textContent     = labelOk;
+  btnOk.style.background = colorOk;
+  btnOk.onclick = () => { cerrarConfirmCliente(); if (typeof onOk === 'function') onOk(); };
+  _clienteConfirmCb = onOk;
+  const m = document.getElementById('modal-confirm-cliente');
+  m.style.display = 'flex';
+  requestAnimationFrame(() => m.style.opacity = '1');
+}
+function cerrarConfirmCliente() {
+  const m = document.getElementById('modal-confirm-cliente');
+  m.style.opacity = '0';
+  setTimeout(() => { m.style.display = 'none'; }, 180);
+  _clienteConfirmCb = null;
+}
+</script>
+
+<!-- MODAL CONFIRMACIÓN CLIENTE -->
+<div id="modal-confirm-cliente" onclick="if(event.target===this)cerrarConfirmCliente()"
+  style="display:none;opacity:0;position:fixed;inset:0;background:rgba(30,45,74,0.45);backdrop-filter:blur(4px);z-index:9000;align-items:center;justify-content:center;padding:1rem;transition:opacity 0.18s">
+  <div style="background:#fff;border-radius:18px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(30,45,74,0.18);overflow:hidden;animation:slideUp 0.2s ease">
+    <div style="padding:2rem 1.75rem 1.25rem;text-align:center">
+      <div id="mcc-icono" style="font-size:2.8rem;margin-bottom:0.85rem;line-height:1"></div>
+      <div id="mcc-titulo" style="font-family:'Urbanist',sans-serif;font-size:1.1rem;font-weight:700;color:#1e2d4a;margin-bottom:0.5rem"></div>
+      <div id="mcc-desc" style="font-size:0.84rem;color:#64748b;line-height:1.55"></div>
+    </div>
+    <div style="padding:0 1.75rem 1.75rem;display:flex;flex-direction:column;gap:0.6rem">
+      <button id="mcc-btn-ok"
+        style="width:100%;padding:0.85rem;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;color:#fff;cursor:pointer;transition:filter 0.15s"
+        onmouseover="this.style.filter='brightness(0.88)'" onmouseout="this.style.filter=''">
+      </button>
+      <button onclick="cerrarConfirmCliente()"
+        style="width:100%;padding:0.75rem;border:1px solid #dde3ef;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;background:transparent;color:#64748b;transition:all 0.15s"
+        onmouseover="this.style.borderColor='#94a3b8';this.style.color='#334155'"
+        onmouseout="this.style.borderColor='#dde3ef';this.style.color='#64748b'">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+<style>
+@keyframes slideUp { from { transform:translateY(16px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+</style>
+</body>
+</html>
