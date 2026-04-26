@@ -1276,20 +1276,41 @@ user-select: none;
 <div class="login-modal-overlay" id="login-modal-overlay" onclick="cerrarLoginModal(event)">
   <div class="login-modal">
     <button class="login-modal-close" onclick="cerrarLoginModal()">✕</button>
-    <h3>Iniciar sesión</h3>
-    <p>Acceda a su panel de asesor InmobIA</p>
-    <label for="lm-email">Correo o usuario</label>
-    <input type="text" id="lm-email" placeholder="correo@ejemplo.com" autocomplete="username">
-    <label for="lm-pass">Contraseña</label>
-    <input type="password" id="lm-pass" placeholder="••••••••" autocomplete="current-password">
-    <div class="login-modal-error" id="lm-error"></div>
-    <button class="login-modal-btn" onclick="submitLoginModal()">Ingresar al panel</button>
-    <div class="login-modal-footer">
-      <a href="/asesores.html?recuperar=1" style="color:var(--gray);font-size:0.75rem;">¿Olvidó su contraseña?</a>
+
+    <!-- Vista: Login -->
+    <div id="lm-view-login">
+      <h3>Iniciar sesión</h3>
+      <p>Acceda a su panel de asesor InmobIA</p>
+      <label for="lm-email">Correo o usuario</label>
+      <input type="text" id="lm-email" placeholder="correo@ejemplo.com" autocomplete="username">
+      <label for="lm-pass">Contraseña</label>
+      <input type="password" id="lm-pass" placeholder="••••••••" autocomplete="current-password">
+      <div class="login-modal-error" id="lm-error"></div>
+      <button class="login-modal-btn" onclick="submitLoginModal()">Ingresar al panel</button>
+      <div class="login-modal-footer">
+        <a href="#" onclick="mostrarRecuperarModal(event)" style="color:var(--gray);font-size:0.75rem;">¿Olvidó su contraseña?</a>
+      </div>
+      <div class="login-modal-footer">
+        ¿No tiene cuenta? <a href="/asesores.html">Regístrese gratis</a>
+      </div>
     </div>
-    <div class="login-modal-footer">
-      ¿No tiene cuenta? <a href="/asesores.html">Regístrese gratis</a>
+
+    <!-- Vista: Recuperar contraseña -->
+    <div id="lm-view-recuperar" style="display:none">
+      <h3>Recuperar contraseña</h3>
+      <p>Le enviaremos un enlace de recuperación a su correo</p>
+      <label for="lm-rec-email">Correo electrónico</label>
+      <input type="email" id="lm-rec-email" placeholder="correo@ejemplo.com" autocomplete="email">
+      <div class="login-modal-error" id="lm-rec-error"></div>
+      <div id="lm-rec-ok" style="display:none;color:#2d6a4f;font-size:0.82rem;margin-top:0.8rem;padding:0.75rem;background:#d8f3dc;border-radius:8px;">
+        Enlace enviado. Revise su bandeja de entrada.
+      </div>
+      <button class="login-modal-btn" onclick="submitRecuperarModal()" id="lm-rec-btn">Enviar enlace</button>
+      <div class="login-modal-footer">
+        <a href="#" onclick="volverLoginModal(event)">← Volver al inicio de sesión</a>
+      </div>
     </div>
+
   </div>
 </div>
 
@@ -3433,6 +3454,35 @@ user-select: none;
   document.addEventListener('click', () => {
     document.getElementById('nav-cta-dropdown')?.classList.remove('open');
   });
+
+  function mostrarRecuperarModal(e) {
+    e.preventDefault();
+    document.getElementById('lm-view-login').style.display = 'none';
+    document.getElementById('lm-view-recuperar').style.display = 'block';
+    document.getElementById('lm-rec-email').focus();
+  }
+  function volverLoginModal(e) {
+    e.preventDefault();
+    document.getElementById('lm-view-recuperar').style.display = 'none';
+    document.getElementById('lm-view-login').style.display = 'block';
+    document.getElementById('lm-rec-ok').style.display = 'none';
+    document.getElementById('lm-rec-error').style.display = 'none';
+  }
+  async function submitRecuperarModal() {
+    const email = document.getElementById('lm-rec-email').value.trim();
+    const errEl = document.getElementById('lm-rec-error');
+    const okEl  = document.getElementById('lm-rec-ok');
+    errEl.style.display = 'none'; okEl.style.display = 'none';
+    if (!email) { errEl.textContent = 'Ingrese su correo.'; errEl.style.display = 'block'; return; }
+    const btn = document.getElementById('lm-rec-btn');
+    btn.textContent = 'Enviando...'; btn.disabled = true;
+    try {
+      await fetch(`${API}/auth/solicitar-reset`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
+      okEl.style.display = 'block';
+      btn.style.display = 'none';
+    } catch { errEl.textContent = 'Error al enviar. Intente de nuevo.'; errEl.style.display = 'block'; }
+    finally { btn.textContent = 'Enviar enlace'; btn.disabled = false; }
+  }
 
   function abrirLoginModal(e) {
     e.preventDefault();
