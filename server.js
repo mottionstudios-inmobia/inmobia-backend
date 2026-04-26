@@ -101,21 +101,6 @@ app.post('/api/webhook/whatsapp', (req, res) => {
   procesarWebhookMeta(req.body); // body ya parseado por express.urlencoded
 });
 
-// Endpoint temporal: promueve al primer usuario a admin si no hay ninguno
-import { db } from './database.js';
-app.get('/api/setup/promote-first-admin', (_req, res) => {
-  try {
-    const anyAdmin = db.prepare("SELECT id, email FROM usuarios WHERE rol = 'admin' LIMIT 1").get();
-    if (anyAdmin) return res.json({ ok: false, mensaje: 'Ya existe un admin', admin: anyAdmin });
-    const firstUser = db.prepare("SELECT id, email FROM usuarios ORDER BY id ASC LIMIT 1").get();
-    if (!firstUser) return res.json({ ok: false, mensaje: 'No hay usuarios registrados' });
-    db.prepare("UPDATE usuarios SET rol = 'admin' WHERE id = ?").run(firstUser.id);
-    res.json({ ok: true, mensaje: 'Promovido a admin', usuario: firstUser });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // Rutas públicas
 app.use('/api/auth', authRouter);
 app.use('/api/propiedades', propiedadesRouter);
