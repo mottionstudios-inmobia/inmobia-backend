@@ -1732,7 +1732,8 @@ async function iniciarSesion() {
     } else {
       localStorage.setItem('inmobia_asesor_token', data.token);
       toast('Sesión iniciada. Redirigiendo...', 'success');
-      setTimeout(() => { window.location.href = '/panel-asesor.html'; }, 1200);
+      const destino = data.usuario?.rol === 'admin' ? '/admin.html' : '/panel-asesor.html';
+      setTimeout(() => { window.location.href = destino; }, 1200);
     }
   } catch {
     toast('No se puede conectar al servidor', 'error');
