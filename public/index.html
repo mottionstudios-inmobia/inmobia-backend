@@ -94,6 +94,63 @@ user-select: none;
     text-decoration: none; display: inline-block; border-radius: 20px;
   }
   .nav-cta:hover { background: var(--gold-dark); border-color: var(--gold-dark); }
+  .nav-cta-wrap { position: relative; }
+  .nav-cta-dropdown {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--white); border: 1px solid var(--gray-border);
+    border-radius: 12px; min-width: 200px; overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 100;
+  }
+  .nav-cta-dropdown.open { display: block; }
+  .nav-cta-dropdown a {
+    display: block; padding: 0.85rem 1.2rem;
+    color: var(--charcoal); text-decoration: none;
+    font-size: 0.82rem; letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--gray-border);
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-cta-dropdown a:last-child { border-bottom: none; }
+  .nav-cta-dropdown a:hover { background: var(--gray-light); color: var(--gold-dark); }
+  /* Modal login */
+  .login-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 300;
+    align-items: center; justify-content: center;
+  }
+  .login-modal-overlay.open { display: flex; }
+  .login-modal {
+    background: var(--white); border-radius: 16px;
+    padding: 2.5rem 2rem; width: 100%; max-width: 400px;
+    margin: 1rem; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .login-modal h3 {
+    font-family: var(--font-display); font-size: 1.6rem;
+    font-weight: 300; color: var(--charcoal); margin-bottom: 0.4rem;
+  }
+  .login-modal p { font-size: 0.82rem; color: var(--gray); margin-bottom: 1.8rem; }
+  .login-modal-close {
+    position: absolute; top: 1rem; right: 1.2rem;
+    background: none; border: none; font-size: 1.3rem;
+    cursor: pointer; color: var(--gray); line-height: 1;
+  }
+  .login-modal label { display: block; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray); margin-bottom: 0.4rem; margin-top: 1rem; }
+  .login-modal input {
+    width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--gray-border);
+    border-radius: 8px; font-size: 0.9rem; color: var(--charcoal);
+    outline: none; transition: border-color 0.2s; box-sizing: border-box;
+  }
+  .login-modal input:focus { border-color: var(--gold); }
+  .login-modal-btn {
+    width: 100%; margin-top: 1.5rem; padding: 0.9rem;
+    background: var(--charcoal); color: var(--white); border: none;
+    border-radius: 8px; font-size: 0.82rem; letter-spacing: 0.08em;
+    text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+  }
+  .login-modal-btn:hover { background: var(--gold-dark); }
+  .login-modal-error { color: #c0392b; font-size: 0.78rem; margin-top: 0.8rem; display: none; }
+  .login-modal-footer { text-align: center; margin-top: 1.2rem; font-size: 0.78rem; color: var(--gray); }
+  .login-modal-footer a { color: var(--gold-dark); text-decoration: none; }
   .nav-login {
     background: transparent; color: var(--charcoal);
     border: 1px solid var(--gray-border); padding: 0.65rem 1.25rem;
@@ -1166,8 +1223,13 @@ user-select: none;
     <li><a href="https://wa.me/50247073915?text=Hola,%20quisiera%20m%C3%A1s%20informaci%C3%B3n" target="_blank">Contacto</a></li>
   </ul>
   <div style="display:flex;align-items:center;gap:0.6rem">
-    <a href="/asesores.html" class="nav-cta">Área de asesores</a>
-    <a href="/asesores.html#login" class="nav-login" onclick="irAlLogin(event)">Iniciar sesión</a>
+    <div class="nav-cta-wrap" id="nav-cta-wrap">
+      <button class="nav-cta" onclick="toggleCtaMenu(event)">Área de asesores ▾</button>
+      <div class="nav-cta-dropdown" id="nav-cta-dropdown">
+        <a href="/asesores.html">Registrarme como asesor</a>
+        <a href="#" onclick="abrirLoginModal(event)">Iniciar sesión</a>
+      </div>
+    </div>
     <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMenu()" aria-label="Menú">
       <span></span><span></span><span></span>
     </button>
@@ -1190,6 +1252,24 @@ user-select: none;
 </div>
 <div class="nav-overlay" id="nav-overlay" onclick="toggleMenu()"></div>
  
+<!-- MODAL LOGIN ASESOR -->
+<div class="login-modal-overlay" id="login-modal-overlay" onclick="cerrarLoginModal(event)">
+  <div class="login-modal">
+    <button class="login-modal-close" onclick="cerrarLoginModal()">✕</button>
+    <h3>Iniciar sesión</h3>
+    <p>Accede a tu panel de asesor InmobIA</p>
+    <label for="lm-email">Correo o usuario</label>
+    <input type="text" id="lm-email" placeholder="tu@email.com" autocomplete="username">
+    <label for="lm-pass">Contraseña</label>
+    <input type="password" id="lm-pass" placeholder="••••••••" autocomplete="current-password">
+    <div class="login-modal-error" id="lm-error"></div>
+    <button class="login-modal-btn" onclick="submitLoginModal()">Ingresar al panel</button>
+    <div class="login-modal-footer">
+      ¿No tienes cuenta? <a href="/asesores.html">Regístrate gratis</a>
+    </div>
+  </div>
+</div>
+
 <!-- HERO -->
 <section id="hero">
   <div class="hero-content">
@@ -3317,6 +3397,45 @@ user-select: none;
     document.getElementById('nav-drawer').classList.toggle('open');
     document.getElementById('nav-overlay').classList.toggle('open');
   }
+
+  function toggleCtaMenu(e) {
+    e.stopPropagation();
+    document.getElementById('nav-cta-dropdown').classList.toggle('open');
+  }
+  document.addEventListener('click', () => {
+    document.getElementById('nav-cta-dropdown')?.classList.remove('open');
+  });
+
+  function abrirLoginModal(e) {
+    e.preventDefault();
+    document.getElementById('nav-cta-dropdown').classList.remove('open');
+    document.getElementById('login-modal-overlay').classList.add('open');
+    document.getElementById('lm-email').focus();
+  }
+  function cerrarLoginModal(e) {
+    if (e && e.target !== document.getElementById('login-modal-overlay')) return;
+    document.getElementById('login-modal-overlay').classList.remove('open');
+    document.getElementById('lm-error').style.display = 'none';
+  }
+  async function submitLoginModal() {
+    const email = document.getElementById('lm-email').value.trim();
+    const pass  = document.getElementById('lm-pass').value;
+    const errEl = document.getElementById('lm-error');
+    errEl.style.display = 'none';
+    if (!email || !pass) { errEl.textContent = 'Completa todos los campos.'; errEl.style.display = 'block'; return; }
+    const btn = document.querySelector('.login-modal-btn');
+    btn.textContent = 'Ingresando...'; btn.disabled = true;
+    try {
+      const r = await fetch(`${API}/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password: pass }) });
+      const data = await r.json();
+      if (!r.ok) { errEl.textContent = data.error || 'Credenciales incorrectas.'; errEl.style.display = 'block'; return; }
+      localStorage.setItem('inmobia_asesor_token', data.token);
+      const destino = data.usuario?.rol === 'admin' ? '/admin.html' : '/panel-asesor.html';
+      window.location.href = destino;
+    } catch { errEl.textContent = 'No se puede conectar al servidor.'; errEl.style.display = 'block'; }
+    finally { btn.textContent = 'Ingresar al panel'; btn.disabled = false; }
+  }
+  document.getElementById('lm-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitLoginModal(); });
 
   function irAlLogin(e) {
     e.preventDefault();
