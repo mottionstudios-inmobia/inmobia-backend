@@ -1014,11 +1014,54 @@ user-select: none;
   }
 
   /* ── MOBILE ── */
+  /* ── HAMBURGER + DRAWER ── */
+  .nav-hamburger { display: none; }
+  .nav-drawer { display: none; }
+  .nav-overlay { display: none; }
+
   @media (max-width: 900px) {
     nav { padding: 1rem 1.5rem; }
     .nav-links { display: none; }
     .nav-cta { padding: 0.45rem 0.9rem; font-size: 0.65rem; letter-spacing: 0.05em; border-radius: 16px; }
     .nav-login { display: none; }
+    .nav-hamburger {
+      display: flex; flex-direction: column; justify-content: space-between;
+      width: 24px; height: 18px; background: none; border: none; cursor: pointer; padding: 0;
+    }
+    .nav-hamburger span {
+      display: block; height: 2px; background: var(--charcoal); border-radius: 2px;
+      transition: all 0.3s;
+    }
+    .nav-drawer {
+      position: fixed; top: 0; right: -280px; width: 280px; height: 100vh;
+      background: var(--white); z-index: 200; padding: 2rem 1.5rem;
+      transition: right 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.12);
+    }
+    .nav-drawer.open { display: block; right: 0; }
+    .nav-drawer ul { list-style: none; padding: 2rem 0 0; margin: 0; }
+    .nav-drawer ul li { border-bottom: 1px solid var(--gray-border); }
+    .nav-drawer ul li a {
+      display: block; padding: 1rem 0; color: var(--charcoal);
+      text-decoration: none; font-size: 0.9rem; letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .nav-drawer ul li a:hover { color: var(--gold); }
+    .drawer-sep { border-bottom: 2px solid var(--gray-border) !important; margin: 0.5rem 0; }
+    .drawer-cta {
+      background: var(--gold); color: var(--white) !important;
+      border-radius: 20px; padding: 0.65rem 1.5rem !important;
+      text-align: center; margin-top: 0.5rem; display: block;
+    }
+    .nav-drawer-close {
+      position: absolute; top: 1rem; right: 1.5rem;
+      background: none; border: none; font-size: 1.2rem;
+      cursor: pointer; color: var(--charcoal);
+    }
+    .nav-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      z-index: 199;
+    }
+    .nav-overlay.open { display: block; }
     #hero { grid-template-columns: 1fr; min-height: auto; }
     .hero-image { aspect-ratio: 1 / 1; height: auto; background: transparent; }
     .hero-stat { justify-content: center; gap: 1.5rem; }
@@ -1125,8 +1168,27 @@ user-select: none;
   <div style="display:flex;align-items:center;gap:0.6rem">
     <a href="/asesores.html" class="nav-cta">Área de asesores</a>
     <a href="/asesores.html#login" class="nav-login" onclick="irAlLogin(event)">Iniciar sesión</a>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMenu()" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<!-- DRAWER MÓVIL -->
+<div class="nav-drawer" id="nav-drawer">
+  <button class="nav-drawer-close" onclick="toggleMenu()">✕</button>
+  <ul>
+    <li><a href="#propiedades" onclick="toggleMenu()">Propiedades</a></li>
+    <li><a href="#busqueda-personalizada" onclick="toggleMenu()">Búsqueda personalizada</a></li>
+    <li><a href="#servicios" onclick="toggleMenu()">Servicios</a></li>
+    <li><a href="#testimonios" onclick="toggleMenu()">Testimonios</a></li>
+    <li><a href="https://wa.me/50247073915" target="_blank">Contacto</a></li>
+    <li class="drawer-sep"></li>
+    <li><a href="/asesores.html" class="drawer-cta">Área de asesores</a></li>
+    <li><a href="/asesores.html#login" onclick="irAlLogin(event);toggleMenu()">Iniciar sesión</a></li>
+  </ul>
+</div>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleMenu()"></div>
  
 <!-- HERO -->
 <section id="hero">
@@ -3251,6 +3313,11 @@ user-select: none;
   iniciarHeroSlideshow();
 
   // Botón "Iniciar sesión" — lleva al tab de login en asesores.html
+  function toggleMenu() {
+    document.getElementById('nav-drawer').classList.toggle('open');
+    document.getElementById('nav-overlay').classList.toggle('open');
+  }
+
   function irAlLogin(e) {
     e.preventDefault();
     // Si ya tiene sesión activa, ir directo al panel
