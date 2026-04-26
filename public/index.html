@@ -1082,6 +1082,7 @@ user-select: none;
     .nav-links { display: none; }
     .nav-cta { padding: 0.45rem 0.9rem; font-size: 0.65rem; letter-spacing: 0.05em; border-radius: 16px; }
     .nav-login { display: none; }
+    .nav-cta-wrap { display: none; }
     .nav-hamburger {
       display: flex; flex-direction: column; justify-content: space-between;
       width: 24px; height: 18px; background: none; border: none; cursor: pointer; padding: 0;
@@ -1248,7 +1249,7 @@ user-select: none;
     <li><a href="https://wa.me/50247073915" target="_blank">Contacto</a></li>
     <li class="drawer-sep"></li>
     <li><a href="/asesores.html" class="drawer-cta">Área de asesores</a></li>
-    <li><a href="/asesores.html#login" onclick="irAlLogin(event);toggleMenu()">Iniciar sesión</a></li>
+    <li><a href="#" onclick="toggleMenu();abrirLoginModal(event)">Iniciar sesión</a></li>
   </ul>
 </div>
 <div class="nav-overlay" id="nav-overlay" onclick="toggleMenu()"></div>
