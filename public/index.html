@@ -1106,11 +1106,24 @@ user-select: none;
     }
     .nav-drawer ul li a:hover { color: var(--gold); }
     .drawer-sep { border-bottom: 2px solid var(--gray-border) !important; margin: 0.5rem 0; }
-    .drawer-cta {
-      background: var(--gold); color: var(--white) !important;
-      border-radius: 20px; padding: 0.65rem 1.5rem !important;
-      text-align: center; margin-top: 0.5rem; display: block;
+    .drawer-cta-wrap { border-bottom: none !important; padding: 0.75rem 0; }
+    .drawer-cta-btn {
+      background: var(--gold); color: var(--white);
+      border: none; border-radius: 20px; cursor: pointer;
+      padding: 0.5rem 1.2rem; font-size: 0.72rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      font-family: var(--font-body); width: 100%;
     }
+    .drawer-cta-sub { display: none; margin-top: 0.5rem; border: 1px solid var(--gray-border); border-radius: 12px; overflow: hidden; }
+    .drawer-cta-sub.open { display: block; }
+    .drawer-cta-sub a {
+      display: block; padding: 0.75rem 1.2rem; font-size: 0.78rem;
+      color: var(--charcoal); text-decoration: none;
+      letter-spacing: 0.06em; text-transform: uppercase; text-align: center;
+      border-bottom: 1px solid var(--gray-border);
+    }
+    .drawer-cta-sub a:last-child { border-bottom: none; }
+    .drawer-cta-sub a:hover { background: var(--gray-light); }
     .nav-drawer-close {
       position: absolute; top: 1rem; right: 1.5rem;
       background: none; border: none; font-size: 1.2rem;
@@ -1248,8 +1261,13 @@ user-select: none;
     <li><a href="#testimonios" onclick="toggleMenu()">Testimonios</a></li>
     <li><a href="https://wa.me/50247073915" target="_blank">Contacto</a></li>
     <li class="drawer-sep"></li>
-    <li><a href="/asesores.html" class="drawer-cta">Área de asesores</a></li>
-    <li><a href="#" onclick="toggleMenu();abrirLoginModal(event)">Iniciar sesión</a></li>
+    <li class="drawer-cta-wrap">
+      <button class="drawer-cta-btn" onclick="toggleDrawerCta(event)">Área de asesores ▾</button>
+      <div class="drawer-cta-sub" id="drawer-cta-sub">
+        <a href="/asesores.html" onclick="toggleMenu()">Registrarme</a>
+        <a href="#" onclick="toggleMenu();setTimeout(()=>abrirLoginModal(event),200)">Iniciar sesión</a>
+      </div>
+    </li>
   </ul>
 </div>
 <div class="nav-overlay" id="nav-overlay" onclick="toggleMenu()"></div>
@@ -3398,6 +3416,11 @@ user-select: none;
   function toggleMenu() {
     document.getElementById('nav-drawer').classList.toggle('open');
     document.getElementById('nav-overlay').classList.toggle('open');
+  }
+
+  function toggleDrawerCta(e) {
+    e.stopPropagation();
+    document.getElementById('drawer-cta-sub').classList.toggle('open');
   }
 
   function toggleCtaMenu(e) {
