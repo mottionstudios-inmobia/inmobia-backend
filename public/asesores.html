@@ -782,10 +782,42 @@
     .valor-flujo { grid-template-columns: 1fr; }
     .valor-flecha { transform: rotate(90deg); text-align: center; }
   }
+  .nav-hamburger-as { display: none; }
+  .nav-drawer-as { display: none; }
+  .nav-overlay-as { display: none; }
+
   @media (max-width: 768px) {
     nav { padding: 1rem 1.5rem; }
-    .nav-links { gap: 1rem; }
-    .nav-links a:not(.nav-cta) { display: none; }
+    .nav-links { display: none; }
+    .nav-hamburger-as {
+      display: flex; flex-direction: column; justify-content: space-between;
+      width: 24px; height: 18px; background: none; border: none; cursor: pointer; padding: 0;
+    }
+    .nav-hamburger-as span { display: block; height: 2px; background: var(--white); border-radius: 2px; }
+    .nav-drawer-as {
+      position: fixed; top: 0; right: -280px; width: 280px; height: 100vh;
+      background: #0f0f14; z-index: 200; padding: 2rem 1.5rem;
+      transition: right 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+    }
+    .nav-drawer-as.open { display: block; right: 0; }
+    .nav-drawer-as ul { list-style: none; padding: 2.5rem 0 0; margin: 0; }
+    .nav-drawer-as ul li { border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .nav-drawer-as ul li a {
+      display: block; padding: 1rem 0; color: rgba(255,255,255,0.8);
+      text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .nav-drawer-as ul li a:hover { color: var(--gold-vivid); }
+    .nav-drawer-as-close {
+      position: absolute; top: 1rem; right: 1.5rem;
+      background: none; border: none; font-size: 1.2rem; cursor: pointer; color: rgba(255,255,255,0.6);
+    }
+    .drawer-as-cta {
+      display: block; margin-top: 1rem; padding: 0.75rem 1.5rem;
+      background: var(--gold-vivid); color: #fff !important; text-align: center;
+      border-radius: 6px; font-weight: 600; letter-spacing: 0.06em;
+    }
+    .nav-overlay-as { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; }
+    .nav-overlay-as.open { display: block; }
     .hero, .section, .planes-section, .como-section, .roi-section, .test-section, .cta-section { padding: 5rem 1.5rem; }
     .planes-grid { grid-template-columns: 1fr; }
     .benefits-grid { grid-template-columns: 1fr; }
@@ -884,7 +916,23 @@
     <a href="#planes">Planes</a>
     <a href="#" class="nav-cta" onclick="event.preventDefault();destacarFormulario()">Registrarse gratis</a>
   </div>
+  <button class="nav-hamburger-as" onclick="toggleMenuAs()" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- DRAWER MÓVIL -->
+<div class="nav-drawer-as" id="nav-drawer-as">
+  <button class="nav-drawer-as-close" onclick="toggleMenuAs()">✕</button>
+  <ul>
+    <li><a href="/index.html" onclick="toggleMenuAs()">Ver propiedades</a></li>
+    <li><a href="#como-funciona" onclick="toggleMenuAs()">¿Cómo funciona?</a></li>
+    <li><a href="#beneficios" onclick="toggleMenuAs()">Beneficios</a></li>
+    <li><a href="#planes" onclick="toggleMenuAs()">Planes</a></li>
+    <li><a href="#" class="drawer-as-cta" onclick="toggleMenuAs();destacarFormulario()">Registrarse gratis</a></li>
+  </ul>
+</div>
+<div class="nav-overlay-as" id="nav-overlay-as" onclick="toggleMenuAs()"></div>
 
 <!-- HERO -->
 <section class="hero" id="inicio">
@@ -1503,6 +1551,11 @@ function actualizarBandera() {
   const sel = document.getElementById('r-prefijo');
   const flag = sel.options[sel.selectedIndex].dataset.flag;
   document.getElementById('phone-flag').textContent = flag;
+}
+
+function toggleMenuAs() {
+  document.getElementById('nav-drawer-as').classList.toggle('open');
+  document.getElementById('nav-overlay-as').classList.toggle('open');
 }
 
 function destacarFormulario() {
