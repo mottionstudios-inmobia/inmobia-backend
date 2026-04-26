@@ -466,6 +466,7 @@ try { db.exec(`ALTER TABLE usuarios ADD COLUMN acred_gpi_codigo TEXT DEFAULT ''`
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN mostrar_zonas INTEGER DEFAULT 1`); } catch {}
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN sexo TEXT DEFAULT ''`); } catch {}
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN hero_opacidad REAL DEFAULT 0.45`); } catch {}
+try { db.exec(`ALTER TABLE usuarios ADD COLUMN codigo_asesor TEXT DEFAULT ''`); } catch {}
 
 // Bitácora de pagos (historial)
 db.exec(`
