@@ -1017,6 +1017,8 @@ user-select: none;
   @media (max-width: 900px) {
     nav { padding: 1rem 1.5rem; }
     .nav-links { display: none; }
+    .nav-cta { padding: 0.45rem 0.9rem; font-size: 0.65rem; letter-spacing: 0.05em; border-radius: 16px; }
+    .nav-login { display: none; }
     #hero { grid-template-columns: 1fr; }
     .hero-image { aspect-ratio: 1 / 1; height: auto; }
     .hero-image > img.hero-static { opacity: 1; object-fit: cover; object-position: center; }
@@ -1079,6 +1081,7 @@ user-select: none;
 
   /* ── MOBILE SMALL ── */
   @media (max-width: 480px) {
+    .nav-cta { padding: 0.4rem 0.75rem; font-size: 0.6rem; }
     .hero-slide-titulo { font-size: clamp(1.8rem, 4vw, 2.5rem); }
     .hero-slide-meta span { font-size: 0.65rem; letter-spacing: 0.06em; }
     .hero-stat-num { font-size: 1.8rem; }
