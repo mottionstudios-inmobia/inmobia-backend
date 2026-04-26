@@ -11,7 +11,9 @@ import { detectarModelo, MODELOS } from '../lib/modelos.js';
 import { sendWhatsApp } from '../whatsapp.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const mascotaDir = path.join(__dirname, '../../public/uploads/mascotas');
+const mascotaDir = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'uploads/mascotas')
+  : path.join(__dirname, '../../public/uploads/mascotas');
 mkdirSync(mascotaDir, { recursive: true });
 
 const uploadMascota = multer({

@@ -12,20 +12,24 @@ import { enviarCorreoResetPassword } from '../email.js';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const uploadsDir = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'uploads')
+  : path.join(__dirname, '../../public/uploads');
+
 const storageFoto = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../../public/uploads')),
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename:    (req, file, cb) => cb(null, `asesor_${Date.now()}${path.extname(file.originalname)}`)
 });
 const uploadFoto = multer({ storage: storageFoto, limits: { fileSize: 2 * 1024 * 1024 }, fileFilter: (req, file, cb) => cb(null, /jpeg|jpg|png|webp/.test(file.mimetype)) });
 
 const storageHero = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../../public/uploads')),
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename:    (req, file, cb) => cb(null, `hero_${Date.now()}${path.extname(file.originalname)}`)
 });
 const uploadHero = multer({ storage: storageHero, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: (req, file, cb) => cb(null, /jpeg|jpg|png|webp/.test(file.mimetype)) });
 
 const storageLogo = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../../public/uploads')),
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename:    (req, file, cb) => cb(null, `logo_${Date.now()}${path.extname(file.originalname)}`)
 });
 const uploadLogo = multer({ storage: storageLogo, limits: { fileSize: 1 * 1024 * 1024 }, fileFilter: (req, file, cb) => cb(null, /jpeg|jpg|png|webp|svg/.test(file.mimetype)) });

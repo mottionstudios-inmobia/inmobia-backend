@@ -4,7 +4,11 @@ import { fileURLToPath } from 'url';
 import { mkdirSync } from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbDir  = path.join(__dirname, '../database');
+// En producción (Railway) usar volumen persistente vía DATA_DIR
+// En desarrollo local cae a ../database (mismo path histórico)
+const dbDir  = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'database')
+  : path.join(__dirname, '../database');
 const dbPath = path.join(dbDir, 'inmobia.db');
 
 // Asegurar que el directorio exista

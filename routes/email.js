@@ -16,7 +16,9 @@ const router = Router();
 const uploadMemory = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // Multer en disco para fotos de mascota (genera URLs públicas)
-const mascotaDir = path.join(__dirname, '../../public/uploads/mascotas');
+const mascotaDir = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'uploads/mascotas')
+  : path.join(__dirname, '../../public/uploads/mascotas');
 mkdirSync(mascotaDir, { recursive: true });
 const uploadMascota = multer({
   storage: multer.diskStorage({

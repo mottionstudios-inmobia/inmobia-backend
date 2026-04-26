@@ -10,7 +10,9 @@ import { db } from '../database.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const router = Router();
 
-const uploadsDir = path.join(__dirname, '../../public/uploads');
+const uploadsDir = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'uploads')
+  : path.join(__dirname, '../../public/uploads');
 
 // Multer: acepta hasta 20MB (sharp comprimirá internamente)
 const storage = multer.diskStorage({

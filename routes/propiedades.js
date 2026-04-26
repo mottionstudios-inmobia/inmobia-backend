@@ -8,10 +8,14 @@ import { authMiddleware } from '../auth.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const router = Router();
 
+const uploadsDir = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'uploads')
+  : path.join(__dirname, '../../public/uploads');
+
 // Configuración de subida de imágenes
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../public/uploads'));
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
