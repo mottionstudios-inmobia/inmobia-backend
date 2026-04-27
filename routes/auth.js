@@ -102,9 +102,14 @@ router.post('/registro-asesor', (req, res) => {
   const hash = bcrypt.hashSync(password, 10);
 
   // Crear slug único para la URL del asesor
-  const slug = nombre.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const slugBase = nombre.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+  let slug = slugBase;
+  let slugN = 2;
+  while (db.prepare('SELECT id FROM usuarios WHERE slug = ?').get(slug)) {
+    slug = slugBase + '-' + slugN++;
+  }
 
   const codigoAsesor = generarCodigoAsesor();
 

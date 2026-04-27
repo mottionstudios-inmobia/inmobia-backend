@@ -39,14 +39,11 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
   border-right: 1px solid var(--border);
 }
 .sidebar-logo {
-  padding: 1.4rem 1.4rem 1rem;
+  padding: 1.2rem 1.4rem 1rem;
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: baseline; gap: 0;
-  text-decoration: none; font-size: 0;
+  display: flex; align-items: center;
+  text-decoration: none;
 }
-.sidebar-logo .inmob { font-family: 'Comfortaa', sans-serif; font-size: 1.25rem; font-weight: 300; color: #fff; letter-spacing: 0.01em; }
-.sidebar-logo .ia    { font-family: 'Century Gothic', 'Trebuchet MS', sans-serif; font-size: 1.45rem; font-weight: 400; color: var(--gold); letter-spacing: -0.01em; line-height: 1; }
-.sidebar-logo .ia sup { font-size: 0.38em; vertical-align: super; letter-spacing: 0.05em; }
 
 /* Perfil compacto en sidebar */
 .sidebar-profile {
@@ -985,7 +982,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
   .sidebar { width: 60px; }
   .sidebar .inmob, .sidebar .ia, .sidebar-profile-name, .sidebar-profile-plan,
   .sidebar-stars, .nav-item span, .nav-badge, .nav-section, .btn-logout span,
-  .sidebar-logo .inmob, .sidebar-logo .ia { display: none; }
+  .sidebar-logo-img { display: none; }
   /* Avatar centrado en sidebar colapsado */
   .sidebar-profile { padding: 0.6rem 0; display: flex; justify-content: center; align-items: center; }
   .sb-profile-inner { gap: 0 !important; justify-content: center; }
@@ -1407,7 +1404,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <a href="/index.html" class="sidebar-logo">
-    <span class="inmob">Inmob</span><span class="ia">IA<sup>GT</sup></span>
+    <img src="/logo-inmobia-home.svg" alt="InmobIA" class="sidebar-logo-img" style="height:48px;width:auto;display:block;max-width:100%">
   </a>
   <div class="sidebar-profile">
     <div class="sb-profile-inner" style="display:flex;align-items:center;gap:0.75rem">
@@ -1494,7 +1491,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
     <div class="topbar-actions">
       <div class="topbar-url" id="topbar-url" onclick="copiarPortalUrl()" title="Copiar enlace de mi portal">
         <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-        <span id="topbar-url-text">inmobia.com/asesor/...</span>
+        <span id="topbar-url-text">inmobia.site/asesor/...</span>
       </div>
       <div class="topbar-notif">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
@@ -1511,13 +1508,15 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
     <!-- ═══════════ DASHBOARD ═══════════ -->
     <section id="s-dashboard" class="section active">
       <div class="page-header">
-        <h1><span id="dash-saludo">Bienvenido</span>, <span id="dash-nombre">Asesor</span> 👋</h1>
+        <h1><span id="dash-saludo">Bienvenido</span>, <span id="dash-nombre">Asesor</span></h1>
         <p>Aquí tiene el resumen de su actividad en InmobIA</p>
       </div>
 
       <!-- Banner primer mes (se muestra/oculta via JS) -->
       <div id="banner-primer-mes" style="display:none;margin-bottom:1.25rem;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#1e3a5f 0%,#0ea5e9 100%);padding:1.1rem 1.5rem;display:flex;align-items:center;gap:1.25rem;position:relative">
-        <div style="font-size:2rem;flex-shrink:0">🚀</div>
+        <div style="width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        </div>
         <div style="flex:1;min-width:0">
           <div style="font-weight:800;font-size:0.95rem;color:#fff;margin-bottom:0.25rem">Beneficio exclusivo de bienvenida — Primer mes</div>
           <div style="font-size:0.8rem;color:rgba(255,255,255,0.85);line-height:1.5">
@@ -1588,12 +1587,14 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
             </div>
           </div>
         </div>
-        <div class="metric-card purple" onclick="irA('perfil')" style="cursor:pointer" title="Ver mi perfil">
-          <div class="metric-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-          <div class="metric-label">Mi Score</div>
+        <div class="metric-card purple" style="cursor:default" title="Mi Score">
+          <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.1rem">
+            <div class="metric-icon" style="margin:0;width:20px;height:20px"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            <div class="metric-label" style="margin:0">Mi Score</div>
+          </div>
           <div class="metric-value" id="m-score">3.0</div>
           <div class="score-stars" id="m-stars"></div>
-          <button onclick="abrirModalScoreAcciones()" style="margin-top:0.5rem;font-size:0.7rem;font-weight:600;color:#8b5cf6;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:6px;padding:0.3rem 0.7rem;cursor:pointer;width:100%;text-align:center">¿Cómo subir mi score? →</button>
+          <button onclick="abrirModalScoreAcciones()" style="margin-top:0.75rem;font-size:0.78rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#6d28d9,#8b5cf6);border:none;border-radius:8px;padding:0.5rem 0.85rem;cursor:pointer;width:100%;text-align:center;box-shadow:0 2px 8px rgba(109,40,217,0.35);letter-spacing:0.01em;transition:opacity 0.15s;display:flex;align-items:center;justify-content:center;gap:0.35rem" onmouseenter="this.style.opacity='0.88'" onmouseleave="this.style.opacity='1'"><svg viewBox="0 0 24 24" width="13" height="13" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ¿Cómo subir mi score?</button>
         </div>
       </div>
 
@@ -1670,44 +1671,52 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
       <div class="grid-2">
         <!-- Leads recientes -->
         <div class="card">
-          <div class="card-header">
+          <div class="card-header" onclick="toggleAcordion('leads-recientes-body','leads-recientes-chevron')" style="cursor:pointer;user-select:none">
             <h3>Leads recientes</h3>
-            <button class="btn-sm" onclick="irA('crm')">Ver todos →</button>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="btn-sm" onclick="event.stopPropagation();irA('crm')">Ver todos →</button>
+              <svg id="leads-recientes-chevron" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
           </div>
-          <div class="card-body" style="padding:0 1.4rem" id="leads-recientes">
-            <div class="empty-state">
-              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-              <h4>Sin leads aún</h4>
-              <p>Cuando InmobIA le asigne un lead aparecerá aquí</p>
+          <div id="leads-recientes-body" style="display:none">
+            <div class="card-body" style="padding:0 1.4rem" id="leads-recientes">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                <h4>Sin leads aún</h4>
+                <p>Cuando reciba un contacto desde su portal aparecerá aquí</p>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Actividad reciente -->
         <div class="card">
-          <div class="card-header">
+          <div class="card-header" onclick="toggleAcordion('actividad-reciente-body','actividad-reciente-chevron')" style="cursor:pointer;user-select:none">
             <h3>Actividad reciente</h3>
+            <svg id="actividad-reciente-chevron" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-          <div class="card-body" style="padding:0.5rem 1.4rem">
-            <div class="actividad-item">
-              <div class="actividad-dot" style="background:#8b5cf6"></div>
-              <div>
-                <div class="actividad-texto">Cuenta creada exitosamente en InmobIA</div>
-                <div class="actividad-hora">Hoy</div>
+          <div id="actividad-reciente-body" style="display:none">
+            <div class="card-body" style="padding:0.5rem 1.4rem">
+              <div class="actividad-item">
+                <div class="actividad-dot" style="background:#8b5cf6"></div>
+                <div>
+                  <div class="actividad-texto">Cuenta creada exitosamente en InmobIA</div>
+                  <div class="actividad-hora">Hoy</div>
+                </div>
               </div>
-            </div>
-            <div class="actividad-item">
-              <div class="actividad-dot" style="background:var(--gold)"></div>
-              <div>
-                <div class="actividad-texto">Score inicial asignado: <strong>3.0★</strong> — neutral, no penalizado</div>
-                <div class="actividad-hora">Hoy</div>
+              <div class="actividad-item">
+                <div class="actividad-dot" style="background:var(--gold)"></div>
+                <div>
+                  <div class="actividad-texto">Score inicial asignado: <strong>0.0★</strong> — comienza con actividad</div>
+                  <div class="actividad-hora">Hoy</div>
+                </div>
               </div>
-            </div>
-            <div class="actividad-item">
-              <div class="actividad-dot" style="background:var(--success)"></div>
-              <div>
-                <div class="actividad-texto">Portal de asesor creado — comparta su URL para recibir clientes</div>
-                <div class="actividad-hora">Hoy</div>
+              <div class="actividad-item">
+                <div class="actividad-dot" style="background:var(--success)"></div>
+                <div>
+                  <div class="actividad-texto">Portal de asesor creado — comparta su URL para recibir clientes</div>
+                  <div class="actividad-hora">Hoy</div>
+                </div>
               </div>
             </div>
           </div>
@@ -1715,28 +1724,38 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
       </div>
 
       <!-- Próximos pasos -->
-      <div class="card" style="margin-top:1.1rem">
-        <div class="card-header"><h3>🚀 Próximos pasos para cerrar su primer negocio</h3></div>
-        <div class="card-body">
-          <div class="three-col-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
-            <div style="padding:1rem;background:#f8f9fc;border-radius:8px;border:1px solid #e2e6f0">
-              <div style="font-size:1.5rem;margin-bottom:0.5rem">1️⃣</div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--charcoal);margin-bottom:0.3rem">Complete su perfil</div>
-              <div style="font-size:0.74rem;color:var(--text-muted)">Agregue foto, bio y zonas de trabajo para generar confianza</div>
-              <button class="btn-sm btn-primary" style="margin-top:0.75rem;font-size:0.72rem" onclick="irA('perfil')">Ir a perfil →</button>
-            </div>
-            <div style="padding:1rem;background:#f8f9fc;border-radius:8px;border:1px solid #e2e6f0">
-              <div style="font-size:1.5rem;margin-bottom:0.5rem">2️⃣</div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--charcoal);margin-bottom:0.3rem">Publique su primera propiedad</div>
-              <div style="font-size:0.74rem;color:var(--text-muted)">Active el toggle "En InmobIA" para que aparezca en el buscador</div>
-              <button class="btn-sm btn-primary" style="margin-top:0.75rem;font-size:0.72rem" onclick="irA('propiedades')">Mis propiedades →</button>
-            </div>
-            <div style="padding:1rem;background:#f8f9fc;border-radius:8px;border:1px solid #e2e6f0">
-              <div style="font-size:1.5rem;margin-bottom:0.5rem">3️⃣</div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--charcoal);margin-bottom:0.3rem">Impulsa tu score</div>
-              <div style="font-size:0.74rem;color:var(--text-muted)">Genera más credibilidad con tus próximos clientes con un score alto</div>
-              <button class="btn-sm btn-primary" style="margin-top:0.75rem;font-size:0.72rem" onclick="irA('perfil')">Ir a Score →</button>
-            </div>
+      <div style="margin-top:1.1rem;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#1e1b4b 100%);border-radius:14px;padding:1.75rem 1.5rem;position:relative;overflow:hidden">
+        <!-- Decoración de fondo -->
+        <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none"></div>
+        <div style="position:absolute;bottom:-70px;left:-30px;width:240px;height:240px;background:rgba(255,255,255,0.03);border-radius:50%;pointer-events:none"></div>
+        <!-- Encabezado -->
+        <div style="margin-bottom:1.35rem;position:relative">
+          <div style="font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:0.3rem">Guía de inicio</div>
+          <h3 style="margin:0;font-size:1.08rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:0.5rem"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Próximos pasos para cerrar su primer negocio</h3>
+          <p style="margin:0.3rem 0 0;font-size:0.76rem;color:rgba(255,255,255,0.55)">Completar estos 3 pasos aumenta hasta 3× sus posibilidades de recibir leads calificados</p>
+        </div>
+        <!-- Pasos -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;position:relative">
+          <!-- Paso 1 -->
+          <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.15rem">
+            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:800;color:#fff;margin-bottom:0.8rem;box-shadow:0 3px 10px rgba(59,130,246,0.45)">1</div>
+            <div style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.3rem">Complete su perfil</div>
+            <div style="font-size:0.73rem;color:rgba(255,255,255,0.58);line-height:1.5;margin-bottom:1rem">Foto, bio y zonas de trabajo. Los clientes confían 3× más en asesores con perfil completo.</div>
+            <button onclick="irA('perfil')" style="font-size:0.76rem;font-weight:700;color:#fff;background:rgba(59,130,246,0.28);border:1px solid rgba(59,130,246,0.55);border-radius:8px;padding:0.5rem 0.8rem;cursor:pointer;width:100%;text-align:center;transition:background 0.15s" onmouseenter="this.style.background='rgba(59,130,246,0.5)'" onmouseleave="this.style.background='rgba(59,130,246,0.28)'">Ir a mi perfil →</button>
+          </div>
+          <!-- Paso 2 -->
+          <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.15rem">
+            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:800;color:#fff;margin-bottom:0.8rem;box-shadow:0 3px 10px rgba(16,185,129,0.45)">2</div>
+            <div style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.3rem">Publique su primera propiedad</div>
+            <div style="font-size:0.73rem;color:rgba(255,255,255,0.58);line-height:1.5;margin-bottom:1rem">Active el toggle "En InmobIA" y su propiedad aparece en el buscador — empieza a generar leads al instante.</div>
+            <button onclick="irA('propiedades')" style="font-size:0.76rem;font-weight:700;color:#fff;background:rgba(16,185,129,0.28);border:1px solid rgba(16,185,129,0.55);border-radius:8px;padding:0.5rem 0.8rem;cursor:pointer;width:100%;text-align:center;transition:background 0.15s" onmouseenter="this.style.background='rgba(16,185,129,0.5)'" onmouseleave="this.style.background='rgba(16,185,129,0.28)'">Subir propiedad →</button>
+          </div>
+          <!-- Paso 3 -->
+          <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.15rem">
+            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:800;color:#fff;margin-bottom:0.8rem;box-shadow:0 3px 10px rgba(139,92,246,0.45)">3</div>
+            <div style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.3rem">Impulse su score</div>
+            <div style="font-size:0.73rem;color:rgba(255,255,255,0.58);line-height:1.5;margin-bottom:1rem">Un score alto le da más leads, prioridad en la red y mayor credibilidad ante los clientes.</div>
+            <button onclick="abrirModalScoreAcciones()" style="font-size:0.76rem;font-weight:700;color:#fff;background:rgba(139,92,246,0.28);border:1px solid rgba(139,92,246,0.55);border-radius:8px;padding:0.5rem 0.8rem;cursor:pointer;width:100%;text-align:center;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:0.35rem" onmouseenter="this.style.background='rgba(139,92,246,0.5)'" onmouseleave="this.style.background='rgba(139,92,246,0.28)'"><svg viewBox="0 0 24 24" width="13" height="13" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Subir mi score →</button>
           </div>
         </div>
       </div>
@@ -1754,7 +1773,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
         <div class="perfil-url-box" style="flex:1;margin-bottom:0">
           <div>
             <div class="perfil-url-label">Su URL de portal</div>
-            <div class="perfil-url-value" id="perfil-url-display">inmobia.com/asesor/...</div>
+            <div class="perfil-url-value" id="perfil-url-display">inmobia.site/asesor/...</div>
           </div>
           <button class="btn-copy" onclick="copiarPortalUrl()">Copiar enlace</button>
         </div>
@@ -2944,7 +2963,7 @@ Cada propiedad incluye un código estructurado que permite identificar fácilmen
               <div class="portal-preview-icon">🏠</div>
               <div style="font-size:0.9rem;font-weight:600;color:var(--charcoal);margin-bottom:0.35rem">Su portal personal en InmobIA</div>
               <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem">Sus propiedades, perfil y formulario de contacto directo — sin comisión</div>
-              <div class="portal-preview-url" id="portal-url-display" onclick="copiarPortalUrl()">inmobia.com/asesor/...</div>
+              <div class="portal-preview-url" id="portal-url-display" onclick="copiarPortalUrl()">inmobia.site/asesor/...</div>
               <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
                 <button class="btn-sm btn-gold" onclick="verPortal()">
                   <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -3149,7 +3168,7 @@ Cada propiedad incluye un código estructurado que permite identificar fácilmen
           <div class="plan-price">Q0</div>
           <div class="plan-period">Siempre gratis — sin tarjeta</div>
           <ul class="plan-features">
-            <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Portal personal inmobia.com/asesor/nombre</li>
+            <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Portal personal inmobia.site/asesor/nombre</li>
             <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Publicación <strong>ilimitada</strong> de propiedades</li>
             <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>CRM + pipeline de leads</li>
             <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Formularios y agendamiento</li>
@@ -4781,9 +4800,9 @@ function actualizarUI() {
   const nombre = asesor.nombre || 'Asesor';
   const inicial = nombre.charAt(0).toUpperCase();
   const slug    = asesor.slug || nombre.toLowerCase().replace(/\s+/g, '-');
-  const score   = parseFloat(asesor.score) || 3.0;
+  const score   = parseFloat(asesor.score) || 0;
   const plan    = asesor.plan || 'gratis';
-  const portalUrl = `inmobia.com/asesor/${slug}`;
+  const portalUrl = `inmobia.site/asesor/${slug}`;
 
   // Sidebar — poner inicial primero (antes de que la foto reemplace el span)
   const sbInicial = document.getElementById('sb-inicial');
@@ -7068,6 +7087,15 @@ function renderCierresMes(leads) {
   });
 
   document.getElementById('cierres-mes-periodo').textContent = `${meses[ahora.getMonth()]} ${ahora.getFullYear()}`;
+}
+
+function toggleAcordion(bodyId, chevronId) {
+  const body = document.getElementById(bodyId);
+  const chevron = document.getElementById(chevronId);
+  if (!body) return;
+  const abierto = body.style.display !== 'none';
+  body.style.display = abierto ? 'none' : 'block';
+  if (chevron) chevron.style.transform = abierto ? '' : 'rotate(180deg)';
 }
 
 function toggleCierresMes() {
@@ -11937,7 +11965,7 @@ function mostrarCelebracionScore(scoreNuevo, scoreDelta, accion = 'default') {
 }
 
 function abrirModalScoreAcciones() {
-  const score = parseFloat(asesor?.score) || 3.0;
+  const score = parseFloat(asesor?.score) || 0;
   const el = document.getElementById('modal-score-val');
   if (el) el.textContent = score.toFixed(1);
   const stars = document.getElementById('modal-score-stars');
