@@ -14,6 +14,18 @@ export async function enviarEmail({ to, subject, html, attachments }) {
   if (error) throw new Error(error.message || JSON.stringify(error));
 }
 
+// Shim compatible con nodemailer para archivos que aún usan crearTransporter()
+export function crearTransporter() {
+  return {
+    verify: async () => true,
+    sendMail: async ({ to, subject, html, attachments: adj }) => {
+      const adjResend = adj?.map(a => ({ filename: a.filename, content: a.content || a.path }));
+      await enviarEmail({ to, subject, html, attachments: adjResend?.length ? adjResend : undefined });
+      return { messageId: 'resend-ok' };
+    },
+  };
+}
+
 // HTML del correo principal (todos los datos)
 export function htmlCorreoPrincipal(datos) {
   const { codigo, url_propiedad, ...resto } = datos;
