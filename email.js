@@ -705,6 +705,67 @@ export async function enviarCorreoResetPassword({ email, nombre, linkReset }) {
   }
 }
 
+export async function enviarCorreoBienvenidaAsesor({ email, nombre, slug }) {
+  if (!email) return { ok: false, error: 'sin email' };
+  const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
+  const linkPanel = `${BASE_URL}/panel-asesor.html`;
+  const linkPortal = `${BASE_URL}/asesor/${slug}`;
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f0ede8;font-family:Arial,sans-serif">
+  <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <div style="background:#1e2d4a;border-top:4px solid #c9a84c">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        <td style="padding:28px 32px;vertical-align:middle">
+          <h1 style="margin:0;color:#fff;font-size:1.3rem;font-weight:600;font-family:Arial,sans-serif">¡Bienvenido a Inmobia, ${nombre}!</h1>
+          <p style="margin:6px 0 0;color:rgba(255,255,255,0.6);font-size:0.85rem">Tu cuenta de asesor está activa</p>
+        </td>
+        <td style="padding:28px 32px 28px 0;vertical-align:middle;text-align:right;white-space:nowrap">
+          <span style="font-family:'Comfortaa',Arial,sans-serif;font-size:1.7rem;font-weight:300;color:#fff">Inmob</span><span style="font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;font-size:1.9rem;font-weight:400;color:#c9a84c">IA</span>
+        </td>
+      </tr></table>
+    </div>
+    <div style="padding:32px">
+      <p style="margin:0 0 20px;font-size:0.95rem;color:#333;line-height:1.6">Hola <strong>${nombre}</strong>, ya eres parte de la red inmobiliaria más inteligente de Guatemala. Tu portal personal ya está disponible para que empieces a publicar propiedades y recibir leads.</p>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:28px">
+        <tr>
+          <td style="padding:14px 16px;background:#f4f6fb;border-radius:8px 8px 0 0;border-bottom:1px solid #e5e2da">
+            <p style="margin:0;font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.05em">Tu portal personal</p>
+            <a href="${linkPortal}" style="color:#1e2d4a;font-weight:600;font-size:0.95rem;text-decoration:none">${linkPortal}</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:14px 16px;background:#f4f6fb;border-radius:0 0 8px 8px">
+            <p style="margin:0;font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.05em">Tu panel de trabajo</p>
+            <a href="${linkPanel}" style="color:#c9a84c;font-weight:600;font-size:0.95rem;text-decoration:none">${linkPanel}</a>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:0 0 12px;font-size:0.9rem;color:#444;font-weight:600">Primeros pasos recomendados:</p>
+      <table style="width:100%;border-collapse:collapse;font-size:0.88rem">
+        <tr><td style="padding:8px 12px;color:#444;border-bottom:1px solid #f0ede8">1. Completa tu perfil con foto y bio</td></tr>
+        <tr><td style="padding:8px 12px;color:#444;border-bottom:1px solid #f0ede8">2. Sube tu primera propiedad con galería</td></tr>
+        <tr><td style="padding:8px 12px;color:#444;border-bottom:1px solid #f0ede8">3. Activa la publicación en Inmobia para recibir leads</td></tr>
+        <tr><td style="padding:8px 12px;color:#444">4. Comparte tu portal con tus clientes</td></tr>
+      </table>
+    </div>
+    <div style="background:#1e2d4a;padding:20px 32px;text-align:center">
+      <a href="${linkPanel}" style="display:inline-block;background:#c9a84c;color:#fff;font-weight:600;font-size:0.95rem;padding:12px 32px;border-radius:6px;text-decoration:none">Ir a mi panel →</a>
+    </div>
+    <div style="background:#f4f6fb;padding:14px 32px;text-align:center;font-size:0.75rem;color:#999;border-top:1px solid #e5e2da">
+      InmobIA · Este correo fue generado automáticamente · <a href="${BASE_URL}/terminos.html" style="color:#999">Términos y condiciones</a>
+    </div>
+  </div>
+</body></html>`;
+  try {
+    await enviarEmail({ to: email, subject: '¡Bienvenido a Inmobia! Tu cuenta está activa', html });
+    return { ok: true };
+  } catch (err) {
+    console.error('⚠️  Error enviando bienvenida a', email, '→', err.message);
+    return { ok: false, error: err.message };
+  }
+}
+
 // Mapeo de claves a etiquetas legibles
 function etiqueta(clave) {
   const mapa = {

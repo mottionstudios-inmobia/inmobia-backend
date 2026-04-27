@@ -8,7 +8,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { db } from '../database.js';
 import { generarToken, authMiddleware } from '../auth.js';
-import { enviarCorreoResetPassword } from '../email.js';
+import { enviarCorreoResetPassword, enviarCorreoBienvenidaAsesor } from '../email.js';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -137,6 +137,11 @@ router.post('/registro-asesor', (req, res) => {
 
   const usuario = { id: resultado.lastInsertRowid, nombre, email, rol: 'asesor' };
   const token = generarToken(usuario);
+
+  enviarCorreoBienvenidaAsesor({ email, nombre, slug }).catch(e =>
+    console.error('⚠️  Bienvenida no enviada:', e.message)
+  );
+
   res.status(201).json({ token, usuario });
 });
 
