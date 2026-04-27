@@ -113,6 +113,24 @@ app.use('/api/requerimientos', requerimientosRouter);
 app.use('/api/pagos', pagosRouter);
 app.use('/api/settings', settingsRouter);
 
+// TEMPORAL: test SMTP — eliminar después
+import { crearTransporter } from './email.js';
+app.get('/api/test-email', async (req, res) => {
+  try {
+    const t = crearTransporter();
+    await t.verify();
+    await t.sendMail({
+      from: `"InmobIA test" <${process.env.SMTP_USER}>`,
+      to: process.env.SMTP_USER,
+      subject: 'Test SMTP InmobIA',
+      text: 'Si ves este correo, el SMTP funciona correctamente.',
+    });
+    res.json({ ok: true, msg: 'Correo enviado a ' + process.env.SMTP_USER });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message, code: err.code });
+  }
+});
+
 // Manejador global de errores — siempre devuelve JSON
 app.use((err, _req, res, _next) => {
   console.error('Error no manejado:', err.message);
