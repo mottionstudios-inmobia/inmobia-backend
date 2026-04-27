@@ -861,16 +861,4 @@ router.get('/mis-calificaciones', authMiddleware, (req, res) => {
   res.json({ calificaciones, total, promedio, distribucion, topRazones });
 });
 
-// ── TEMPORAL: forzar contraseña por secret ────────────────────
-// ELIMINAR después de usar
-router.post('/dev-reset-pw', (req, res) => {
-  const { secret, email, newPassword } = req.body;
-  if (secret !== 'INMOBIA_DEVFIX_2026') return res.status(403).json({ error: 'Forbidden' });
-  if (!email || !newPassword) return res.status(400).json({ error: 'Faltan datos' });
-  const hash = bcrypt.hashSync(newPassword, 10);
-  const r = db.prepare('UPDATE usuarios SET password = ? WHERE LOWER(email) = LOWER(?)').run(hash, email);
-  if (r.changes === 0) return res.status(404).json({ error: 'Email no encontrado' });
-  res.json({ ok: true, updated: r.changes });
-});
-
 export default router;
