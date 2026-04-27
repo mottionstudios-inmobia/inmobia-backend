@@ -5,7 +5,7 @@ import path from 'path';
 import 'dotenv/config';
 
 const resend = new Resend(process.env.RESEND_KEY);
-const FROM = 'InmobIA <onboarding@resend.dev>';
+const FROM = 'InmobIA <noreply@inmobia.site>';
 
 export async function enviarEmail({ to, subject, html, attachments }) {
   const payload = { from: FROM, to: Array.isArray(to) ? to : [to], subject, html };
