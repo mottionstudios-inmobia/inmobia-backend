@@ -766,6 +766,20 @@ router.get('/admin/asesores/:id', (req, res) => {
   } catch { res.status(401).json({ error: 'Token inválido' }); }
 });
 
+// DELETE /api/auth/admin/asesores/:id
+router.delete('/admin/asesores/:id', (req, res) => {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET || 'inmobia_secret_2024');
+    const admin = db.prepare('SELECT rol FROM usuarios WHERE id = ?').get(decoded.id);
+    if (!admin || admin.rol !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+    const r = db.prepare('DELETE FROM usuarios WHERE id = ? AND rol = ?').run(req.params.id, 'asesor');
+    if (r.changes === 0) return res.status(404).json({ error: 'Asesor no encontrado' });
+    res.json({ ok: true });
+  } catch { res.status(401).json({ error: 'Token inválido' }); }
+});
+
 // PATCH /api/auth/admin/asesores/:id/plan
 router.patch('/admin/asesores/:id/plan', (req, res) => {
   const auth = req.headers.authorization;
@@ -787,7 +801,7 @@ router.post('/solicitar-reset', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email requerido' });
 
-  const usuario = db.prepare("SELECT id, nombre, email FROM usuarios WHERE LOWER(email) = LOWER(?)").get(email.trim());
+  const usuario = db.prepare("SELECT id, nombre, email, rol FROM usuarios WHERE LOWER(email) = LOWER(?)").get(email.trim());
   // Responder siempre OK para no revelar si el email existe
   if (!usuario) return res.json({ ok: true });
 
@@ -799,7 +813,8 @@ router.post('/solicitar-reset', async (req, res) => {
   db.prepare("INSERT INTO password_resets (email, token, expira_en) VALUES (?, ?, ?)").run(usuario.email.toLowerCase(), token, expira);
 
   const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
-  const linkReset = `${BASE_URL}/asesores.html?accion=reset-password&token=${token}`;
+  const pagina = usuario.rol === 'admin' ? 'admin.html' : 'asesores.html';
+  const linkReset = `${BASE_URL}/${pagina}?token=${token}`;
 
   const r = await enviarCorreoResetPassword({ email: usuario.email, nombre: usuario.nombre, linkReset });
   if (r.ok) console.log('📧 Correo de reset enviado a', usuario.email);
