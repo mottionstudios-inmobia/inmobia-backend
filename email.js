@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import 'dotenv/config';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_KEY);
 const FROM = 'InmobIA <onboarding@resend.dev>';
 
 export async function enviarEmail({ to, subject, html, attachments }) {
