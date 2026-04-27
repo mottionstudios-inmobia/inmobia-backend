@@ -2,7 +2,8 @@ import { Router } from 'express';
 import multer from 'multer';
 import { db } from '../database.js';
 import { authMiddleware } from '../auth.js';
-import { crearTransporter, htmlCorreoPrincipal, htmlCorreoSuscriptor } from '../email.js';
+import { enviarEmail, htmlCorreoPrincipal, htmlCorreoSuscriptor } from '../email.js';
+import { readFileSync } from 'fs';
 import 'dotenv/config';
 
 import path from 'path';
@@ -34,41 +35,20 @@ router.post('/formulario', async (req, res) => {
 
   const datos = { nombre, telefono, email, propiedad, proyecto, zona, dias, horario, dia_hora, comentario, codigo, url_propiedad };
 
-  console.log('📧 Intento de envío de correo a:', process.env.SMTP_USER, '| Pass cargado:', !!process.env.SMTP_PASS);
-
   try {
-    const transporter = crearTransporter();
-
-    // Verificar conexión SMTP
-    await transporter.verify();
-    console.log('✅ Conexión SMTP verificada');
-
-    // 1. Correo al email principal
     const emailPrincipal = db.prepare("SELECT valor FROM config_email WHERE clave = 'email_principal'").get()?.valor
       || process.env.EMAIL_PRINCIPAL;
 
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: emailPrincipal,
-      subject: `Nueva solicitud de visita — ${propiedad || 'Propiedad'}`,
-      html: htmlCorreoPrincipal(datos),
-    });
+    await enviarEmail({ to: emailPrincipal, subject: `Nueva solicitud de visita — ${propiedad || 'Propiedad'}`, html: htmlCorreoPrincipal(datos) });
 
-    // 2. Correos a suscriptores activos
     const suscriptores = db.prepare('SELECT email FROM suscriptores_email WHERE activo = 1').all();
     if (suscriptores.length) {
       const camposRaw = db.prepare("SELECT valor FROM config_email WHERE clave = 'campos_suscriptores'").get()?.valor;
       const camposPermitidos = camposRaw ? JSON.parse(camposRaw) : [];
       const mensajePersonalizado = db.prepare("SELECT valor FROM config_email WHERE clave = 'mensaje_personalizado'").get()?.valor || '';
-
       const htmlSusc = htmlCorreoSuscriptor(datos, camposPermitidos, mensajePersonalizado);
       for (const { email: dest } of suscriptores) {
-        await transporter.sendMail({
-          from: `"InmobIA" <${process.env.SMTP_USER}>`,
-          to: dest,
-          subject: `Solicitud de visita — ${propiedad || 'Propiedad'}`,
-          html: htmlSusc,
-        });
+        await enviarEmail({ to: dest, subject: `Solicitud de visita — ${propiedad || 'Propiedad'}`, html: htmlSusc });
       }
     }
 
@@ -131,7 +111,6 @@ router.post('/busqueda', uploadMascota.array('fotos', 10), async (req, res) => {
 </body></html>`;
 
   try {
-    const transporter = crearTransporter();
     const emailPrincipal = db.prepare("SELECT valor FROM config_email WHERE clave = 'email_principal'").get()?.valor
       || process.env.EMAIL_PRINCIPAL;
 
@@ -140,17 +119,10 @@ router.post('/busqueda', uploadMascota.array('fotos', 10), async (req, res) => {
 
     const adjuntos = (req.files || []).map(f => ({
       filename: f.originalname,
-      path: f.path,
-      contentType: f.mimetype,
+      content: readFileSync(f.path).toString('base64'),
     }));
 
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: emailPrincipal,
-      subject: `Nueva búsqueda personalizada — ${nombre || 'Cliente'}`,
-      html,
-      attachments: adjuntos,
-    });
+    await enviarEmail({ to: emailPrincipal, subject: `Nueva búsqueda personalizada — ${nombre || 'Cliente'}`, html, attachments: adjuntos.length ? adjuntos : undefined });
 
     res.json({ ok: true, fotosUrls });
   } catch (err) {

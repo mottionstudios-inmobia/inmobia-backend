@@ -1,18 +1,17 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import 'dotenv/config';
 
-// Transporter con Gmail SMTP
-export function crearTransporter() {
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM = 'InmobIA <onboarding@resend.dev>';
+
+export async function enviarEmail({ to, subject, html, attachments }) {
+  const payload = { from: FROM, to: Array.isArray(to) ? to : [to], subject, html };
+  if (attachments?.length) payload.attachments = attachments;
+  const { error } = await resend.emails.send(payload);
+  if (error) throw new Error(error.message || JSON.stringify(error));
 }
 
 // HTML del correo principal (todos los datos)
@@ -201,13 +200,7 @@ export function htmlCorreoBienvenidaPremium({ nombre, monto = 'Q399.00', moneda 
 export async function enviarCorreoBienvenidaPremium({ email, nombre, monto, moneda, renovacionISO, checkoutId }) {
   if (!email) return { ok: false, error: 'sin email' };
   try {
-    const transporter = crearTransporter();
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: '¡Bienvenido a Premium InmobIA! — Pago confirmado',
-      html: htmlCorreoBienvenidaPremium({ nombre, monto, moneda, renovacionISO, checkoutId }),
-    });
+    await enviarEmail({ to: email, subject: '¡Bienvenido a Premium InmobIA! — Pago confirmado', html: htmlCorreoBienvenidaPremium({ nombre, monto, moneda, renovacionISO, checkoutId }) });
     return { ok: true };
   } catch (err) {
     console.error('⚠️  Error enviando correo Premium a', email, '→', err.message);
@@ -312,13 +305,7 @@ export async function enviarCorreoVerificacionCierre({ email, nombreCliente, nom
   const accion = esRenta ? 'tu renta' : 'tu compra';
   const asunto = `¡Felicitaciones por tu ${articulo} ${sustantivo}! — Confirma ${accion}`;
   try {
-    const transporter = crearTransporter();
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: asunto,
-      html: htmlCorreoVerificacionCierre({ nombreCliente, nombreAsesor, propiedadTitulo, valorCierre, moneda, linkPanel, tipoOperacion, tipoPropiedad }),
-    });
+    await enviarEmail({ to: email, subject: asunto, html: htmlCorreoVerificacionCierre({ nombreCliente, nombreAsesor, propiedadTitulo, valorCierre, moneda, linkPanel, tipoOperacion, tipoPropiedad }) });
     return { ok: true };
   } catch (err) {
     console.error('⚠️  Error enviando correo verificación cierre a', email, '→', err.message);
@@ -402,13 +389,7 @@ export function htmlCorreoComisionAsesor({ nombreAsesor, nombreCliente, propieda
 export async function enviarCorreoComisionAsesor({ email, nombreAsesor, nombreCliente, propiedadTitulo, valorCierre, comisionInmobia, moneda, linkPago, diasPlazo }) {
   if (!email) return { ok: false, error: 'sin email' };
   try {
-    const transporter = crearTransporter();
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: `Cierre confirmado — cobro de comisión InmobIA`,
-      html: htmlCorreoComisionAsesor({ nombreAsesor, nombreCliente, propiedadTitulo, valorCierre, comisionInmobia, moneda, linkPago, diasPlazo }),
-    });
+    await enviarEmail({ to: email, subject: `Cierre confirmado — cobro de comisión InmobIA`, html: htmlCorreoComisionAsesor({ nombreAsesor, nombreCliente, propiedadTitulo, valorCierre, comisionInmobia, moneda, linkPago, diasPlazo }) });
     return { ok: true };
   } catch (err) {
     console.error('⚠️  Error enviando correo comisión a', email, '→', err.message);
@@ -473,13 +454,7 @@ export function htmlCorreoCierreConfirmado1D({ nombreAsesor, nombreCliente, prop
 export async function enviarCorreoCierreConfirmado1D({ email, nombreAsesor, nombreCliente, propiedadTitulo, valorCierre, comisionAsesor, moneda }) {
   if (!email) return { ok: false, error: 'sin email' };
   try {
-    const transporter = crearTransporter();
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: `¡Cierre confirmado! Tu comisión está en proceso`,
-      html: htmlCorreoCierreConfirmado1D({ nombreAsesor, nombreCliente, propiedadTitulo, valorCierre, comisionAsesor, moneda }),
-    });
+    await enviarEmail({ to: email, subject: `¡Cierre confirmado! Tu comisión está en proceso`, html: htmlCorreoCierreConfirmado1D({ nombreAsesor, nombreCliente, propiedadTitulo, valorCierre, comisionAsesor, moneda }) });
     return { ok: true };
   } catch (err) {
     console.error('⚠️  Error enviando correo cierre 1D a', email, '→', err.message);
@@ -546,13 +521,7 @@ export function htmlCorreoPagoProgramado1D({ nombreAsesor, propiedadTitulo, comi
 export async function enviarCorreoPagoProgramado1D({ email, nombreAsesor, propiedadTitulo, comisionAsesor, moneda, fechaPago, referencia, notas }) {
   if (!email) return { ok: false, error: 'sin email' };
   try {
-    const transporter = crearTransporter();
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: `Tu pago está programado — InmobIA`,
-      html: htmlCorreoPagoProgramado1D({ nombreAsesor, propiedadTitulo, comisionAsesor, moneda, fechaPago, referencia, notas }),
-    });
+    await enviarEmail({ to: email, subject: `Tu pago está programado — InmobIA`, html: htmlCorreoPagoProgramado1D({ nombreAsesor, propiedadTitulo, comisionAsesor, moneda, fechaPago, referencia, notas }) });
     return { ok: true };
   } catch (err) {
     console.error('⚠️  Error enviando correo pago programado a', email, '→', err.message);
@@ -588,13 +557,7 @@ export async function enviarCorreoVisitaConfirmada5RA({ email, nombreCliente, no
   </div>
 </body></html>`;
   try {
-    const transporter = crearTransporter();
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: `Tu visita está confirmada — ${propiedadTitulo || 'InmobIA'}`,
-      html,
-    });
+    await enviarEmail({ to: email, subject: `Tu visita está confirmada — ${propiedadTitulo || 'InmobIA'}`, html });
     return { ok: true };
   } catch (err) {
     console.error('⚠️  Error enviando correo visita 5RA a', email, '→', err.message);
@@ -657,13 +620,7 @@ export function htmlCorreoSolicitarCalificacion({ nombreCliente, nombreAsesor, p
 export async function enviarCorreoSolicitarCalificacion({ email, nombreCliente, nombreAsesor, propiedadTitulo, linkCalificar }) {
   if (!email) return { ok: false, error: 'sin email' };
   try {
-    const transporter = crearTransporter();
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: `¿Cómo te fue? Califica tu visita con ${nombreAsesor || 'el asesor'}`,
-      html: htmlCorreoSolicitarCalificacion({ nombreCliente, nombreAsesor, propiedadTitulo, linkCalificar }),
-    });
+    await enviarEmail({ to: email, subject: `¿Cómo te fue? Califica tu visita con ${nombreAsesor || 'el asesor'}`, html: htmlCorreoSolicitarCalificacion({ nombreCliente, nombreAsesor, propiedadTitulo, linkCalificar }) });
     return { ok: true };
   } catch (err) {
     console.error('⚠️  Error enviando correo calificación a', email, '→', err.message);
@@ -728,13 +685,7 @@ export function htmlCorreoResetPassword({ nombre, linkReset }) {
 export async function enviarCorreoResetPassword({ email, nombre, linkReset }) {
   if (!email) return { ok: false, error: 'sin email' };
   try {
-    const transporter = crearTransporter();
-    await transporter.sendMail({
-      from: `"InmobIA" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: 'Recupera tu contraseña — InmobIA',
-      html: htmlCorreoResetPassword({ nombre, linkReset }),
-    });
+    await enviarEmail({ to: email, subject: 'Recupera tu contraseña — InmobIA', html: htmlCorreoResetPassword({ nombre, linkReset }) });
     return { ok: true };
   } catch (err) {
     console.error('⚠️  Error enviando correo reset a', email, '→', err.message);
