@@ -64,7 +64,7 @@ export function htmlCorreoPrincipal(datos) {
             <p style="margin:6px 0 0;color:rgba(255,255,255,0.6);font-size:0.85rem;font-family:Arial,sans-serif">InmobIA — Panel de propiedades</p>
           </td>
           <td style="padding:28px 32px 28px 0;vertical-align:middle;text-align:right;white-space:nowrap">
-            <span style="font-family:'Comfortaa',Arial,sans-serif;font-size:1.7rem;font-weight:300;color:#ffffff;letter-spacing:0.01em">Inmob</span><span style="font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;font-size:1.9rem;font-weight:400;color:#c9a84c">IA</span>
+            <img src="https://inmobia.site/logo-inmobia.svg" alt="InmobIA" style="height:38px;width:auto;display:block">
           </td>
         </tr>
       </table>
@@ -147,7 +147,7 @@ export function htmlCorreoBienvenidaPremium({ nombre, monto = 'Q399.00', moneda 
             <p style="margin:6px 0 0;color:rgba(255,255,255,0.6);font-size:0.85rem;font-family:Arial,sans-serif">Confirmación de pago — InmobIA</p>
           </td>
           <td style="padding:28px 32px 28px 0;vertical-align:middle;text-align:right;white-space:nowrap">
-            <span style="font-family:'Comfortaa',Arial,sans-serif;font-size:1.7rem;font-weight:300;color:#ffffff;letter-spacing:0.01em">Inmob</span><span style="font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;font-size:1.9rem;font-weight:400;color:#c9a84c">IA</span>
+            <img src="https://inmobia.site/logo-inmobia.svg" alt="InmobIA" style="height:38px;width:auto;display:block">
           </td>
         </tr>
       </table>
@@ -248,7 +248,7 @@ export function htmlCorreoVerificacionCierre({ nombreCliente, nombreAsesor, prop
             <p style="margin:6px 0 0;color:rgba(255,255,255,0.6);font-size:0.85rem">InmobIA — Verificación de tu operación</p>
           </td>
           <td style="padding:28px 32px 28px 0;vertical-align:middle;text-align:right;white-space:nowrap">
-            <span style="font-family:'Comfortaa',Arial,sans-serif;font-size:1.7rem;font-weight:300;color:#ffffff">Inmob</span><span style="font-family:'Century Gothic',Arial,sans-serif;font-size:1.9rem;font-weight:400;color:#c9a84c">IA</span>
+            <img src="https://inmobia.site/logo-inmobia.svg" alt="InmobIA" style="height:38px;width:auto;display:block">
           </td>
         </tr>
       </table>
@@ -345,7 +345,7 @@ export function htmlCorreoComisionAsesor({ nombreAsesor, nombreCliente, propieda
             <p style="margin:6px 0 0;color:rgba(255,255,255,0.6);font-size:0.85rem">Cobro de comisión — InmobIA</p>
           </td>
           <td style="padding:28px 32px 28px 0;vertical-align:middle;text-align:right;white-space:nowrap">
-            <span style="font-family:'Comfortaa',Arial,sans-serif;font-size:1.7rem;font-weight:300;color:#ffffff">Inmob</span><span style="font-family:'Century Gothic',Arial,sans-serif;font-size:1.9rem;font-weight:400;color:#c9a84c">IA</span>
+            <img src="https://inmobia.site/logo-inmobia.svg" alt="InmobIA" style="height:38px;width:auto;display:block">
           </td>
         </tr>
       </table>
@@ -592,7 +592,7 @@ export function htmlCorreoSolicitarCalificacion({ nombreCliente, nombreAsesor, p
             <p style="margin:6px 0 0;color:rgba(255,255,255,0.6);font-size:0.85rem">InmobIA — Tu opinión importa</p>
           </td>
           <td style="padding:28px 32px 28px 0;vertical-align:middle;text-align:right;white-space:nowrap">
-            <span style="font-family:'Comfortaa',Arial,sans-serif;font-size:1.7rem;font-weight:300;color:#ffffff;letter-spacing:0.01em">Inmob</span><span style="font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;font-size:1.9rem;font-weight:400;color:#c9a84c">IA</span>
+            <img src="https://inmobia.site/logo-inmobia.svg" alt="InmobIA" style="height:38px;width:auto;display:block">
           </td>
         </tr>
       </table>
@@ -655,7 +655,7 @@ export function htmlCorreoResetPassword({ nombre, linkReset }) {
             <p style="margin:6px 0 0;color:rgba(255,255,255,0.6);font-size:0.85rem">InmobIA — Acceso seguro</p>
           </td>
           <td style="padding:28px 32px 28px 0;vertical-align:middle;text-align:right;white-space:nowrap">
-            <span style="font-family:'Comfortaa',Arial,sans-serif;font-size:1.7rem;font-weight:300;color:#ffffff;letter-spacing:0.01em">Inmob</span><span style="font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;font-size:1.9rem;font-weight:400;color:#c9a84c">IA</span>
+            <img src="https://inmobia.site/logo-inmobia.svg" alt="InmobIA" style="height:38px;width:auto;display:block">
           </td>
         </tr>
       </table>
@@ -721,7 +721,7 @@ export async function enviarCorreoBienvenidaAsesor({ email, nombre, slug }) {
           <p style="margin:6px 0 0;color:rgba(255,255,255,0.6);font-size:0.85rem">Tu cuenta de asesor está activa</p>
         </td>
         <td style="padding:28px 32px 28px 0;vertical-align:middle;text-align:right;white-space:nowrap">
-          <span style="font-family:'Comfortaa',Arial,sans-serif;font-size:1.7rem;font-weight:300;color:#fff">Inmob</span><span style="font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;font-size:1.9rem;font-weight:400;color:#c9a84c">IA</span>
+          <img src="https://inmobia.site/logo-inmobia.svg" alt="InmobIA" style="height:38px;width:auto;display:block">
         </td>
       </tr></table>
     </div>
