@@ -279,6 +279,7 @@ router.post('/', authMiddleware, uploadFieldsSafe, (req, res) => {
     mant_agua = 0, mant_basura = 0, mant_seguridad = 0, mant_areas_comunes = 0, mant_areas_verdes = 0,
     req_dpi = 0, req_constancia = 0, req_estados_cuenta = 0, req_formulario = 0, req_fiador = 0,
     req_antecedentes = 0, req_renas = 0, req_infornet = 0, req_deposito = 0,
+    req_contrato_1ano = 0, req_notario = 0, req_valor_contrato = '', req_adicionales = '',
     publicado_inmobia: _pub = 0
   } = req.body;
 

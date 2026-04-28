@@ -50,6 +50,9 @@ app.use('/fondos', express.static(fondosDir));
 // Archivos HTML del frontend
 app.use(express.static(path.join(__dirname, './public')));
 
+// Recursos públicos compartidos (iconos, logos, imágenes estáticas)
+app.use('/public', express.static(path.join(__dirname, '../public')));
+
 // GET /api/fondos — lista todos los fondos disponibles
 app.get('/api/fondos', (_req, res) => {
   try {
@@ -112,6 +115,11 @@ app.use('/api/cliente', clienteRouter);
 app.use('/api/requerimientos', requerimientosRouter);
 app.use('/api/pagos', pagosRouter);
 app.use('/api/settings', settingsRouter);
+
+// Portal del asesor: /asesor/:slug → sirve asesor.html y el JS lee el slug de la URL
+app.get('/asesor/:slug', (_req, res) => {
+  res.sendFile(path.join(__dirname, './public/asesor.html'));
+});
 
 // Manejador global de errores — siempre devuelve JSON
 app.use((err, _req, res, _next) => {

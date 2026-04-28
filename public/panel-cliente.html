@@ -33,9 +33,7 @@ body { font-family: var(--font-body); background: #f0f3fa; color: var(--charcoal
   padding: 0.9rem 1.5rem;
   box-shadow: 0 2px 12px rgba(30,45,74,0.18);
 }
-.topbar-brand { display: flex; align-items: center; gap: 0.6rem; }
-.topbar-brand span { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: #fff; }
-.topbar-brand em { color: var(--gold); font-style: normal; }
+.topbar-brand { display: flex; align-items: center; }
 .topbar-user { display: flex; align-items: center; gap: 0.5rem; }
 .topbar-email { font-size: 0.75rem; color: rgba(255,255,255,0.55); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -92,7 +90,7 @@ body { font-family: var(--font-body); background: #f0f3fa; color: var(--charcoal
 
 /* ── FEED CARD ── */
 .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
-.feed-card { background: var(--white); border: 1px solid var(--gray-border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; transition: box-shadow 0.2s, transform 0.2s; text-decoration: none; color: inherit; display: block; }
+.feed-card { background: var(--white); border: 1px solid var(--gray-border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; transition: box-shadow 0.2s, transform 0.2s; text-decoration: none; color: inherit; display: block; position: relative; }
 .feed-card:hover { box-shadow: 0 6px 24px rgba(30,45,74,0.13); transform: translateY(-2px); }
 .feed-card-img { width: 100%; height: 150px; object-fit: cover; display: block; background: var(--gray-light); }
 .feed-card-img-placeholder { width: 100%; height: 150px; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
@@ -101,6 +99,8 @@ body { font-family: var(--font-body); background: #f0f3fa; color: var(--charcoal
 .feed-card-titulo { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.2rem; line-height: 1.3; }
 .feed-card-precio { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--charcoal); }
 .feed-card-zona { font-size: 0.72rem; color: var(--gray); margin-top: 0.2rem; }
+.feed-card-stats { display: flex; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.72rem; color: var(--gray); }
+.feed-card-stats span { display: flex; align-items: center; gap: 0.25rem; }
 
 /* ── CALIFICACIÓN MODAL ── */
 .modal-overlay { position: fixed; inset: 0; background: rgba(15,22,32,0.55); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
@@ -113,9 +113,20 @@ body { font-family: var(--font-body); background: #f0f3fa; color: var(--charcoal
 .modal-foot { padding: 1rem 1.5rem; border-top: 1px solid var(--gray-border); display: flex; gap: 0.6rem; justify-content: flex-end; }
 
 /* Estrellas */
-.estrellas-row { display: flex; gap: 0.4rem; margin: 0.75rem 0; }
-.estrella { font-size: 2rem; cursor: pointer; color: #d1d9e6; transition: color 0.15s; }
+.estrellas-row { display: flex; gap: 0.4rem; margin: 0.4rem 0 0; }
+.estrella, .estrella-asesor { font-size: 2rem; cursor: pointer; color: #d1d9e6; transition: color 0.15s; }
 .estrella.active { color: var(--gold); }
+.estrella-asesor.active { color: var(--gold); }
+
+/* Botones de nivel de interés */
+.interes-cal-btn { padding:0.5rem;border-radius:8px;border:1.5px solid var(--gray-border);background:var(--white);color:var(--gray);font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);text-align:center; }
+.interes-cal-btn:hover { border-color:var(--gold); }
+.interes-cal-btn.active { background:var(--charcoal);color:#fff;border-color:var(--charcoal); }
+
+/* Botones recomendaría */
+.recomienda-cal-btn { padding:0.45rem 1rem;border-radius:20px;border:1.5px solid var(--gray-border);background:var(--white);color:var(--gray);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:var(--font-body); }
+.recomienda-cal-btn:hover { border-color:var(--gold); }
+.recomienda-cal-btn.active { background:var(--charcoal);color:#fff;border-color:var(--charcoal); }
 
 /* Razones chips */
 .razones-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0; }
@@ -146,6 +157,38 @@ textarea:focus { border-color: var(--gold); }
 .access-error-box p { color: var(--gray); font-size: 0.88rem; margin-bottom: 1.5rem; line-height: 1.6; }
 .access-error-box a { color: var(--gold); text-decoration: none; font-weight: 600; }
 
+/* Chips búsqueda */
+.busq-chip { padding:0.4rem 0.9rem;border-radius:20px;border:1.5px solid var(--gray-border);font-size:0.78rem;font-weight:500;cursor:pointer;background:var(--white);color:var(--charcoal);transition:all 0.15s;font-family:var(--font-body); }
+.busq-chip:hover { border-color:var(--gold); }
+.busq-chip.active { background:var(--charcoal);color:#fff;border-color:var(--charcoal); }
+
+/* Filtros de zona en el feed */
+.feed-zona-bar { display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.2rem; }
+.zona-chip { padding:0.3rem 0.8rem;border-radius:20px;border:1.5px solid var(--gray-border);font-size:0.75rem;font-weight:500;cursor:pointer;background:var(--white);color:var(--charcoal);transition:all 0.15s;font-family:var(--font-body); }
+.zona-chip:hover { border-color:var(--gold); }
+.zona-chip.active { background:var(--charcoal);color:#fff;border-color:var(--charcoal); }
+
+/* Picker de zonas en Mi búsqueda */
+.zona-picker { border:1px solid var(--gray-border);border-radius:10px;overflow:hidden;margin-top:0.35rem; }
+.zona-picker-sel { padding:0.6rem 0.75rem;background:var(--bg);min-height:38px;display:flex;flex-wrap:wrap;gap:0.3rem;align-items:center;border-bottom:1px solid var(--gray-border); }
+.zona-sel-tag { display:flex;align-items:center;gap:0.25rem;background:var(--charcoal);color:#fff;border-radius:20px;padding:0.2rem 0.55rem 0.2rem 0.7rem;font-size:0.72rem;font-weight:600; }
+.zona-sel-tag button { background:none;border:none;color:#fff;cursor:pointer;font-size:0.9rem;line-height:1;padding:0;opacity:0.75; }
+.zona-sel-tag button:hover { opacity:1; }
+.zona-picker-sel-empty { font-size:0.78rem;color:var(--gray); }
+.zona-picker-grupos { padding:0.6rem 0.75rem;display:flex;flex-direction:column;gap:0.85rem;max-height:240px;overflow-y:auto; }
+.zona-grupo-label { font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);margin-bottom:0.3rem; }
+.zona-grupo-chips { display:flex;flex-wrap:wrap;gap:0.3rem; }
+.zona-pick-chip { padding:0.28rem 0.7rem;border-radius:20px;border:1.5px solid var(--gray-border);font-size:0.74rem;font-weight:500;cursor:pointer;background:var(--white);color:var(--charcoal);transition:all 0.12s;font-family:var(--font-body); }
+.zona-pick-chip:hover { border-color:var(--gold); }
+.zona-pick-chip.active { background:var(--charcoal);color:#fff;border-color:var(--charcoal); }
+.busq-check { display:flex;align-items:center;gap:0.45rem;cursor:pointer;font-size:0.82rem;color:var(--charcoal);user-select:none; }
+.busq-check input[type=checkbox] { width:16px;height:16px;accent-color:var(--charcoal);cursor:pointer; }
+
+/* Badge compatibilidad feed */
+.match-badge { position:absolute;top:8px;right:8px;background:rgba(30,45,74,0.85);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:20px;backdrop-filter:blur(4px);letter-spacing:0.03em; }
+.match-badge.high { background:rgba(22,163,74,0.9); }
+.match-badge.mid  { background:rgba(201,168,76,0.95);color:#1e2d4a; }
+
 /* Toast */
 #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--charcoal); color: #fff; padding: 0.7rem 1.4rem; border-radius: 8px; font-size: 0.82rem; box-shadow: 0 4px 16px rgba(0,0,0,0.2); transition: transform 0.3s; z-index: 999; pointer-events: none; border-left: 3px solid var(--gold); }
 #toast.show { transform: translateX(-50%) translateY(0); }
@@ -156,8 +199,7 @@ textarea:focus { border-color: var(--gold); }
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-brand">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span>Inmo<em>bia</em></span>
+    <img src="logo-inmobia-home.svg" alt="InmobIA" style="height:36px;width:auto;display:block">
   </div>
   <div class="topbar-user">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -179,6 +221,10 @@ textarea:focus { border-color: var(--gold); }
     <button class="tab" onclick="irTab('calificar')" id="tab-calificar">
       <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
       Calificar
+    </button>
+    <button class="tab" onclick="irTab('busqueda')" id="tab-busqueda">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Mi búsqueda
     </button>
   </div>
 </div>
@@ -215,6 +261,7 @@ textarea:focus { border-color: var(--gold); }
   <section class="section" id="s-feed">
     <p class="section-title">Propiedades para ti</p>
     <p class="section-sub">Selección basada en tu búsqueda y preferencias</p>
+    <div class="feed-zona-bar" id="feed-zona-bar" style="display:none"></div>
     <div class="feed-grid" id="feed-grid">
       <div class="loader-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
     </div>
@@ -229,39 +276,234 @@ textarea:focus { border-color: var(--gold); }
     </div>
   </section>
 
+  <!-- SECCIÓN: MI BÚSQUEDA -->
+  <section class="section" id="s-busqueda">
+    <p class="section-title">Mi búsqueda</p>
+    <p class="section-sub">Ajusta tu perfil para que InmobIA te sugiera propiedades más precisas</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div style="display:grid;gap:1rem">
+
+          <!-- Tipo de inmueble -->
+          <div>
+            <label class="form-label">¿Qué tipo de inmueble buscas?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.35rem" id="busq-tipo-btns">
+              <button class="busq-chip" data-val="casa"        onclick="selBusqTipo(this)">🏠 Casa</button>
+              <button class="busq-chip" data-val="apartamento" onclick="selBusqTipo(this)">🏢 Apartamento</button>
+              <button class="busq-chip" data-val="local"       onclick="selBusqTipo(this)">🏪 Local comercial</button>
+              <button class="busq-chip" data-val="bodega"      onclick="selBusqTipo(this)">🏭 Bodega</button>
+              <button class="busq-chip" data-val="terreno"     onclick="selBusqTipo(this)">🌿 Terreno</button>
+              <button class="busq-chip" data-val="oficina"     onclick="selBusqTipo(this)">💼 Oficina</button>
+            </div>
+          </div>
+
+          <!-- Operación -->
+          <div>
+            <label class="form-label">Modalidad</label>
+            <div style="display:flex;gap:0.5rem;margin-top:0.35rem">
+              <button class="busq-chip" data-val="venta"  onclick="selBusqOp(this)">Compra / Venta</button>
+              <button class="busq-chip" data-val="renta"  onclick="selBusqOp(this)">Alquiler / Renta</button>
+            </div>
+          </div>
+
+          <!-- Presupuesto -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div>
+              <label class="form-label">Presupuesto máximo</label>
+              <input type="text" id="busq-presupuesto" placeholder="Ej. 800,000" inputmode="numeric"
+                style="width:100%;padding:0.6rem 0.75rem;border:1px solid var(--gray-border);border-radius:8px;font-size:0.88rem;color:var(--charcoal);outline:none;margin-top:0.35rem"
+                onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--gray-border)'"
+                oninput="formatearPresupuesto(this)">
+            </div>
+            <div>
+              <label class="form-label">Moneda</label>
+              <select id="busq-moneda"
+                style="width:100%;padding:0.6rem 0.75rem;border:1px solid var(--gray-border);border-radius:8px;font-size:0.88rem;color:var(--charcoal);outline:none;background:#fff;margin-top:0.35rem">
+                <option value="GTQ">Quetzales (Q)</option>
+                <option value="USD">Dólares ($)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Zonas -->
+          <div>
+            <label class="form-label">Zonas o municipios preferidos</label>
+            <div class="zona-picker">
+              <!-- Seleccionadas -->
+              <div class="zona-picker-sel" id="zona-sel-tags">
+                <span class="zona-sel-empty" style="font-size:0.78rem;color:var(--gray)">Ninguna seleccionada — elige abajo</span>
+              </div>
+              <!-- Grupos -->
+              <div class="zona-picker-grupos">
+                <div>
+                  <div class="zona-grupo-label">🏙 Ciudad de Guatemala</div>
+                  <div class="zona-grupo-chips" id="zg-capital"></div>
+                </div>
+                <div>
+                  <div class="zona-grupo-label">🌆 Área metropolitana</div>
+                  <div class="zona-grupo-chips" id="zg-metro"></div>
+                </div>
+                <div>
+                  <div class="zona-grupo-label">🗺 Otros departamentos</div>
+                  <div class="zona-grupo-chips" id="zg-depto"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Habitaciones y baños -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div>
+              <label class="form-label">Habitaciones mínimas</label>
+              <select id="busq-hab"
+                style="width:100%;padding:0.6rem 0.75rem;border:1px solid var(--gray-border);border-radius:8px;font-size:0.88rem;color:var(--charcoal);outline:none;background:#fff;margin-top:0.35rem">
+                <option value="0">Sin preferencia</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Baños mínimos</label>
+              <select id="busq-banos"
+                style="width:100%;padding:0.6rem 0.75rem;border:1px solid var(--gray-border);border-radius:8px;font-size:0.88rem;color:var(--charcoal);outline:none;background:#fff;margin-top:0.35rem">
+                <option value="0">Sin preferencia</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Características -->
+          <div>
+            <label class="form-label">Características importantes</label>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.35rem">
+              <label class="busq-check"><input type="checkbox" id="busq-mascota"> 🐾 Acepta mascotas</label>
+              <label class="busq-check" id="wrap-financiamiento"><input type="checkbox" id="busq-financiamiento"> 🏦 Acepta financiamiento</label>
+            </div>
+          </div>
+
+          <!-- Red colaborativa: siempre activa, sin opción -->
+          <div style="background:#f0f4ff;border:1px solid #c7d4f5;border-radius:10px;padding:0.85rem 1rem;display:flex;align-items:flex-start;gap:0.6rem">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4f6ef7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;color:var(--charcoal)">Tu búsqueda se comparte automáticamente con la red de asesores</div>
+              <div style="font-size:0.73rem;color:var(--gray);margin-top:0.2rem">Los asesores de InmobIA podrán ofrecerte propiedades que aún no están en el portal. Aumenta hasta 3x la probabilidad de encontrar tu propiedad ideal.</div>
+            </div>
+          </div>
+
+          <!-- Notas adicionales -->
+          <div>
+            <label class="form-label">Detalles adicionales (opcional)</label>
+            <textarea id="busq-notas" placeholder="Ej. Necesito patio grande, prefiero planta baja, busco cerca de escuelas..." style="height:80px;margin-top:0.35rem"></textarea>
+          </div>
+
+          <button class="btn-primary" id="btn-guardar-busqueda" onclick="guardarBusqueda()" style="align-self:flex-end;padding:0.7rem 1.8rem">
+            Guardar preferencias
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </div><!-- /content -->
 
 <!-- MODAL CALIFICACIÓN -->
 <div class="modal-overlay" id="modal-cal" onclick="if(event.target===this)cerrarModal()">
-  <div class="modal-box">
+  <div class="modal-box" style="max-width:500px">
     <div class="modal-head">
       <h3>Calificar visita</h3>
       <button class="modal-close" onclick="cerrarModal()">×</button>
     </div>
-    <div class="modal-body">
-      <div style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem">Propiedad: <strong id="modal-cal-prop" style="color:var(--charcoal)"></strong></div>
-      <div style="font-size:0.82rem;color:var(--gray)">Asesor: <strong id="modal-cal-asesor" style="color:var(--charcoal)"></strong></div>
+    <div class="modal-body" style="max-height:72vh;overflow-y:auto;display:flex;flex-direction:column;gap:0.75rem">
 
-      <div style="margin-top:1rem">
-        <label class="form-label">¿Cómo fue tu experiencia?</label>
-        <div class="estrellas-row" id="estrellas-row">
-          <span class="estrella" data-val="1" onclick="selEstrellas(1)">★</span>
-          <span class="estrella" data-val="2" onclick="selEstrellas(2)">★</span>
-          <span class="estrella" data-val="3" onclick="selEstrellas(3)">★</span>
-          <span class="estrella" data-val="4" onclick="selEstrellas(4)">★</span>
-          <span class="estrella" data-val="5" onclick="selEstrellas(5)">★</span>
+      <!-- Contexto -->
+      <div style="font-size:0.8rem;color:var(--gray);line-height:1.6">
+        <div>Propiedad: <strong id="modal-cal-prop" style="color:var(--charcoal)"></strong></div>
+        <div>Asesor: <strong id="modal-cal-asesor" style="color:var(--charcoal)"></strong></div>
+      </div>
+
+      <!-- ── SECCIÓN PROPIEDAD ── -->
+      <div style="border:1px solid var(--gray-border);border-radius:10px;padding:1rem">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gold);margin-bottom:0.85rem">🏠 La Propiedad</div>
+
+        <!-- P1: Stars propiedad -->
+        <div style="margin-bottom:1rem">
+          <label class="form-label">¿Qué tan buena fue la propiedad?</label>
+          <div class="estrellas-row" id="estrellas-row">
+            <span class="estrella" data-val="1" onclick="selEstrellas(1)">★</span>
+            <span class="estrella" data-val="2" onclick="selEstrellas(2)">★</span>
+            <span class="estrella" data-val="3" onclick="selEstrellas(3)">★</span>
+            <span class="estrella" data-val="4" onclick="selEstrellas(4)">★</span>
+            <span class="estrella" data-val="5" onclick="selEstrellas(5)">★</span>
+          </div>
+        </div>
+
+        <!-- P2: Nivel de interés -->
+        <div style="margin-bottom:1rem">
+          <label class="form-label">¿Qué tan interesado estás en esta propiedad?</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-top:0.4rem">
+            <button class="interes-cal-btn" data-val="muy-interesado"  onclick="selInteresCalif(this)">🔥 Muy interesado</button>
+            <button class="interes-cal-btn" data-val="interesado"      onclick="selInteresCalif(this)">👍 Interesado</button>
+            <button class="interes-cal-btn" data-val="poco-interesado" onclick="selInteresCalif(this)">🤔 Poco interesado</button>
+            <button class="interes-cal-btn" data-val="no-interesado"   onclick="selInteresCalif(this)">❌ No me interesó</button>
+          </div>
+        </div>
+
+        <!-- P3: Razones chips (contextuales) -->
+        <div id="razones-wrap" style="display:none;margin-bottom:1rem">
+          <label class="form-label">¿Por qué? (opcional)</label>
+          <div class="razones-grid" id="razones-grid"></div>
+        </div>
+
+        <!-- P4: Comentario propiedad -->
+        <div>
+          <label class="form-label" for="cal-comentario">Comentario sobre la propiedad (opcional)</label>
+          <textarea id="cal-comentario" placeholder="¿Qué te gustó o qué le faltó?" style="height:56px"></textarea>
         </div>
       </div>
 
-      <div id="razones-wrap" style="display:none;margin-top:0.75rem">
-        <label class="form-label">¿Por qué? (opcional)</label>
-        <div class="razones-grid" id="razones-grid"></div>
+      <!-- ── SECCIÓN ASESOR ── -->
+      <div style="border:1px solid var(--gray-border);border-radius:10px;padding:1rem">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gold);margin-bottom:0.85rem">⭐ El Asesor</div>
+
+        <!-- A1: Stars asesor -->
+        <div style="margin-bottom:1rem">
+          <label class="form-label">¿Cómo calificarías el servicio del asesor?</label>
+          <div class="estrellas-row" id="asesor-estrellas-row">
+            <span class="estrella-asesor" data-val="1" onclick="selAsesorEstrellas(1)">★</span>
+            <span class="estrella-asesor" data-val="2" onclick="selAsesorEstrellas(2)">★</span>
+            <span class="estrella-asesor" data-val="3" onclick="selAsesorEstrellas(3)">★</span>
+            <span class="estrella-asesor" data-val="4" onclick="selAsesorEstrellas(4)">★</span>
+            <span class="estrella-asesor" data-val="5" onclick="selAsesorEstrellas(5)">★</span>
+          </div>
+        </div>
+
+        <!-- A2: Servicio chips -->
+        <div id="asesor-razones-wrap" style="display:none;margin-bottom:1rem">
+          <label class="form-label">¿Qué destacas de su servicio? (opcional)</label>
+          <div class="razones-grid" id="asesor-razones-grid"></div>
+        </div>
+
+        <!-- A3: ¿Lo recomendarías? -->
+        <div style="margin-bottom:1rem">
+          <label class="form-label">¿Recomendarías a este asesor?</label>
+          <div style="display:flex;gap:0.5rem;margin-top:0.4rem">
+            <button class="recomienda-cal-btn" data-val="si" onclick="selRecomendaCalif(this)">👍 Sí, lo recomendaría</button>
+            <button class="recomienda-cal-btn" data-val="no" onclick="selRecomendaCalif(this)">👎 No</button>
+          </div>
+        </div>
+
+        <!-- A4: Comentario asesor -->
+        <div>
+          <label class="form-label" for="cal-asesor-comentario">Comentario sobre el asesor (opcional)</label>
+          <textarea id="cal-asesor-comentario" placeholder="¿Cómo fue su atención?" style="height:56px"></textarea>
+        </div>
       </div>
 
-      <div style="margin-top:0.75rem">
-        <label class="form-label" for="cal-comentario">Comentario libre (opcional)</label>
-        <textarea id="cal-comentario" placeholder="Cuéntanos más sobre tu experiencia..."></textarea>
-      </div>
     </div>
     <div class="modal-foot">
       <button class="btn-ghost" onclick="cerrarModal()">Cancelar</button>
@@ -371,7 +613,8 @@ textarea:focus { border-color: var(--gold); }
 <div id="toast"></div>
 
 <script>
-const API   = 'https://inmobia.site/api';
+const API      = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : 'https://inmobia.site/api';
+const BASE_URL = API.replace('/api', '');
 function parseSQL(s) {
   if (!s) return null;
   const str = String(s);
@@ -382,8 +625,12 @@ const token = new URLSearchParams(location.search).get('token');
 
 let clienteData = null;
 let leadActivo  = null;
-let estrellasVal = 0;
-const razonesSelec = new Set();
+let estrellasVal     = 0;
+let asesorEstrellasVal = 0;
+let interesCalifVal  = '';
+let recomendariaCalifVal = '';
+const razonesSelec      = new Set();
+const asesorRazonesSelec = new Set();
 
 // Estado encuesta post-visita
 let encLeadId = null;
@@ -393,7 +640,19 @@ const encRazonesSelec = new Set();
 let encAsesorEstrellasVal = 0;
 const encAsesorRazonesSelec = new Set();
 
-// ── RAZONES por nivel de estrellas ──
+// ── RAZONES propiedad ──
+const RAZONES_PROP = {
+  negativo: ['Muy pequeño', 'Precio alto', 'Zona lejana', 'Mal estado', 'Poca luz', 'Sin parqueo', 'No acepta mascotas', 'Distribución no me gustó', 'Mucho ruido', 'Mal mantenimiento'],
+  positivo: ['Espacioso', 'Precio justo', 'Excelente zona', 'Buen estado', 'Bien iluminado', 'Parqueo amplio', 'Diseño moderno', 'Muy tranquilo', 'Vista hermosa', 'Bien ubicado']
+};
+
+// ── RAZONES asesor ──
+const RAZONES_ASESOR_CALIF = {
+  positivo: ['Muy puntual', 'Bien informado', 'Amable y cordial', 'Respondió rápido', 'Excelente atención', 'Conoce bien las propiedades', 'Buen seguimiento'],
+  negativo: ['Llegó tarde', 'Poco informado', 'No respondió bien', 'Falta de atención', 'No escuchó mis necesidades', 'Poco profesional']
+};
+
+// Kept for enc-encuesta (post-visita automática)
 const RAZONES = {
   bajo: ['Muy pequeño', 'Precio alto', 'Zona lejana', 'Mal estado', 'Asesor tardó', 'No cumplió expectativas'],
   alto: ['Excelente asesor', 'Muy puntual', 'Propiedad hermosa', 'Precio justo', 'Muy profesional', 'Superó expectativas']
@@ -425,6 +684,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     renderVisitas();
     cargarFeed();
     renderCalificar();
+    initZonaPicker();
+    cargarBusqueda();
 
     // Si el link viene con acción específica, scroll al elemento relevante
     const params = new URLSearchParams(location.search);
@@ -516,7 +777,7 @@ function renderVisitas() {
 
   el.innerHTML = leads.map(l => {
     const img = l.prop_imagen
-      ? `<img class="visita-img" src="https://inmobia.site${l.prop_imagen}" alt="${l.propiedad_titulo || ''}" loading="lazy">`
+      ? `<img class="visita-img" src="${BASE_URL}${l.prop_imagen}" alt="${l.propiedad_titulo || ''}" loading="lazy">`
       : `<div class="visita-img-placeholder">🏠</div>`;
 
     const etapaLabels = { nuevo:'Contactado', agendado:'Agendado', interesado:'Interesado', negociando:'En negociación', cerrado:'Cerrado', inactivo:'Inactivo' };
@@ -531,7 +792,7 @@ function renderVisitas() {
     const fecha = l.creado_en ? parseSQL(l.creado_en).toLocaleDateString('es-GT', { day:'numeric', month:'short', year:'numeric' }) : '';
 
     const asesorAvatar = l.asesor_foto
-      ? `<img src="https://inmobia.site${l.asesor_foto}" alt="${l.asesor_nombre || ''}">`
+      ? `<img src="${BASE_URL}${l.asesor_foto}" alt="${l.asesor_nombre || ''}">`
       : `<div class="asesor-iniciales">${(l.asesor_nombre||'A').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>`;
 
     const yaCalificado = !!l.calificacion_estrellas;
@@ -557,11 +818,10 @@ function renderVisitas() {
           ${asesorAvatar}
           <span>${l.asesor_nombre || 'Asesor'}</span>
           ${l.asesor_empresa ? `<span>· ${l.asesor_empresa}</span>` : ''}
-          ${l.asesor_telefono ? `<button type="button" onclick="abrirWhatsAppAsesor(event, ${l.id})"
-              style="margin-left:auto;background:#25d366;color:#fff;border:none;border-radius:6px;padding:0.35rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:0.35rem">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-              WhatsApp
-            </button>` : ''}
+          <a href="#" onclick="abrirChatInmobia(event,${l.id})" style="margin-left:auto;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:6px;padding:0.3rem 0.65rem;font-size:0.7rem;font-weight:600;display:inline-flex;align-items:center;gap:0.3rem;text-decoration:none;cursor:pointer">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+            Comunicación vía InmobIA
+          </a>
         </div>
         ${fvDate ? `
         <div id="visita-block-${l.id}" style="background:linear-gradient(135deg,#fffbeb 0%,#fef9e0 100%);border:1px solid #fde68a;border-left:3px solid #d4a017;border-radius:8px;padding:0.55rem 0.8rem;margin-top:0.3rem">
@@ -608,10 +868,120 @@ function renderVisitas() {
   }).join('');
 }
 
+// ── COMPATIBILIDAD ──
+let perfilCliente = null;
+
+function calcMatch(p) {
+  if (!perfilCliente) return null;
+  let puntos = 0, total = 0;
+
+  // Tipo — 30 pts (multi-select: cualquier match suma)
+  const tiposPerf = (perfilCliente.tipo || '').split(',').map(t => t.trim()).filter(Boolean);
+  if (tiposPerf.length) {
+    total += 30;
+    if (tiposPerf.includes(p.tipo)) puntos += 30;
+  }
+  // Operación — 20 pts
+  if (perfilCliente.operacion) {
+    total += 20;
+    if (p.operacion === perfilCliente.operacion) puntos += 20;
+  }
+  // Presupuesto — 20 pts
+  if (perfilCliente.presupuesto_max > 0) {
+    total += 20;
+    if (p.precio && p.precio <= perfilCliente.presupuesto_max) puntos += 20;
+    else if (p.precio && p.precio <= perfilCliente.presupuesto_max * 1.1) puntos += 10;
+  }
+  // Zona — 15 pts (al menos un token coincide)
+  const zonasTokens = (perfilCliente.zonas || '').split(',').map(z => z.trim().toLowerCase()).filter(Boolean);
+  if (zonasTokens.length) {
+    total += 15;
+    const propZona = [p.municipio, p.zona, p.colonia].filter(Boolean).join(' ').toLowerCase();
+    if (zonasTokens.some(z => propZona.includes(z))) puntos += 15;
+  }
+  // Habitaciones — 10 pts
+  if (perfilCliente.habitaciones_min > 0) {
+    total += 10;
+    if (p.habitaciones >= perfilCliente.habitaciones_min) puntos += 10;
+    else if (p.habitaciones >= perfilCliente.habitaciones_min - 1) puntos += 5;
+  }
+  // Mascotas — 5 pts
+  if (perfilCliente.acepta_mascotas) {
+    total += 5;
+    if (p.mascota) puntos += 5;
+  }
+
+  if (!total) return null;
+  return Math.round((puntos / total) * 100);
+}
+
 // ── FEED ──
+let todasLasProps = [];
+let zonaFiltroActual = 'todas';
+
+function renderFeedGrid(props) {
+  const grid = document.getElementById('feed-grid');
+  if (!props.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <h3>Sin propiedades en esta zona</h3>
+      <p>Prueba seleccionando "Todas" para ver más opciones.</p>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = props.map(p => {
+    const pct = calcMatch(p);
+    const precio = `${p.moneda === 'USD' ? '$' : 'Q'}${Number(p.precio).toLocaleString('es-GT')}${p.operacion === 'renta' ? '/mes' : ''}`;
+    const tipo = p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1);
+    const zona = [p.colonia, p.zona, p.municipio].filter(Boolean).join(', ');
+    const img = p.imagen_principal
+      ? `<img class="feed-card-img" src="${BASE_URL}${p.imagen_principal}" alt="${p.titulo}" loading="lazy">`
+      : `<div class="feed-card-img-placeholder">🏠</div>`;
+    const badgeCls = pct >= 80 ? 'high' : pct >= 50 ? 'mid' : '';
+    const badge = pct !== null ? `<div class="match-badge ${badgeCls}">${pct}% match</div>` : '';
+    const stats = [
+      p.habitaciones > 0 ? `<span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V8a2 2 0 012-2h14a2 2 0 012 2v14"/><path d="M3 12h18"/><path d="M3 17h18"/></svg> ${p.habitaciones}</span>` : '',
+      p.banos > 0     ? `<span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/></svg> ${p.banos}</span>` : '',
+      p.parqueos > 0  ? `<span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg> ${p.parqueos}</span>` : '',
+    ].filter(Boolean).join('');
+    return `<a href="/propiedad.html?id=${p.id}" class="feed-card">
+      ${img}
+      ${badge}
+      <div class="feed-card-body">
+        <div class="feed-card-tipo">${tipo} · ${p.operacion === 'venta' ? 'Venta' : 'Renta'}</div>
+        <div class="feed-card-titulo">${p.titulo}</div>
+        <div class="feed-card-precio">${precio}</div>
+        ${zona ? `<div class="feed-card-zona">${zona}</div>` : ''}
+        ${stats ? `<div class="feed-card-stats">${stats}</div>` : ''}
+      </div>
+    </a>`;
+  }).join('');
+}
+
+function filtrarZona(zona, btn) {
+  zonaFiltroActual = zona;
+  document.querySelectorAll('.zona-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const filtradas = zona === 'todas'
+    ? todasLasProps
+    : todasLasProps.filter(p => {
+        const zonaStr = [p.colonia, p.zona, p.municipio].filter(Boolean).join(' ').toLowerCase();
+        return zonaStr.includes(zona.toLowerCase());
+      });
+  renderFeedGrid(filtradas);
+}
+
 async function cargarFeed() {
   const grid = document.getElementById('feed-grid');
   try {
+    // Cargar perfil del cliente si existe
+    if (token) {
+      try {
+        const rp = await fetch(`${API}/cliente/busqueda?token=${encodeURIComponent(token)}`);
+        if (rp.ok) perfilCliente = await rp.json();
+      } catch {}
+    }
+
     const r = await fetch(`${API}/cliente/propiedades-sugeridas?email=${encodeURIComponent(clienteData.email)}`);
     const data = await r.json();
     const props = data.propiedades || [];
@@ -625,26 +995,200 @@ async function cargarFeed() {
       return;
     }
 
-    grid.innerHTML = props.map(p => {
-      const precio = `${p.moneda === 'USD' ? '$' : 'Q'}${Number(p.precio).toLocaleString('es-GT')}${p.operacion === 'renta' ? '/mes' : ''}`;
-      const tipo = p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1);
-      const zona = [p.colonia, p.zona, p.municipio].filter(Boolean).join(', ');
-      const img = p.imagen_principal
-        ? `<img class="feed-card-img" src="https://inmobia.site${p.imagen_principal}" alt="${p.titulo}" loading="lazy">`
-        : `<div class="feed-card-img-placeholder">🏠</div>`;
+    // Ordenar por % match descendente si hay perfil
+    if (perfilCliente?.tipo || perfilCliente?.operacion) {
+      props.sort((a, b) => (calcMatch(b) || 0) - (calcMatch(a) || 0));
+    }
 
-      return `<a href="/propiedad.html?id=${p.id}" class="feed-card">
-        ${img}
-        <div class="feed-card-body">
-          <div class="feed-card-tipo">${tipo} · ${p.operacion === 'venta' ? 'Venta' : 'Renta'}</div>
-          <div class="feed-card-titulo">${p.titulo}</div>
-          <div class="feed-card-precio">${precio}</div>
-          ${zona ? `<div class="feed-card-zona">${zona}</div>` : ''}
-        </div>
-      </a>`;
-    }).join('');
+    todasLasProps = props;
+    zonaFiltroActual = 'todas';
+
+    // Construir chips de zona únicos
+    const zonasSet = new Set();
+    props.forEach(p => {
+      if (p.zona)      zonasSet.add(p.zona.trim());
+      if (p.municipio) zonasSet.add(p.municipio.trim());
+    });
+    const zonas = [...zonasSet].sort();
+    const zonaBar = document.getElementById('feed-zona-bar');
+    if (zonas.length > 1) {
+      zonaBar.style.display = '';
+      zonaBar.innerHTML = `<button class="zona-chip active" onclick="filtrarZona('todas',this)">Todas</button>`
+        + zonas.map(z => `<button class="zona-chip" onclick="filtrarZona('${z.replace(/'/g,"\\'")}',this)">${z}</button>`).join('');
+    }
+
+    renderFeedGrid(todasLasProps);
   } catch {
     grid.innerHTML = `<div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--gray)">No se pudo cargar el feed.</div>`;
+  }
+}
+
+// ── MI BÚSQUEDA ──
+const busqTiposSelec = new Set();
+let busqOpVal        = '';
+const busqZonasSelec = new Set();
+
+// ── Datos de zonas estructuradas ──
+const ZONAS_GRUPOS = {
+  capital: [
+    'Zona 1','Zona 2','Zona 3','Zona 4','Zona 5','Zona 6','Zona 7','Zona 8','Zona 9','Zona 10',
+    'Zona 11','Zona 12','Zona 13','Zona 14','Zona 15','Zona 16','Zona 17','Zona 18','Zona 19','Zona 21'
+  ],
+  metro: [
+    'Mixco','Villa Nueva','Santa Catarina Pinula','San José Pinula','Fraijanes',
+    'Amatitlán','San Miguel Petapa','Villa Canales','Palencia','Chinautla',
+    'San Pedro Sacatepéquez','San Juan Sacatepéquez','San Raymundo'
+  ],
+  depto: [
+    'Antigua Guatemala','Sacatepéquez','Escuintla','Quetzaltenango',
+    'Chimaltenango','Cobán','Alta Verapaz','Huehuetenango','Xela'
+  ]
+};
+
+function initZonaPicker() {
+  const grupos = { 'zg-capital': ZONAS_GRUPOS.capital, 'zg-metro': ZONAS_GRUPOS.metro, 'zg-depto': ZONAS_GRUPOS.depto };
+  Object.entries(grupos).forEach(([id, zonas]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = zonas.map(z =>
+      `<button type="button" class="zona-pick-chip ${busqZonasSelec.has(z) ? 'active' : ''}" data-zona="${z}" onclick="toggleBusqZona('${z.replace(/'/g,"\\'")}')">${z}</button>`
+    ).join('');
+  });
+  renderZonaTags();
+}
+
+function toggleBusqZona(zona) {
+  if (busqZonasSelec.has(zona)) busqZonasSelec.delete(zona);
+  else busqZonasSelec.add(zona);
+  // Actualizar chip visual
+  document.querySelectorAll(`.zona-pick-chip[data-zona="${zona}"]`).forEach(c => {
+    c.classList.toggle('active', busqZonasSelec.has(zona));
+  });
+  renderZonaTags();
+}
+
+function renderZonaTags() {
+  const wrap = document.getElementById('zona-sel-tags');
+  if (!wrap) return;
+  if (!busqZonasSelec.size) {
+    wrap.innerHTML = `<span class="zona-sel-empty" style="font-size:0.78rem;color:var(--gray)">Ninguna seleccionada — elige abajo</span>`;
+    return;
+  }
+  wrap.innerHTML = [...busqZonasSelec].map(z =>
+    `<span class="zona-sel-tag">${z}<button type="button" onclick="toggleBusqZona('${z.replace(/'/g,"\\'")}')" title="Quitar">×</button></span>`
+  ).join('');
+}
+
+function selBusqTipo(btn) {
+  const val = btn.dataset.val;
+  if (busqTiposSelec.has(val)) busqTiposSelec.delete(val);
+  else busqTiposSelec.add(val);
+  btn.classList.toggle('active', busqTiposSelec.has(val));
+}
+
+function actualizarFinanciamientoVisibility() {
+  const wrap = document.getElementById('wrap-financiamiento');
+  if (!wrap) return;
+  const esRenta = busqOpVal === 'renta';
+  wrap.style.display = esRenta ? 'none' : '';
+  if (esRenta) document.getElementById('busq-financiamiento').checked = false;
+}
+
+function selBusqOp(btn) {
+  document.querySelectorAll('#s-busqueda .busq-chip[data-val="venta"], #s-busqueda .busq-chip[data-val="renta"]')
+    .forEach(b => b.classList.remove('active'));
+  const nuevo = btn.dataset.val === busqOpVal ? '' : btn.dataset.val;
+  busqOpVal = nuevo;
+  if (nuevo) btn.classList.add('active');
+  actualizarFinanciamientoVisibility();
+}
+
+async function cargarBusqueda() {
+  if (!token) return;
+  try {
+    const r = await fetch(`${API}/cliente/busqueda?token=${encodeURIComponent(token)}`);
+    if (!r.ok) return;
+    const data = await r.json();
+    if (!data.tipo && !data.operacion) return;
+
+    busqOpVal = data.operacion || '';
+    busqTiposSelec.clear();
+    if (data.tipo) {
+      data.tipo.split(',').map(t => t.trim()).filter(Boolean).forEach(t => {
+        busqTiposSelec.add(t);
+        const btn = document.querySelector(`#busq-tipo-btns .busq-chip[data-val="${t}"]`);
+        if (btn) btn.classList.add('active');
+      });
+    }
+    if (busqOpVal) {
+      const btn = document.querySelector(`#s-busqueda .busq-chip[data-val="${busqOpVal}"]`);
+      if (btn) btn.classList.add('active');
+    }
+    if (data.presupuesto_max) document.getElementById('busq-presupuesto').value = Number(data.presupuesto_max).toLocaleString('es-GT');
+    if (data.moneda) document.getElementById('busq-moneda').value = data.moneda;
+    if (data.zonas) {
+      busqZonasSelec.clear();
+      data.zonas.split(',').map(z => z.trim()).filter(Boolean).forEach(z => busqZonasSelec.add(z));
+      initZonaPicker();
+    }
+    if (data.habitaciones_min) document.getElementById('busq-hab').value = data.habitaciones_min;
+    if (data.banos_min) document.getElementById('busq-banos').value = data.banos_min;
+    actualizarFinanciamientoVisibility();
+    if (data.acepta_mascotas) document.getElementById('busq-mascota').checked = true;
+    if (data.acepta_financiamiento && busqOpVal !== 'renta') document.getElementById('busq-financiamiento').checked = true;
+    if (data.notas) document.getElementById('busq-notas').value = data.notas;
+
+    perfilCliente = data;
+  } catch {}
+}
+
+function formatearPresupuesto(input) {
+  const pos = input.selectionStart;
+  const raw = input.value.replace(/[^0-9]/g, '');
+  if (!raw) { input.value = ''; return; }
+  const num = parseInt(raw, 10);
+  const formatted = num.toLocaleString('es-GT');
+  input.value = formatted;
+  // Mantener cursor al final tras formateo
+  const diff = formatted.length - (input.value.length - (pos || 0));
+  try { input.setSelectionRange(formatted.length, formatted.length); } catch {}
+}
+
+function parsearPresupuesto(val) {
+  const raw = String(val || '').replace(/[^0-9]/g, '');
+  return raw ? parseFloat(raw) : null;
+}
+
+async function guardarBusqueda() {
+  const btn = document.getElementById('btn-guardar-busqueda');
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+  try {
+    const payload = {
+      token,
+      tipo: [...busqTiposSelec].join(','),
+      operacion: busqOpVal,
+      presupuesto_max: parsearPresupuesto(document.getElementById('busq-presupuesto').value),
+      moneda: document.getElementById('busq-moneda').value,
+      zonas: [...busqZonasSelec].join(','),
+      habitaciones_min: parseInt(document.getElementById('busq-hab').value) || 0,
+      banos_min: parseFloat(document.getElementById('busq-banos').value) || 0,
+      acepta_mascotas: document.getElementById('busq-mascota').checked,
+      acepta_financiamiento: document.getElementById('busq-financiamiento').checked,
+      activo_en_red: true,
+      notas: document.getElementById('busq-notas').value.trim()
+    };
+    const r = await fetch(`${API}/cliente/busqueda`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) throw new Error();
+    perfilCliente = payload;
+    toast('¡Preferencias guardadas! Tu feed se actualizará en tu próxima visita.');
+  } catch {
+    toast('No se pudo guardar. Intenta de nuevo.', 'error');
+  } finally {
+    btn.textContent = 'Guardar preferencias'; btn.disabled = false;
   }
 }
 
@@ -746,6 +1290,16 @@ function renderCierreBanner(l) {
   </div>`;
 }
 
+function abrirChatInmobia(e, leadId) {
+  e.preventDefault(); e.stopPropagation();
+  const lead = (clienteData?.leads || []).find(l => l.id === leadId);
+  const nombre    = lead?.nombre        || clienteData?.email || 'Cliente';
+  const propiedad = lead?.propiedad_titulo || 'una propiedad';
+  const asesor    = lead?.asesor_nombre || 'el asesor';
+  const msg = `Hola InmobIA, soy ${nombre}. Quisiera comunicarme sobre la propiedad "${propiedad}" que tengo agendada con ${asesor}. ¿Me pueden ayudar?`;
+  window.open(`https://wa.me/14155238886?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
 async function confirmarVisita(e, leadId) {
   e.preventDefault(); e.stopPropagation();
   mostrarConfirmCliente({
@@ -825,35 +1379,38 @@ async function disputarCierre(e, leadId) {
   });
 }
 
-function abrirWhatsAppAsesor(e, leadId) {
-  e.preventDefault();
-  e.stopPropagation();
-  const l = (clienteData.leads || []).find(x => x.id === leadId);
-  if (!l || !l.asesor_telefono) return;
-  const tel = String(l.asesor_telefono).replace(/\D/g,'');
-  const msg = encodeURIComponent(`Hola ${l.asesor_nombre || ''}, soy ${l.nombre || 'su cliente'} de InmobIA. Quisiera coordinar sobre la propiedad "${l.propiedad_titulo || ''}".`);
-  window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
-}
 
 function abrirCalificar(e, leadId) {
   e.preventDefault(); e.stopPropagation();
   const lead = clienteData.leads.find(l => l.id === leadId);
   if (!lead) return;
   leadActivo = lead;
-  estrellasVal = lead.calificacion_estrellas || 0;
 
-  document.getElementById('modal-cal-prop').textContent   = lead.propiedad_titulo || 'Propiedad';
-  document.getElementById('modal-cal-asesor').textContent = lead.asesor_nombre || 'Asesor';
-  document.getElementById('cal-comentario').value = lead.calificacion_comentario || '';
-
-  // Reset razones
+  // Reset propiedad
+  estrellasVal    = lead.calificacion_estrellas || 0;
+  interesCalifVal = lead.calificacion_interes   || '';
   razonesSelec.clear();
-  if (lead.calificacion_razones) {
+  if (lead.calificacion_razones)
     lead.calificacion_razones.split(',').filter(Boolean).forEach(r => razonesSelec.add(r));
-  }
+
+  // Reset asesor
+  asesorEstrellasVal    = lead.cal_asesor_estrellas || 0;
+  recomendariaCalifVal  = lead.cal_recomendaria     || '';
+  asesorRazonesSelec.clear();
+  if (lead.cal_asesor_razones)
+    lead.cal_asesor_razones.split(',').filter(Boolean).forEach(r => asesorRazonesSelec.add(r));
+
+  document.getElementById('modal-cal-prop').textContent    = lead.propiedad_titulo || 'Propiedad';
+  document.getElementById('modal-cal-asesor').textContent  = lead.asesor_nombre    || 'Asesor';
+  document.getElementById('cal-comentario').value          = lead.calificacion_comentario   || '';
+  document.getElementById('cal-asesor-comentario').value   = lead.cal_asesor_comentario     || '';
 
   actualizarEstrellas();
-  if (estrellasVal > 0) renderRazones();
+  actualizarAsesorEstrellas();
+  actualizarInteresCalif();
+  actualizarRecomendaCalif();
+  if (estrellasVal > 0 || interesCalifVal) renderRazones();
+  if (asesorEstrellasVal > 0) renderAsesorRazones();
 
   document.getElementById('modal-cal').classList.add('open');
 }
@@ -863,6 +1420,7 @@ function cerrarModal() {
   leadActivo = null;
 }
 
+// ── Propiedad ──
 function selEstrellas(val) {
   estrellasVal = val;
   actualizarEstrellas();
@@ -875,13 +1433,29 @@ function actualizarEstrellas() {
   });
 }
 
+function selInteresCalif(btn) {
+  const nuevo = btn.dataset.val === interesCalifVal ? '' : btn.dataset.val;
+  interesCalifVal = nuevo;
+  actualizarInteresCalif();
+  renderRazones();
+}
+
+function actualizarInteresCalif() {
+  document.querySelectorAll('.interes-cal-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === interesCalifVal);
+  });
+}
+
 function renderRazones() {
   const wrap = document.getElementById('razones-wrap');
   const grid = document.getElementById('razones-grid');
-  wrap.style.display = 'block';
-  const lista = estrellasVal <= 2 ? RAZONES.bajo : RAZONES.alto;
+  const esNegativo = estrellasVal <= 2 || interesCalifVal === 'poco-interesado' || interesCalifVal === 'no-interesado';
+  const esPositivo = estrellasVal >= 4 || interesCalifVal === 'muy-interesado' || interesCalifVal === 'interesado';
+  if (!estrellasVal && !interesCalifVal) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  const lista = esNegativo ? RAZONES_PROP.negativo : RAZONES_PROP.positivo;
   grid.innerHTML = lista.map(r => `
-    <span class="razon-chip ${razonesSelec.has(r) ? 'active' : ''}" onclick="toggleRazon(this, '${r}')">${r}</span>
+    <span class="razon-chip ${razonesSelec.has(r) ? 'active' : ''}" onclick="toggleRazon(this,'${r}')">${r}</span>
   `).join('');
 }
 
@@ -890,8 +1464,52 @@ function toggleRazon(el, razon) {
   else { razonesSelec.add(razon); el.classList.add('active'); }
 }
 
+// ── Asesor ──
+function selAsesorEstrellas(val) {
+  asesorEstrellasVal = val;
+  actualizarAsesorEstrellas();
+  renderAsesorRazones();
+}
+
+function actualizarAsesorEstrellas() {
+  document.querySelectorAll('.estrella-asesor').forEach(el => {
+    el.classList.toggle('active', Number(el.dataset.val) <= asesorEstrellasVal);
+  });
+}
+
+function renderAsesorRazones() {
+  const wrap = document.getElementById('asesor-razones-wrap');
+  const grid = document.getElementById('asesor-razones-grid');
+  if (!asesorEstrellasVal) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  const lista = asesorEstrellasVal >= 4 ? RAZONES_ASESOR_CALIF.positivo : RAZONES_ASESOR_CALIF.negativo;
+  grid.innerHTML = lista.map(r => `
+    <span class="razon-chip ${asesorRazonesSelec.has(r) ? 'active' : ''}" onclick="toggleAsesorRazon(this,'${r}')">${r}</span>
+  `).join('');
+}
+
+function toggleAsesorRazon(el, razon) {
+  if (asesorRazonesSelec.has(razon)) { asesorRazonesSelec.delete(razon); el.classList.remove('active'); }
+  else { asesorRazonesSelec.add(razon); el.classList.add('active'); }
+}
+
+function selRecomendaCalif(btn) {
+  const nuevo = btn.dataset.val === recomendariaCalifVal ? '' : btn.dataset.val;
+  recomendariaCalifVal = nuevo;
+  actualizarRecomendaCalif();
+}
+
+function actualizarRecomendaCalif() {
+  document.querySelectorAll('.recomienda-cal-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === recomendariaCalifVal);
+  });
+}
+
 async function enviarCalificacion() {
-  if (!estrellasVal) { toast('Selecciona una calificación de 1 a 5 estrellas', 'error'); return; }
+  if (!estrellasVal)      { toast('Califica la propiedad con estrellas', 'error'); return; }
+  if (!interesCalifVal)   { toast('Indica tu nivel de interés en la propiedad', 'error'); return; }
+  if (!asesorEstrellasVal){ toast('Califica el servicio del asesor con estrellas', 'error'); return; }
+
   const btn = document.getElementById('btn-enviar-cal');
   btn.textContent = 'Enviando...'; btn.disabled = true;
 
@@ -901,20 +1519,25 @@ async function enviarCalificacion() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         token,
-        lead_id: leadActivo.id,
-        estrellas: estrellasVal,
-        razones: [...razonesSelec],
-        comentario: document.getElementById('cal-comentario').value
+        lead_id:          leadActivo.id,
+        estrellas:        estrellasVal,
+        razones:          [...razonesSelec],
+        comentario:       document.getElementById('cal-comentario').value,
+        interes:          interesCalifVal,
+        asesor_estrellas: asesorEstrellasVal,
+        asesor_razones:   [...asesorRazonesSelec],
+        asesor_comentario: document.getElementById('cal-asesor-comentario').value,
+        recomendaria:     recomendariaCalifVal
       })
     });
     if (!r.ok) throw new Error();
 
-    // Actualizar datos locales
     const lead = clienteData.leads.find(l => l.id === leadActivo.id);
     if (lead) {
-      lead.calificacion_estrellas = estrellasVal;
-      lead.calificacion_razones   = [...razonesSelec].join(',');
+      lead.calificacion_estrellas  = estrellasVal;
+      lead.calificacion_razones    = [...razonesSelec].join(',');
       lead.calificacion_comentario = document.getElementById('cal-comentario').value;
+      lead.cal_asesor_estrellas    = asesorEstrellasVal;
     }
 
     toast('¡Gracias! Tu calificación fue enviada.');

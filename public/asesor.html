@@ -31,16 +31,17 @@ nav {
   position: sticky; top: 0; z-index: 200;
   background: var(--white); border-bottom: 1px solid var(--gray-border);
   height: 68px; overflow: visible;
+  padding: 0 3rem;
 }
 .nav-inner {
-  max-width: 1440px; margin: 0 auto; padding: 0 3rem;
+  max-width: 1440px; margin: 0 auto;
   height: 100%; display: flex; align-items: center; justify-content: space-between;
   position: relative;
 }
 /* Logo cuadrado flotante — cae sobre el hero */
 #logo-sq-card {
   display: none;
-  position: absolute; top: 0; left: 3rem;
+  position: absolute; top: 0; left: 0;
   background: var(--white);
   border-radius: 0 0 12px 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.13);
@@ -50,7 +51,7 @@ nav {
   max-width: 120px;
 }
 #logo-sq-card img { max-width: 84px; max-height: 84px; object-fit: contain; display: block; }
-.nav-logo { display: flex; align-items: center; text-decoration: none; }
+.nav-logo { display: flex; align-items: stretch; text-decoration: none; align-self: stretch; height: 100%; padding: 0; }
 .logo-inmob { font-family: 'Comfortaa', sans-serif; font-size: 1.7rem; font-weight: 300; color: var(--charcoal); }
 .logo-ia    { font-family: 'Century Gothic', 'Trebuchet MS', sans-serif; font-size: 2rem; font-weight: 400; color: var(--gold); }
 .nav-links {
@@ -476,7 +477,7 @@ footer {
       <span class="nav-logo-text" id="nav-logo-inmobia">
         <span class="logo-inmob">Inmob</span><span class="logo-ia">IA<sup style="font-size:0.4em;vertical-align:super">GT</sup></span>
       </span>
-      <img id="nav-logo-custom" src="" alt="Logo" style="display:none;max-height:42px;max-width:160px;object-fit:contain">
+      <img id="nav-logo-custom" src="" alt="Logo" style="display:none;height:68px;width:auto;max-width:320px">
     </a>
     <div class="nav-links" id="nav-links">
       <a class="nav-link-item" onclick="scrollToId('props-grid');return false;" href="#propiedades">Propiedades</a>
@@ -888,7 +889,8 @@ footer {
 </footer>
 
 <script>
-const API  = 'https://inmobia.site/api';
+const BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://inmobia.site';
+const API  = BASE_URL + '/api';
 const slug = new URLSearchParams(window.location.search).get('slug')
           || window.location.pathname.split('/').pop();
 
@@ -938,7 +940,7 @@ function renderHero(a) {
   const hero = document.querySelector('.hero');
   if (a.hero_imagen) {
     const heroOp = parseFloat(a.hero_opacidad ?? 0.45);
-    hero.style.background = `linear-gradient(rgba(0,0,0,${heroOp}), rgba(0,0,0,${heroOp})), url('https://inmobia.site${a.hero_imagen}')`;
+    hero.style.background = `linear-gradient(rgba(0,0,0,${heroOp}), rgba(0,0,0,${heroOp})), url('${BASE_URL}${a.hero_imagen}')`;
     hero.style.backgroundSize = 'cover';
     hero.style.backgroundPosition = 'center';
   } else {
@@ -971,7 +973,7 @@ function renderHero(a) {
   // Logo en nav
   document.getElementById('nav-logo-inmobia').style.display = 'none';
   if (a.logo) {
-    const logoUrl = a.logo.startsWith('http') ? a.logo : `https://inmobia.site${a.logo}`;
+    const logoUrl = a.logo.startsWith('http') ? a.logo : `${BASE_URL}${a.logo}`;
     const tmpImg = new Image();
     tmpImg.onload = () => {
       const ratio = tmpImg.naturalWidth / (tmpImg.naturalHeight || 1);
@@ -1033,7 +1035,7 @@ function renderHero(a) {
 
   // Foto
   if (a.foto) {
-    document.getElementById('hero-avatar').innerHTML = `<img src="https://inmobia.site${a.foto}" alt="${nombre}">`;
+    document.getElementById('hero-avatar').innerHTML = `<img src="${BASE_URL}${a.foto}" alt="${nombre}">`;
   }
 
   // Badges
@@ -1049,10 +1051,11 @@ function renderHero(a) {
   const scoreRound = Math.round(score * 10) / 10;
   const fullStars = Math.floor(scoreRound);
   const halfStar  = (scoreRound - fullStars) >= 0.5;
+  const halfStarSvg = `<svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle;margin:0 1px"><defs><linearGradient id="hg"><stop offset="50%" stop-color="#f59e0b"/><stop offset="50%" stop-color="rgba(255,255,255,0.25)"/></linearGradient></defs><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="url(#hg)" stroke="none"/></svg>`;
   let starsHtml = '';
   for (let i = 1; i <= 5; i++) {
     if (i <= fullStars) starsHtml += `<span style="color:#f59e0b;font-size:1.05rem">★</span>`;
-    else if (i === fullStars + 1 && halfStar) starsHtml += `<span style="color:#f59e0b;font-size:1.05rem">½</span>`;
+    else if (i === fullStars + 1 && halfStar) starsHtml += halfStarSvg;
     else starsHtml += `<span style="color:rgba(255,255,255,0.25);font-size:1.05rem">★</span>`;
   }
   scoreEl.innerHTML = `
@@ -1241,7 +1244,7 @@ function pintarGrid(propiedades) {
 
     const imgWrap = p.imagen_principal
       ? `<div class="prop-img-wrap">
-           <img class="prop-img" src="https://inmobia.site${p.imagen_principal}" alt="${p.titulo}" loading="lazy">
+           <img class="prop-img" src="${BASE_URL}${p.imagen_principal}" alt="${p.titulo}" loading="lazy">
            <span class="prop-badge-op${esVenta ? ' venta' : ''}">${opLabel}</span>
            <span class="prop-price-tag">${sym}${precio}</span>
            ${badge1D}

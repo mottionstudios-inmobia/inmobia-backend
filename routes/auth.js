@@ -34,8 +34,11 @@ const storageLogo = multer.diskStorage({
 });
 const uploadLogo = multer({ storage: storageLogo, limits: { fileSize: 1 * 1024 * 1024 }, fileFilter: (req, file, cb) => cb(null, /jpeg|jpg|png|webp|svg/.test(file.mimetype)) });
 
+const dpiDir = path.join(__dirname, '../../private/dpi');
+fs.mkdirSync(dpiDir, { recursive: true });
+
 const storageDPI = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../../private/dpi')),
+  destination: (req, file, cb) => cb(null, dpiDir),
   filename:    (req, file, cb) => cb(null, `dpi_${Date.now()}${path.extname(file.originalname)}`)
 });
 const uploadDPI = multer({ storage: storageDPI, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: (req, file, cb) => cb(null, /jpeg|jpg|png|webp|pdf/.test(file.mimetype)) });
@@ -187,7 +190,7 @@ router.get('/me', (req, res) => {
   if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
   try {
     const { id } = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET || 'inmobia_secret_2024');
-    const u = db.prepare('SELECT id, nombre, email, rol, telefono, zona, tipo_asesor, nit, usuario, bio, foto, logo, empresa, plan, score, slug, tipos_ranking, tipo_doc, pais_origen, hero_color_izq, hero_color_der, hero_imagen, hero_opacidad, btn_estilo, btn_whatsapp, btn_agendar, btn_mensaje, red_fb, red_ig, red_tiktok, red_linkedin, vis_fb, vis_ig, vis_tiktok, vis_linkedin, servicios_activo, servicios_titulo, servicios_data, testimonios_activo, testimonios_titulo, testimonios_data, permitir_similares_otros, creado_en, codigo_asesor, premium_estado, premium_activado_en, premium_renovacion_en, recurrente_subscription_id, dpi_archivo, dpi_subido_en, acred_cbr, acred_cbr_codigo, acred_gpi, acred_gpi_codigo, mostrar_zonas FROM usuarios WHERE id = ?').get(id);
+    const u = db.prepare('SELECT id, nombre, email, rol, telefono, zona, tipo_asesor, nit, usuario, bio, foto, logo, empresa, plan, score, slug, tipos_ranking, tipo_doc, pais_origen, hero_color_izq, hero_color_der, hero_imagen, hero_opacidad, btn_estilo, btn_whatsapp, btn_agendar, btn_mensaje, red_fb, red_ig, red_tiktok, red_linkedin, vis_fb, vis_ig, vis_tiktok, vis_linkedin, servicios_activo, servicios_titulo, servicios_data, testimonios_activo, testimonios_titulo, testimonios_data, permitir_similares_otros, creado_en, codigo_asesor, premium_estado, premium_activado_en, premium_renovacion_en, recurrente_subscription_id, dpi_archivo, dpi_subido_en, dpi_estado, dpi_rechazado_razon, acred_cbr, acred_cbr_codigo, acred_gpi, acred_gpi_codigo, mostrar_zonas FROM usuarios WHERE id = ?').get(id);
     if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
     res.json(u);
   } catch { res.status(401).json({ error: 'Token inválido' }); }
@@ -267,7 +270,7 @@ router.get('/score-detalle', authMiddleware, (req, res) => {
   const colab = db.prepare(`SELECT COUNT(*) as c FROM leads WHERE asesor_id = ? AND etapa = 'cerrado' AND modelo IN ('4T','5RA') AND cerrado_en >= ?`).get(asesorId, inicioMes).c;
   const areaColab = colab === 0 ? 0 : colab === 1 ? 3 : 5;
 
-  // Score final = promedio de las 9 áreas
+  // Score final = promedio de las 9 áreas (0–5★)
   const areasArr = [areaPerfil, areaPropiedades, areaCierres, areaCali, areaVisitas, areaLeads, areaRespuesta, areaReferidos, areaColab];
   const scoreFinal = Math.round(areasArr.reduce((a, b) => a + b, 0) / areasArr.length * 10) / 10;
 
@@ -344,11 +347,16 @@ router.put('/perfil', (req, res) => {
   if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
   try {
     const { id } = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET || 'inmobia_secret_2024');
-    const { nombre, telefono, bio, zona, tipo_asesor, empresa, tipos_ranking, cuenta_banco, cuenta_numero, cuenta_tipo, cuenta_titular, acred_cbr, acred_cbr_codigo, acred_gpi, acred_gpi_codigo, mostrar_zonas } = req.body;
-    const cur = db.prepare('SELECT tipos_ranking, cuenta_banco, cuenta_numero, cuenta_tipo, cuenta_titular, mostrar_zonas, acred_cbr, acred_cbr_codigo, acred_gpi, acred_gpi_codigo FROM usuarios WHERE id=?').get(id) || {};
-    db.prepare('UPDATE usuarios SET nombre=?, telefono=?, bio=?, zona=?, tipo_asesor=?, empresa=?, tipos_ranking=?, cuenta_banco=?, cuenta_numero=?, cuenta_tipo=?, cuenta_titular=?, acred_cbr=?, acred_cbr_codigo=?, acred_gpi=?, acred_gpi_codigo=?, mostrar_zonas=? WHERE id=?')
+    const { nombre, telefono, bio, zona, tipo_asesor, empresa, tipos_ranking, cuenta_banco, cuenta_numero, cuenta_tipo, cuenta_titular, acred_cbr, acred_cbr_codigo, acred_gpi, acred_gpi_codigo, mostrar_zonas, nit, tipo_doc } = req.body;
+    const cur = db.prepare('SELECT nombre, telefono, bio, zona, tipo_asesor, empresa, tipos_ranking, cuenta_banco, cuenta_numero, cuenta_tipo, cuenta_titular, mostrar_zonas, acred_cbr, acred_cbr_codigo, acred_gpi, acred_gpi_codigo, nit, tipo_doc FROM usuarios WHERE id=?').get(id) || {};
+    db.prepare('UPDATE usuarios SET nombre=?, telefono=?, bio=?, zona=?, tipo_asesor=?, empresa=?, tipos_ranking=?, cuenta_banco=?, cuenta_numero=?, cuenta_tipo=?, cuenta_titular=?, acred_cbr=?, acred_cbr_codigo=?, acred_gpi=?, acred_gpi_codigo=?, mostrar_zonas=?, nit=?, tipo_doc=? WHERE id=?')
       .run(
-        nombre || '', telefono || '', bio || '', zona || '', tipo_asesor || 'independiente', empresa || '',
+        nombre    !== undefined ? (nombre    || '') : (cur.nombre    || ''),
+        telefono  !== undefined ? (telefono  || '') : (cur.telefono  || ''),
+        bio       !== undefined ? (bio       || '') : (cur.bio       || ''),
+        zona      !== undefined ? (zona      || '') : (cur.zona      || ''),
+        tipo_asesor !== undefined ? (tipo_asesor || 'independiente') : (cur.tipo_asesor || 'independiente'),
+        empresa   !== undefined ? (empresa   || '') : (cur.empresa   || ''),
         tipos_ranking   !== undefined ? tipos_ranking   : (cur.tipos_ranking  || ''),
         cuenta_banco    !== undefined ? cuenta_banco    : (cur.cuenta_banco   || ''),
         cuenta_numero   !== undefined ? cuenta_numero   : (cur.cuenta_numero  || ''),
@@ -359,6 +367,8 @@ router.put('/perfil', (req, res) => {
         acred_gpi       !== undefined ? (acred_gpi ? 1 : 0)        : (cur.acred_gpi       ?? 0),
         acred_gpi_codigo !== undefined ? (acred_gpi_codigo || '')   : (cur.acred_gpi_codigo || ''),
         mostrar_zonas   !== undefined ? (mostrar_zonas ? 1 : 0)    : (cur.mostrar_zonas    ?? 1),
+        nit             !== undefined ? (nit || '')                 : (cur.nit              || ''),
+        tipo_doc        !== undefined ? (tipo_doc || 'dpi')         : (cur.tipo_doc         || 'dpi'),
         id
       );
     res.json({ mensaje: 'Perfil actualizado' });
@@ -414,40 +424,43 @@ router.post('/dpi', uploadDPI.single('dpi'), async (req, res) => {
 
   // Análisis de imagen con Sharp
   try {
-    const meta = await sharp(filePath).metadata();
-    const { width: w, height: h } = meta;
+    // Rotar automáticamente según EXIF (fotos de celular)
+    const rotated = sharp(filePath).rotate();
+    const meta = await rotated.metadata();
+    const w = meta.width;
+    const h = meta.height;
 
-    // 1. Dimensiones mínimas — documento real debe tener al menos 400×250 px
-    if (w < 400 || h < 250) {
+    // 1. Dimensiones mínimas
+    if (w < 300 || h < 200) {
       fs.unlinkSync(filePath);
       return res.status(422).json({ error: `Imagen muy pequeña (${w}×${h}px). Suba una foto más nítida del documento.` });
     }
 
-    // 2. Aspect ratio — rangos válidos para DPI Guatemala y pasaportes internacionales
+    // 2. Aspect ratio — aceptamos landscape (DPI/tarjeta), portrait (pasaporte o foto con ambas caras)
     const ratio = w / h;
-    // DPI (tarjeta ID-1): ~1.586:1 → aceptamos 1.15–2.1 (landscape)
-    // Pasaporte hoja datos landscape: ~1.2–1.55
-    // Pasaporte portrait: ratio 0.65–0.95
-    const esLandscapeDoc = ratio >= 1.15 && ratio <= 2.1;
-    const esPortraitDoc  = ratio >= 0.55 && ratio <= 0.95;
+    const esLandscapeDoc = ratio >= 1.0  && ratio <= 2.5;   // DPI solo o landscape
+    const esPortraitDoc  = ratio >= 0.35 && ratio < 1.0;    // Pasaporte, foto con ambas caras, imagen vertical
     if (!esLandscapeDoc && !esPortraitDoc) {
       fs.unlinkSync(filePath);
       return res.status(422).json({
-        error: `La proporción de la imagen (${ratio.toFixed(2)}:1) no corresponde a un documento de identificación. Fotografíe solo el documento sin recortar partes.`
+        error: `La proporción de la imagen (${ratio.toFixed(2)}:1) no parece corresponder a un documento. Fotografíe el DPI o pasaporte completo.`
       });
     }
 
-    // 3. Análisis de píxeles con Sharp — muestra reducida para velocidad
-    const sampleW = Math.min(w, 300);
-    const sampleH = Math.min(h, 200);
+    // 3. Análisis de píxeles — muestra 300×200 aplicando rotación EXIF
+    const sampleW = 300, sampleH = 200;
     const { data } = await sharp(filePath)
+      .rotate()
       .resize(sampleW, sampleH, { fit: 'fill' })
+      .removeAlpha()
       .raw()
       .toBuffer({ resolveWithObject: true });
 
     const px = data;
     const total = sampleW * sampleH;
-    let brightPx = 0, darkPx = 0, sumLum = 0, blueHeaderPx = 0, headerTotal = 0;
+    let brightPx = 0, darkPx = 0, sumLum = 0;
+    let dpiCyanZonePx = 0, dpiCyanAnyPx = 0, cyanZoneTotal = 0;
+    let pinkPx = 0, greenPx = 0;
     const lumValues = [];
 
     for (let y = 0; y < sampleH; y++) {
@@ -457,59 +470,75 @@ router.post('/dpi', uploadDPI.single('dpi'), async (req, res) => {
         const lum = 0.299*r + 0.587*g + 0.114*b;
         sumLum += lum;
         lumValues.push(lum);
-        if (lum > 200) brightPx++;
+        if (lum > 185) brightPx++;
         if (lum < 60)  darkPx++;
 
-        // Header zone (top 30%) — buscar azul dominante del DPI Guatemala
-        if (y < sampleH * 0.30) {
-          headerTotal++;
-          if (b > 90 && b > r + 25 && b > g - 30) blueHeaderPx++;
+        // Cyan/turquesa DPI Guatemala: R<185, G y B altos y cercanos entre sí, ambos >> R
+        // Captura tanto el encabezado claro (#6DC4D8) como la marca de agua del mapa
+        const esDpiCyan = r < 185 && g > 125 && b > 125 && b > r + 30 && Math.abs(b - g) < 70;
+        if (y < sampleH * 0.50) {
+          cyanZoneTotal++;
+          if (esDpiCyan) dpiCyanZonePx++;
         }
+        if (esDpiCyan) dpiCyanAnyPx++;
+
+        // Rosa/salmón (patentes de comercio)
+        if (lum > 120 && r > b + 35 && r > g + 10) pinkPx++;
+        // Verde dominante (documentos no-DPI)
+        if (lum > 100 && g > r + 25 && g > b + 25) greenPx++;
       }
     }
 
-    const pctBright = brightPx / total;
-    const pctDark   = darkPx / total;
-    const blueHeaderRatio = headerTotal > 0 ? blueHeaderPx / headerTotal : 0;
-
-    // Varianza de luminosidad — documentos tienen texto + foto + fondo = alta varianza
+    const pctBright       = brightPx / total;
+    const pctDark         = darkPx / total;
+    const dpiCyanZoneRatio = cyanZoneTotal > 0 ? dpiCyanZonePx / cyanZoneTotal : 0;
+    const dpiCyanAnyRatio  = dpiCyanAnyPx / total;
+    const pinkRatio        = pinkPx / total;
+    const greenRatio       = greenPx / total;
     const lumMean = sumLum / total;
     const lumStd  = Math.sqrt(lumValues.reduce((acc, v) => acc + (v - lumMean) ** 2, 0) / total);
 
-    // 4. Validaciones de contenido
-    // Imagen muy oscura — mala foto o no es un documento
-    if (pctBright < 0.18 && blueHeaderRatio < 0.10) {
+    // 4. Rechazos directos
+    if (pctBright < 0.10 && dpiCyanAnyRatio < 0.04) {
       fs.unlinkSync(filePath);
       return res.status(422).json({ error: 'La imagen es muy oscura. Tome la foto en un lugar con buena iluminación.' });
     }
-
-    // Imagen sin variación — color uniforme, no es un documento
-    if (lumStd < 12) {
+    if (lumStd < 8) {
       fs.unlinkSync(filePath);
-      return res.status(422).json({ error: 'La imagen parece ser de un solo color. No parece ser un documento de identificación.' });
+      return res.status(422).json({ error: 'La imagen parece ser de un solo color. Suba una foto clara del documento.' });
+    }
+    // Color dominante incompatible con DPI/pasaporte guatemalteco
+    if (pinkRatio > 0.25 && dpiCyanAnyRatio < 0.05) {
+      fs.unlinkSync(filePath);
+      return res.status(422).json({ error: 'El documento parece ser una patente u otro documento comercial. Suba su DPI o pasaporte personal vigente.' });
+    }
+    if (greenRatio > 0.20 && dpiCyanAnyRatio < 0.05) {
+      fs.unlinkSync(filePath);
+      return res.status(422).json({ error: 'El documento no parece ser un DPI o pasaporte. Suba su documento de identificación personal vigente.' });
     }
 
-    // Score de confianza
+    // 5. Score — el cyan DPI Guatemala es el indicador principal
     let score = 0;
-    if (w >= 800 || h >= 500) score += 20;          // Buena resolución
-    if (pctBright >= 0.30)    score += 20;           // Fondo claro (documento)
-    if (pctDark >= 0.03 && pctDark <= 0.45) score += 15; // Texto visible
-    if (lumStd >= 35)         score += 25;           // Alta variación (texto + foto + fondo)
-    if (blueHeaderRatio >= 0.15) score += 30;        // Header azul — DPI Guatemala
-    if (esLandscapeDoc && ratio >= 1.4 && ratio <= 1.75) score += 20; // Ratio exacto tarjeta
-    if (esPortraitDoc)        score += 10;           // Pasaporte portrait
+    if (w >= 600 || h >= 400)                           score += 15; // Resolución mínima
+    if (pctBright >= 0.20)                              score += 10; // Fondo claro
+    if (pctDark >= 0.02 && pctDark <= 0.50)             score += 10; // Texto visible
+    if (lumStd >= 20)                                   score += 10; // Variación de colores
+    if (dpiCyanZoneRatio >= 0.06)                       score += 40; // Cyan DPI en mitad superior ← clave
+    if (dpiCyanAnyRatio >= 0.04)                        score += 20; // Cyan DPI en cualquier parte
+    if (esLandscapeDoc && ratio >= 1.4 && ratio <= 1.8)  score += 15; // Proporción exacta tarjeta DPI
+    if (esPortraitDoc)                                  score += 10; // Foto de dos caras / pasaporte
 
     if (score < 25) {
       fs.unlinkSync(filePath);
-      return res.status(422).json({ error: 'La imagen no parece ser un documento de identificación válido. Suba una foto clara de su DPI o pasaporte.' });
+      return res.status(422).json({ error: 'La imagen no parece ser un documento de identificación. Suba una foto clara de su DPI o pasaporte con buena iluminación.' });
     }
 
-    // Guardado exitoso
-    db.prepare("UPDATE usuarios SET dpi_archivo=?, dpi_subido_en=datetime('now') WHERE id=?")
+    // Guardado exitoso — estado 'pendiente' hasta verificación manual del equipo InmobIA
+    db.prepare("UPDATE usuarios SET dpi_archivo=?, dpi_subido_en=datetime('now'), dpi_estado='pendiente', dpi_rechazado_razon=NULL WHERE id=?")
       .run(`private/dpi/${req.file.filename}`, id);
 
-    const tipo = blueHeaderRatio >= 0.15 ? 'dpi_guatemala' : esPortraitDoc ? 'pasaporte' : 'tarjeta_id';
-    res.json({ ok: true, tipo, confianza: Math.min(100, score) });
+    const tipo = dpiCyanZoneRatio >= 0.06 ? 'dpi_guatemala' : esPortraitDoc ? 'pasaporte' : 'tarjeta_id';
+    res.json({ ok: true, tipo, confianza: Math.min(100, score), estado: 'pendiente' });
 
   } catch (e) {
     try { fs.unlinkSync(filePath); } catch {}
@@ -884,6 +913,60 @@ router.get('/mis-calificaciones', authMiddleware, (req, res) => {
     .map(([razon, cantidad]) => ({ razon, cantidad }));
 
   res.json({ calificaciones, total, promedio, distribucion, topRazones });
+});
+
+// ── ADMIN: verificación de DPI ────────────────────────────────────────────────
+
+// GET /api/auth/admin/dpi-pendientes — lista asesores con DPI pendiente de verificación
+router.get('/admin/dpi-pendientes', (req, res) => {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET || 'inmobia_secret_2024');
+    const admin = db.prepare('SELECT rol FROM usuarios WHERE id = ?').get(decoded.id);
+    if (!admin || admin.rol !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    const pendientes = db.prepare(`
+      SELECT id, nombre, email, telefono, foto, dpi_archivo, dpi_subido_en, dpi_estado, dpi_rechazado_razon, plan, codigo_asesor
+      FROM usuarios
+      WHERE dpi_archivo IS NOT NULL AND dpi_archivo != ''
+      ORDER BY CASE WHEN dpi_estado IS NULL OR dpi_estado = 'pendiente' THEN 0 ELSE 1 END, dpi_subido_en DESC
+    `).all();
+    res.json(pendientes);
+  } catch { res.status(401).json({ error: 'Token inválido' }); }
+});
+
+// PATCH /api/auth/admin/dpi/:id/aprobar — aprueba el DPI de un asesor
+router.patch('/admin/dpi/:id/aprobar', (req, res) => {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET || 'inmobia_secret_2024');
+    const admin = db.prepare('SELECT rol FROM usuarios WHERE id = ?').get(decoded.id);
+    if (!admin || admin.rol !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    const asesorId = parseInt(req.params.id);
+    db.prepare("UPDATE usuarios SET dpi_estado='aprobado', dpi_rechazado_razon=NULL WHERE id=?").run(asesorId);
+    res.json({ ok: true, mensaje: 'DPI aprobado' });
+  } catch { res.status(401).json({ error: 'Token inválido' }); }
+});
+
+// PATCH /api/auth/admin/dpi/:id/rechazar — rechaza el DPI con una razón
+router.patch('/admin/dpi/:id/rechazar', (req, res) => {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET || 'inmobia_secret_2024');
+    const admin = db.prepare('SELECT rol FROM usuarios WHERE id = ?').get(decoded.id);
+    if (!admin || admin.rol !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    const asesorId = parseInt(req.params.id);
+    const { razon } = req.body;
+    if (!razon) return res.status(400).json({ error: 'Debe indicar la razón del rechazo' });
+    db.prepare("UPDATE usuarios SET dpi_estado='rechazado', dpi_rechazado_razon=?, dpi_archivo=NULL, dpi_subido_en=NULL WHERE id=?")
+      .run(razon, asesorId);
+    res.json({ ok: true, mensaje: 'DPI rechazado' });
+  } catch { res.status(401).json({ error: 'Token inválido' }); }
 });
 
 export default router;
