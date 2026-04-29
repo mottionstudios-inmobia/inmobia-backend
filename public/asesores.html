@@ -1699,18 +1699,18 @@ async function registrar(e) {
   btn.textContent = 'Creando cuenta...';
   btn.disabled = true;
 
-  const nombre     = document.getElementById('r-nombre').value.trim();
-  const apellido   = document.getElementById('r-apellido').value.trim();
-  const email      = document.getElementById('r-email').value.trim();
-  const prefijo    = document.getElementById('r-prefijo').value;
-  const telefono   = prefijo + ' ' + document.getElementById('r-telefono').value.trim();
-  const password   = document.getElementById('r-password').value;
-  const tipoDoc    = document.getElementById('r-tipo-doc').value;
-  const nit        = document.getElementById('r-nit').value.trim();
-  const paisOrigen = document.getElementById('r-pais-origen').value;
-  const usuario    = document.getElementById('r-usuario').value.trim();
-
   try {
+    const nombre     = document.getElementById('r-nombre').value.trim();
+    const apellido   = document.getElementById('r-apellido').value.trim();
+    const email      = document.getElementById('r-email').value.trim();
+    const prefijo    = document.getElementById('r-prefijo').value;
+    const telefono   = prefijo + ' ' + document.getElementById('r-telefono').value.trim();
+    const password   = document.getElementById('r-password').value;
+    const tipoDoc    = document.getElementById('r-tipo-doc')?.value || '';
+    const nit        = document.getElementById('r-nit')?.value?.trim() || '';
+    const paisOrigen = document.getElementById('r-pais-origen')?.value || '';
+    const usuario    = document.getElementById('r-usuario').value.trim();
+
     const r = await fetch(`${API}/auth/registro-asesor`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
