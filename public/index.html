@@ -3186,10 +3186,10 @@ user-select: none;
       : `<span class="property-status-tag disponible">Disponible</span>`;
 
     const specs = [];
-    if (p.habitaciones) specs.push(`<div class="spec"><strong>${p.habitaciones}</strong><span>Habs</span></div>`);
-    if (p.banos)        specs.push(`<div class="spec"><strong>${p.banos}</strong><span>Baños</span></div>`);
-    if (p.parqueos)     specs.push(`<div class="spec"><strong>${p.parqueos}</strong><span>${p.parqueos === 1 ? 'Parqueo' : 'Parqueos'}</span></div>`);
-    if (p.metros)       specs.push(`<div class="spec"><strong>${p.metros}</strong><span>m²</span></div>`);
+    if (p.habitaciones) specs.push(`<div class="spec"><img src="/iconos/Habitaciones.png" style="width:20px;height:20px;object-fit:contain;margin-bottom:2px"><strong>${p.habitaciones}</strong><span>Habs</span></div>`);
+    if (p.banos)        specs.push(`<div class="spec"><img src="/iconos/baños.png" style="width:20px;height:20px;object-fit:contain;margin-bottom:2px"><strong>${p.banos}</strong><span>Baños</span></div>`);
+    if (p.parqueos)     specs.push(`<div class="spec"><img src="/iconos/parqueos.png" style="width:20px;height:20px;object-fit:contain;margin-bottom:2px"><strong>${p.parqueos}</strong><span>${p.parqueos === 1 ? 'Parqueo' : 'Parqueos'}</span></div>`);
+    if (p.metros)       specs.push(`<div class="spec"><img src="/iconos/m2.png" style="width:20px;height:20px;object-fit:contain;margin-bottom:2px"><strong>${p.metros}</strong><span>m²</span></div>`);
 
     const tags = [];
     const dot = '<span style="font-size:1rem;line-height:1;vertical-align:middle">•</span>';

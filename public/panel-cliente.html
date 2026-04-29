@@ -60,22 +60,22 @@ body { font-family: var(--font-body); background: #f0f3fa; color: var(--charcoal
 .visita-card {
   background: var(--white); border: 1px solid var(--gray-border);
   border-radius: var(--radius); overflow: hidden;
-  display: flex; gap: 0; margin-bottom: 0.75rem;
+  display: flex; flex-direction: column; gap: 0; margin-bottom: 0.75rem;
   box-shadow: var(--shadow); transition: box-shadow 0.2s, border-color 0.2s;
   text-decoration: none; color: inherit;
 }
-.visita-card[href] { cursor: pointer; }
-.visita-card[href]:hover { box-shadow: 0 4px 20px rgba(30,45,74,0.12); border-color: var(--gold); }
-.visita-card:not([href]) { cursor: default; }
-.visita-card:not([href]):hover { box-shadow: 0 4px 20px rgba(30,45,74,0.12); }
-.visita-img { width: 110px; flex-shrink: 0; object-fit: cover; display: block; background: var(--gray-light); }
-.visita-img-placeholder { width: 110px; flex-shrink: 0; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
-.visita-body { flex: 1; padding: 0.9rem 1rem; min-width: 0; }
+.visita-card { cursor: default; }
+.visita-card:hover { box-shadow: 0 4px 20px rgba(30,45,74,0.12); }
+.visita-top { display: flex; gap: 0; }
+.visita-img { width: 140px; height: 140px; flex-shrink: 0; object-fit: cover; display: block; background: var(--gray-light); }
+.visita-img-placeholder { width: 140px; height: 140px; flex-shrink: 0; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+.visita-body { flex: 1; padding: 0.75rem 1rem; min-width: 0; }
+.visita-actions { padding: 0 1rem 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
 .visita-titulo { font-size: 0.9rem; font-weight: 600; color: var(--charcoal); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .visita-meta { font-size: 0.72rem; color: var(--gray); margin-bottom: 0.55rem; }
 .visita-asesor { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--gray); margin-bottom: 0.5rem; }
-.visita-asesor img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
-.visita-asesor .asesor-iniciales { width: 24px; height: 24px; border-radius: 50%; background: var(--charcoal); color: #fff; font-size: 0.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.visita-asesor img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+.visita-asesor .asesor-iniciales { width: 38px; height: 38px; border-radius: 50%; background: var(--charcoal); color: #fff; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .etapa-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.65rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 20px; }
 .etapa-nuevo     { background: #e0f2fe; color: #0369a1; }
 .etapa-agendado  { background: #fef9c3; color: #854d0e; }
@@ -678,7 +678,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     clienteData = await r.json();
 
     document.getElementById('loader').style.display = 'none';
-    document.getElementById('topbar-email').textContent = clienteData.email;
+    const nombreCliente = clienteData.leads?.[0]?.nombre || clienteData.email;
+    document.getElementById('topbar-email').textContent = nombreCliente;
     document.querySelectorAll('.section').forEach(s => s.style.display = '');
 
     renderVisitas();
@@ -803,28 +804,35 @@ function renderVisitas() {
          </button>`
       : '';
 
-    const tag    = l.propiedad_id ? 'a' : 'div';
-    const hrefAt = l.propiedad_id ? `href="/propiedad.html?id=${l.propiedad_id}&from=cliente"` : '';
+    const tituloHtml = l.propiedad_id
+      ? `<a href="/propiedad.html?id=${l.propiedad_id}&from=cliente" class="visita-titulo" style="text-decoration:none;color:inherit">${l.propiedad_titulo || 'Búsqueda personalizada'}</a>`
+      : `<div class="visita-titulo">${l.propiedad_titulo || 'Búsqueda personalizada'}</div>`;
 
-    return `<${tag} class="visita-card" ${hrefAt}>
-      ${img}
-      <div class="visita-body">
-        <div class="visita-titulo">${l.propiedad_titulo || 'Búsqueda personalizada'}</div>
-        <div class="visita-meta">
-          ${l.prop_proyecto ? `<strong style="color:var(--charcoal)">${l.prop_proyecto}</strong> · ` : ''}
-          ${ubicacion || ''}${precio ? ` · ${precio}` : ''}${l.prop_tipo ? ` · ${l.prop_tipo}` : ''}
+    return `<div class="visita-card">
+      <div class="visita-top">
+        ${img}
+        <div class="visita-body">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.2rem">
+            ${tituloHtml}
+            <a href="#" onclick="abrirChatInmobia(event,${l.id})" style="flex-shrink:0;display:inline-flex;align-items:center;gap:0.3rem;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:6px;padding:0.28rem 0.6rem;font-size:0.68rem;font-weight:600;text-decoration:none;cursor:pointer">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+              Comunicación vía InmobIA
+            </a>
+          </div>
+          <div class="visita-meta">
+            ${l.prop_proyecto ? `<strong style="color:var(--charcoal)">${l.prop_proyecto}</strong> · ` : ''}
+            ${ubicacion || ''}${precio ? ` · ${precio}` : ''}${l.prop_tipo ? ` · ${l.prop_tipo}` : ''}
+          </div>
+          <div class="visita-asesor">
+            ${asesorAvatar}
+            <span>${l.asesor_nombre || 'Asesor'}</span>
+            ${l.asesor_empresa ? `<span>· ${l.asesor_empresa}</span>` : ''}
+          </div>
         </div>
-        <div class="visita-asesor" style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
-          ${asesorAvatar}
-          <span>${l.asesor_nombre || 'Asesor'}</span>
-          ${l.asesor_empresa ? `<span>· ${l.asesor_empresa}</span>` : ''}
-          <a href="#" onclick="abrirChatInmobia(event,${l.id})" style="margin-left:auto;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:6px;padding:0.3rem 0.65rem;font-size:0.7rem;font-weight:600;display:inline-flex;align-items:center;gap:0.3rem;text-decoration:none;cursor:pointer">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-            Comunicación vía InmobIA
-          </a>
-        </div>
+      </div>
+      <div class="visita-actions">
         ${fvDate ? `
-        <div id="visita-block-${l.id}" style="background:linear-gradient(135deg,#fffbeb 0%,#fef9e0 100%);border:1px solid #fde68a;border-left:3px solid #d4a017;border-radius:8px;padding:0.55rem 0.8rem;margin-top:0.3rem">
+        <div id="visita-block-${l.id}" style="background:linear-gradient(135deg,#fffbeb 0%,#fef9e0 100%);border:1px solid #fde68a;border-left:3px solid #d4a017;border-radius:8px;padding:0.55rem 0.8rem">
           <div style="display:flex;align-items:center;gap:0.6rem">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#d4a017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <div style="display:flex;flex-direction:column;line-height:1.2">
@@ -841,7 +849,7 @@ function renderVisitas() {
         </div>` : ''}
         ${renderCierreBanner(l)}
         ${(l.modelo === '2A' || l.origen === 'inmobia') && l.prop_operacion === 'renta' && !['cerrado','inactivo'].includes(l.etapa) ? `
-        <details style="margin-top:0.4rem">
+        <details>
           <summary style="cursor:pointer;list-style:none;background:#f0fdf4;border:1px solid #bbf7d0;border-left:3px solid #16a34a;border-radius:7px;padding:0.45rem 0.75rem;font-size:0.75rem;font-weight:700;color:#15803d;display:flex;align-items:center;justify-content:space-between">
             <span>📋 Instrucciones de pago · Cliente InmobIA</span>
             <span style="font-size:0.65rem;color:#16a34a;font-weight:400">Ver detalle ▼</span>
@@ -864,7 +872,7 @@ function renderVisitas() {
           </div>
         </div>
       </div>
-    </${tag}>`;
+    </div>`;
   }).join('');
 }
 
