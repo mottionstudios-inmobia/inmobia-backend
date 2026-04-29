@@ -4250,13 +4250,18 @@ function renderAsesores() {
           return `<span style="font-weight:700;font-size:0.88rem;color:${color}">${s}</span><span style="color:${color};font-size:0.72rem;margin-left:2px">★</span>`;
         })()}</td>
         <td style="color:var(--text-muted);font-size:0.78rem">${fecha}</td>
-        <td>
+        <td style="white-space:nowrap;display:flex;gap:6px;align-items:center">
           <button onclick="togglePlanAsesor(${a.id}, '${a.plan}')"
             style="font-size:0.72rem;padding:4px 10px;border-radius:6px;border:1px solid;cursor:pointer;
               background:${esPremium ? 'rgba(231,76,60,0.08)' : 'rgba(201,168,76,0.1)'};
               border-color:${esPremium ? 'rgba(231,76,60,0.3)' : 'rgba(201,168,76,0.35)'};
               color:${esPremium ? '#e74c3c' : 'var(--gold)'}">
             ${esPremium ? 'Bajar a Gratis' : 'Subir a Premium'}
+          </button>
+          <button onclick="eliminarAsesor(${a.id}, '${(a.nombre||'').replace(/'/g,"\\'")}')"
+            title="Eliminar asesor"
+            style="font-size:0.72rem;padding:4px 8px;border-radius:6px;border:1px solid rgba(231,76,60,0.35);cursor:pointer;background:rgba(231,76,60,0.08);color:#e74c3c">
+            🗑
           </button>
         </td>
       </tr>`);
@@ -4280,6 +4285,24 @@ async function togglePlanAsesor(id, planActual) {
       toast(`Plan actualizado a ${nuevoPlan}`, 'success');
     }
   } catch(e) { toast('Error al actualizar plan', 'error'); }
+}
+
+async function eliminarAsesor(id, nombre) {
+  if (!confirm(`¿Eliminar al asesor "${nombre}"?\n\nEsta acción no se puede deshacer. Se eliminarán también sus propiedades y leads.`)) return;
+  try {
+    const r = await fetch(`${API}/auth/admin/asesores/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (r.ok) {
+      todosAsesores = todosAsesores.filter(a => a.id !== id);
+      renderAsesores();
+      toast('Asesor eliminado', 'success');
+    } else {
+      const d = await r.json().catch(() => ({}));
+      toast(d.error || 'Error al eliminar', 'error');
+    }
+  } catch { toast('Error de conexión', 'error'); }
 }
 
 function buscarAsesor(v) { filtroAsesorBusqueda = v; renderAsesores(); }
