@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { db } from '../database.js';
-import { authMiddleware } from '../auth.js';
+import { authMiddleware, leerUsuarioToken } from '../auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const router = Router();
@@ -11,6 +11,22 @@ const router = Router();
 const uploadsDir = process.env.DATA_DIR
   ? path.join(process.env.DATA_DIR, 'uploads')
   : path.join(__dirname, '../../public/uploads');
+
+function puedeGestionarPropiedad(req, propiedad) {
+  return req.usuario?.rol === 'admin' || propiedad?.usuario_id === req.usuario?.id;
+}
+
+function validarGestionPropiedad(req, res, propiedad) {
+  if (!propiedad) {
+    res.status(404).json({ error: 'Propiedad no encontrada' });
+    return false;
+  }
+  if (!puedeGestionarPropiedad(req, propiedad)) {
+    res.status(403).json({ error: 'Sin permiso' });
+    return false;
+  }
+  return true;
+}
 
 // Configuración de subida de imágenes
 const storage = multer.diskStorage({
@@ -114,9 +130,10 @@ router.patch('/:id/toggle-publicacion', authMiddleware, (req, res) => {
 router.get('/', (req, res) => {
   const { tipo, operacion, zona, busqueda, minPrecio, maxPrecio, habitaciones, parqueos, estado, limit = 50, offset = 0 } = req.query;
 
-  // estado=todos → sin filtro (admin); sin estado → solo activo+pendiente (público); estado=X → filtrar por X
+  // estado=todos solo omite filtros internos cuando lo solicita un admin autenticado.
+  const usuarioToken = leerUsuarioToken(req);
   const estadoFiltro = estado === 'todos' ? null : (estado || null);
-  const mostrarTodos = estado === 'todos';
+  const mostrarTodos = estado === 'todos' && usuarioToken?.rol === 'admin';
 
   let sql = 'SELECT p.*, (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) AS imagen_principal FROM propiedades p WHERE 1=1';
   const params = [];
@@ -378,7 +395,7 @@ router.post('/', authMiddleware, uploadFieldsSafe, (req, res) => {
 router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
   const { id } = req.params;
   const propExistente = db.prepare('SELECT id, codigo, usuario_id FROM propiedades WHERE id = ?').get(id);
-  if (!propExistente) return res.status(404).json({ error: 'Propiedad no encontrada' });
+  if (!validarGestionPropiedad(req, res, propExistente)) return;
 
   const {
     titulo, nombre_proyecto = '', descripcion_persuasiva = '', descripcion = '', tipo, operacion, precio, moneda = 'GTQ',
@@ -516,8 +533,8 @@ router.patch('/:id/estado', authMiddleware, (req, res) => {
   if (estado !== undefined && !estadosValidos.includes(estado)) {
     return res.status(400).json({ error: 'Estado inválido' });
   }
-  const existe = db.prepare('SELECT id FROM propiedades WHERE id = ?').get(id);
-  if (!existe) return res.status(404).json({ error: 'Propiedad no encontrada' });
+  const existe = db.prepare('SELECT id, usuario_id FROM propiedades WHERE id = ?').get(id);
+  if (!validarGestionPropiedad(req, res, existe)) return;
 
   if (estado !== undefined && precio !== undefined) {
     db.prepare('UPDATE propiedades SET estado=?, precio=?, actualizado_en=CURRENT_TIMESTAMP WHERE id=?').run(estado, Number(precio), id);
@@ -554,8 +571,8 @@ router.patch('/:id/toggle-inmobia-admin', authMiddleware, (req, res) => {
 
 // ── DELETE /api/propiedades/:id  (protegida)
 router.delete('/:id', authMiddleware, (req, res) => {
-  const existe = db.prepare('SELECT id FROM propiedades WHERE id = ?').get(req.params.id);
-  if (!existe) return res.status(404).json({ error: 'Propiedad no encontrada' });
+  const existe = db.prepare('SELECT id, usuario_id FROM propiedades WHERE id = ?').get(req.params.id);
+  if (!validarGestionPropiedad(req, res, existe)) return;
 
   db.prepare('DELETE FROM propiedades WHERE id = ?').run(req.params.id);
   res.json({ mensaje: 'Propiedad eliminada' });
@@ -563,14 +580,16 @@ router.delete('/:id', authMiddleware, (req, res) => {
 
 // ── DELETE /api/propiedades/imagen/:imgId  (protegida)
 router.delete('/imagen/:imgId', authMiddleware, (req, res) => {
+  const img = db.prepare(`SELECT i.id, p.usuario_id FROM imagenes i JOIN propiedades p ON p.id = i.propiedad_id WHERE i.id = ?`).get(req.params.imgId);
+  if (!validarGestionPropiedad(req, res, img)) return;
   db.prepare('DELETE FROM imagenes WHERE id = ?').run(req.params.imgId);
   res.json({ mensaje: 'Imagen eliminada' });
 });
 
 // ── PATCH /api/propiedades/imagen/:imgId/principal  (protegida)
 router.patch('/imagen/:imgId/principal', authMiddleware, (req, res) => {
-  const img = db.prepare('SELECT propiedad_id FROM imagenes WHERE id = ?').get(req.params.imgId);
-  if (!img) return res.status(404).json({ error: 'Imagen no encontrada' });
+  const img = db.prepare(`SELECT i.propiedad_id, p.usuario_id FROM imagenes i JOIN propiedades p ON p.id = i.propiedad_id WHERE i.id = ?`).get(req.params.imgId);
+  if (!validarGestionPropiedad(req, res, img)) return;
   db.prepare('UPDATE imagenes SET principal = 0 WHERE propiedad_id = ?').run(img.propiedad_id);
   db.prepare('UPDATE imagenes SET principal = 1 WHERE id = ?').run(req.params.imgId);
   res.json({ mensaje: 'Imagen principal actualizada' });
@@ -580,6 +599,11 @@ router.patch('/imagen/:imgId/principal', authMiddleware, (req, res) => {
 router.patch('/imagenes/orden', authMiddleware, (req, res) => {
   const { ids } = req.body; // array de IDs en nuevo orden
   if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'ids requerido' });
+  const placeholders = ids.map(() => '?').join(',');
+  const imagenes = db.prepare(`SELECT i.id, i.propiedad_id, p.usuario_id FROM imagenes i JOIN propiedades p ON p.id = i.propiedad_id WHERE i.id IN (${placeholders})`).all(...ids);
+  if (imagenes.length !== ids.length) return res.status(404).json({ error: 'Imagen no encontrada' });
+  if (new Set(imagenes.map(img => img.propiedad_id)).size !== 1) return res.status(400).json({ error: 'Las imagenes deben pertenecer a una sola propiedad' });
+  if (imagenes.some(img => !puedeGestionarPropiedad(req, img))) return res.status(403).json({ error: 'Sin permiso' });
   ids.forEach((id, i) => {
     db.prepare('UPDATE imagenes SET orden = ?, principal = ? WHERE id = ?').run(i, i === 0 ? 1 : 0, id);
   });
@@ -588,6 +612,8 @@ router.patch('/imagenes/orden', authMiddleware, (req, res) => {
 
 // ── GET /api/propiedades/:id/transaccion  (protegida)
 router.get('/:id/transaccion', authMiddleware, (req, res) => {
+  const existe = db.prepare('SELECT id, usuario_id FROM propiedades WHERE id = ?').get(req.params.id);
+  if (!validarGestionPropiedad(req, res, existe)) return;
   const t = db.prepare('SELECT * FROM transacciones WHERE propiedad_id = ? ORDER BY creado_en DESC LIMIT 1').get(req.params.id);
   res.json(t || {});
 });
@@ -595,8 +621,8 @@ router.get('/:id/transaccion', authMiddleware, (req, res) => {
 // ── POST /api/propiedades/:id/transaccion  (protegida)
 router.post('/:id/transaccion', authMiddleware, (req, res) => {
   const { tipo, comprador, asesor, fecha_transaccion, precio_final, moneda, comision, notas } = req.body;
-  const existe = db.prepare('SELECT id FROM propiedades WHERE id = ?').get(req.params.id);
-  if (!existe) return res.status(404).json({ error: 'Propiedad no encontrada' });
+  const existe = db.prepare('SELECT id, usuario_id FROM propiedades WHERE id = ?').get(req.params.id);
+  if (!validarGestionPropiedad(req, res, existe)) return;
 
   // Borrar transacción previa y crear nueva
   db.prepare('DELETE FROM transacciones WHERE propiedad_id = ?').run(req.params.id);

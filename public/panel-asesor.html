@@ -5030,16 +5030,28 @@ function generarMiniEstrellas(stars) {
   return s;
 }
 
-async function cargarPerfil() {
+async function cargarPerfil(intento = 1) {
   let r;
   try {
     r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
   } catch (e) {
     console.error('Error de red:', e);
-    toast('No se pudo conectar con el servidor. Verifique su conexión e intente de nuevo.', 'error', 5000);
+    if (intento < 3) {
+      setTimeout(() => cargarPerfil(intento + 1), 2000);
+    } else {
+      toast('No se pudo conectar con el servidor. Verifique su conexión e intente de nuevo.', 'error', 5000);
+    }
     return;
   }
-  if (!r.ok) { cerrarSesion(); return; }
+  if (r.status === 401) { cerrarSesion(); return; }
+  if (!r.ok) {
+    if (intento < 3) {
+      setTimeout(() => cargarPerfil(intento + 1), 2000);
+    } else {
+      toast('Error al cargar el perfil. Recargue la página.', 'error', 5000);
+    }
+    return;
+  }
   try {
     asesor = await r.json();
     actualizarUI();

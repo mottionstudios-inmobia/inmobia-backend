@@ -13,6 +13,11 @@ import { mkdirSync } from 'fs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const router = Router();
 
+function requireAdmin(req, res, next) {
+  if (req.usuario?.rol !== 'admin') return res.status(403).json({ error: 'Solo admin' });
+  next();
+}
+
 // Multer en memoria para correo principal
 const uploadMemory = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -132,7 +137,7 @@ router.post('/busqueda', uploadMascota.array('fotos', 10), async (req, res) => {
 });
 
 // ── GET /api/email/config  (admin)
-router.get('/config', authMiddleware, (req, res) => {
+router.get('/config', authMiddleware, requireAdmin, (req, res) => {
   const rows = db.prepare('SELECT clave, valor FROM config_email').all();
   const config = Object.fromEntries(rows.map(r => [r.clave, r.valor]));
   // Parsear campos_suscriptores de JSON a array
@@ -143,7 +148,7 @@ router.get('/config', authMiddleware, (req, res) => {
 });
 
 // ── PUT /api/email/config  (admin)
-router.put('/config', authMiddleware, (req, res) => {
+router.put('/config', authMiddleware, requireAdmin, (req, res) => {
   const { email_principal, campos_suscriptores, mensaje_personalizado } = req.body;
   const upsert = db.prepare('INSERT OR REPLACE INTO config_email (clave, valor) VALUES (?, ?)');
 
@@ -155,13 +160,13 @@ router.put('/config', authMiddleware, (req, res) => {
 });
 
 // ── GET /api/email/suscriptores  (admin)
-router.get('/suscriptores', authMiddleware, (req, res) => {
+router.get('/suscriptores', authMiddleware, requireAdmin, (req, res) => {
   const lista = db.prepare('SELECT * FROM suscriptores_email ORDER BY creado_en DESC').all();
   res.json(lista);
 });
 
 // ── POST /api/email/suscriptores  (admin)
-router.post('/suscriptores', authMiddleware, (req, res) => {
+router.post('/suscriptores', authMiddleware, requireAdmin, (req, res) => {
   const { nombre, email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email requerido' });
   try {
@@ -173,7 +178,7 @@ router.post('/suscriptores', authMiddleware, (req, res) => {
 });
 
 // ── PUT /api/email/suscriptores/:id  (admin — activar/desactivar)
-router.put('/suscriptores/:id', authMiddleware, (req, res) => {
+router.put('/suscriptores/:id', authMiddleware, requireAdmin, (req, res) => {
   const { nombre, email, activo } = req.body;
   db.prepare('UPDATE suscriptores_email SET nombre=?, email=?, activo=? WHERE id=?')
     .run(nombre, email, activo ? 1 : 0, req.params.id);
@@ -181,7 +186,7 @@ router.put('/suscriptores/:id', authMiddleware, (req, res) => {
 });
 
 // ── DELETE /api/email/suscriptores/:id  (admin)
-router.delete('/suscriptores/:id', authMiddleware, (req, res) => {
+router.delete('/suscriptores/:id', authMiddleware, requireAdmin, (req, res) => {
   db.prepare('DELETE FROM suscriptores_email WHERE id = ?').run(req.params.id);
   res.json({ ok: true });
 });

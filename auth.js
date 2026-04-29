@@ -10,16 +10,22 @@ export function generarToken(usuario) {
   );
 }
 
-export function authMiddleware(req, res, next) {
+export function leerUsuarioToken(req) {
   const header = req.headers.authorization;
-  if (!header || !header.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Token requerido' });
-  }
+  if (!header || !header.startsWith('Bearer ')) return null;
   try {
     const token = header.split(' ')[1];
-    req.usuario = jwt.verify(token, SECRET);
-    next();
+    return jwt.verify(token, SECRET);
   } catch {
-    return res.status(401).json({ error: 'Token inválido o expirado' });
+    return null;
   }
+}
+
+export function authMiddleware(req, res, next) {
+  const usuario = leerUsuarioToken(req);
+  if (!usuario) {
+    return res.status(401).json({ error: 'Token requerido o inválido' });
+  }
+  req.usuario = usuario;
+  next();
 }
