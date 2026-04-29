@@ -61,8 +61,8 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
 .sidebar-profile-name { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sidebar-profile-plan {
   display: inline-flex; align-items: center; gap: 4px;
-  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-  padding: 2px 8px; border-radius: 20px;
+  font-family: inherit; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 20px; appearance: none; cursor: pointer;
 }
 .plan-gratis { background: rgba(107,122,153,0.2); color: #8a9cc0; border: 1px solid rgba(107,122,153,0.3); }
 .plan-premium { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
@@ -1477,7 +1477,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
       <div class="sidebar-avatar" id="sb-avatar"><span id="sb-inicial">?</span></div>
       <div style="min-width:0">
         <div class="sidebar-profile-name" id="sb-nombre">Cargando...</div>
-        <span class="sidebar-profile-plan plan-gratis" id="sb-plan">Gratis</span>
+        <button type="button" class="sidebar-profile-plan plan-gratis" id="sb-plan" onclick="irA('plan');setTimeout(()=>document.getElementById('plan-premium-card')?.scrollIntoView({behavior:'smooth',block:'center'}),120)" title="Ver opción de Plan Premium">Plan Gratis</button>
       </div>
     </div>
     <div class="sidebar-stars" id="sb-stars"></div>
@@ -5093,7 +5093,7 @@ function actualizarUI() {
     if (img) { img.src = fotoUrl; img.style.display = 'block'; document.getElementById('perfil-inicial').style.display = 'none'; }
     document.getElementById('sb-avatar').innerHTML = `<img src="${fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
   }
-  document.getElementById('sb-plan').textContent    = plan === 'premium' ? '★ Premium' : 'Gratis';
+  document.getElementById('sb-plan').textContent    = plan === 'premium' ? '★ Premium' : 'Plan Gratis';
   document.getElementById('sb-plan').className      = `sidebar-profile-plan ${plan === 'premium' ? 'plan-premium' : 'plan-gratis'}`;
   document.getElementById('sb-stars').innerHTML     = renderStars(score, 'span');
 
