@@ -5,6 +5,7 @@ dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), '.
 import express from 'express';
 import cors from 'cors';
 import { readdirSync, mkdirSync, existsSync, statSync } from 'fs';
+import { db } from './database.js';
 import propiedadesRouter from './routes/propiedades.js';
 import authRouter from './routes/auth.js';
 import contactosRouter from './routes/contactos.js';
@@ -88,6 +89,41 @@ app.get('/api/tipo-cambio', async (_req, res) => {
 });
 
 // ── Webhook WhatsApp Cloud API (Meta) ─────────────────────────────────────
+// GET /api/home-stats — métricas públicas reales del hero
+app.get('/api/home-stats', (_req, res) => {
+  try {
+    const propiedadesActivas = db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM propiedades
+      WHERE publicado_inmobia = 1 AND estado = 'activo'
+    `).get()?.total || 0;
+
+    const cal = db.prepare(`
+      SELECT
+        COUNT(*) AS total,
+        COUNT(CASE WHEN estrellas >= 4 THEN 1 END) AS satisfechos,
+        AVG(estrellas) AS promedio
+      FROM calificaciones
+    `).get();
+
+    const clientesSatisfechos = cal?.satisfechos || 0;
+    const calificacionPromedio = cal?.promedio ? Math.round(Number(cal.promedio) * 10) / 10 : 0;
+    const visible = propiedadesActivas >= 20 && clientesSatisfechos >= 25 && calificacionPromedio >= 4.5;
+
+    res.json({
+      visible,
+      propiedades_activas: propiedadesActivas,
+      clientes_satisfechos: clientesSatisfechos,
+      calificacion_promedio: calificacionPromedio,
+      total_calificaciones: cal?.total || 0,
+      fuente_calificacion: 'calificaciones.estrellas'
+    });
+  } catch (err) {
+    console.error('Error home-stats:', err.message);
+    res.status(500).json({ error: 'No se pudieron obtener las metricas' });
+  }
+});
+
 import { procesarWebhookMeta } from './whatsapp.js';
 const WH_VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || 'inmobia_wh_2026';
 

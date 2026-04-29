@@ -1357,17 +1357,17 @@ user-select: none;
     </div>
     <div id="hero-dots" class="hero-dots"></div>
     <div class="hero-image-overlay">
-      <div class="hero-stat">
+      <div class="hero-stat" id="hero-stat" style="display:none">
         <div class="hero-stat-item">
-          <span class="hero-stat-num">+150</span>
+          <span class="hero-stat-num" id="hero-stat-props">+0</span>
           <span class="hero-stat-label">Propiedades activas</span>
         </div>
         <div class="hero-stat-item">
-          <span class="hero-stat-num">+300</span>
+          <span class="hero-stat-num" id="hero-stat-clientes">+0</span>
           <span class="hero-stat-label">Clientes satisfechos</span>
         </div>
         <div class="hero-stat-item">
-          <span class="hero-stat-num">5★</span>
+          <span class="hero-stat-num" id="hero-stat-rating">0★</span>
           <span class="hero-stat-label">Calificación promedio</span>
         </div>
       </div>
@@ -3175,6 +3175,26 @@ user-select: none;
     return `${sym}${num}${sfx}`;
   }
 
+  async function cargarMetricasHero() {
+    const wrap = document.getElementById('hero-stat');
+    if (!wrap) return;
+    try {
+      const r = await fetch(`${API}/home-stats`);
+      if (!r.ok) throw new Error('stats');
+      const stats = await r.json();
+      if (!stats.visible) {
+        wrap.style.display = 'none';
+        return;
+      }
+      document.getElementById('hero-stat-props').textContent = `+${stats.propiedades_activas}`;
+      document.getElementById('hero-stat-clientes').textContent = `+${stats.clientes_satisfechos}`;
+      document.getElementById('hero-stat-rating').textContent = `${Number(stats.calificacion_promedio).toFixed(1)}★`;
+      wrap.style.display = '';
+    } catch {
+      wrap.style.display = 'none';
+    }
+  }
+
   function crearTarjeta(p) {
     const tipoData = `${p.tipo} ${p.operacion}`.toLowerCase();
     const zonaData = (p.zona || '').toLowerCase();
@@ -3440,6 +3460,7 @@ user-select: none;
 
   // Iniciar carga al cargar la página
   cargarPropiedadesAPI();
+  cargarMetricasHero();
   iniciarHeroSlideshow();
 
   // Botón "Iniciar sesión" — lleva al tab de login en asesores.html
