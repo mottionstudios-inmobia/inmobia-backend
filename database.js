@@ -104,6 +104,7 @@ for (const [clave, valor] of Object.entries(defaultEmailConfig)) {
 // Migraciones: agregar columnas nuevas si no existen
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN mantenimiento INTEGER DEFAULT 0`); } catch {}
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN iva INTEGER DEFAULT 0`); } catch {}
+try { db.exec(`ALTER TABLE propiedades ADD COLUMN impuestos INTEGER DEFAULT 0`); } catch {}
 // Características únicas
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN linea_blanca INTEGER DEFAULT 0`); } catch {}
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN jardin INTEGER DEFAULT 0`); } catch {}
