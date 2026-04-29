@@ -542,6 +542,16 @@ router.patch('/:id/compartir-1d', authMiddleware, (req, res) => {
   res.json({ ok: true });
 });
 
+// ── PATCH /api/propiedades/:id/toggle-inmobia-admin  (solo admin)
+router.patch('/:id/toggle-inmobia-admin', authMiddleware, (req, res) => {
+  if (req.usuario.rol !== 'admin') return res.status(403).json({ error: 'Solo admin' });
+  const { publicado } = req.body;
+  const p = db.prepare('SELECT id FROM propiedades WHERE id = ?').get(req.params.id);
+  if (!p) return res.status(404).json({ error: 'Propiedad no encontrada' });
+  db.prepare('UPDATE propiedades SET publicado_inmobia = ? WHERE id = ?').run(publicado ? 1 : 0, req.params.id);
+  res.json({ ok: true });
+});
+
 // ── DELETE /api/propiedades/:id  (protegida)
 router.delete('/:id', authMiddleware, (req, res) => {
   const existe = db.prepare('SELECT id FROM propiedades WHERE id = ?').get(req.params.id);

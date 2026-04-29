@@ -945,6 +945,11 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         <span>Notificaciones</span>
       </div>
+      <div class="nav-item" onclick="irA('dpi')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="8" cy="15" r="1.5"/><path d="M13 14h5M13 16h3"/></svg>
+        <span>Verificación DPI</span>
+        <span class="nav-badge" id="nav-dpi-badge" style="display:none">0</span>
+      </div>
       <div class="nav-item" onclick="irA('configuracion')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         <span>Configuración</span>
@@ -1562,6 +1567,41 @@
         <div id="notif-empty" class="empty-state" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           <p>Sin notificaciones aún</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VERIFICACIÓN DPI ══ -->
+    <div id="sec-dpi" class="section">
+      <div class="page-header">
+        <div><h1>Verificación de documentos</h1><p>Revisa y aprueba los DPI / pasaportes pendientes de los asesores</p></div>
+        <button class="btn btn-primary" onclick="cargarDpiPendientes()">Actualizar</button>
+      </div>
+
+      <!-- Tabs estado -->
+      <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
+        <button id="dpi-tab-pendiente" class="btn btn-primary" onclick="filtrarDpi('pendiente')" style="font-size:0.82rem;padding:6px 14px">⏳ Pendientes</button>
+        <button id="dpi-tab-aprobado" class="btn" onclick="filtrarDpi('aprobado')" style="font-size:0.82rem;padding:6px 14px;background:var(--card-bg);color:var(--text-muted);border:1px solid var(--border)">✓ Aprobados</button>
+        <button id="dpi-tab-rechazado" class="btn" onclick="filtrarDpi('rechazado')" style="font-size:0.82rem;padding:6px 14px;background:var(--card-bg);color:var(--text-muted);border:1px solid var(--border)">✕ Rechazados</button>
+      </div>
+
+      <div id="dpi-lista" style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))"></div>
+      <div id="dpi-empty" class="empty-state" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        <p>Sin documentos en este estado</p>
+      </div>
+
+      <!-- Modal rechazo -->
+      <div id="modal-rechazo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+        <div style="background:var(--panel-bg);border:1px solid var(--border);border-radius:16px;padding:32px;width:440px;max-width:95vw">
+          <h3 style="margin-bottom:1rem;color:var(--text)">Rechazar documento</h3>
+          <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem">Indique el motivo para que el asesor pueda corregir y re-subir su documento.</p>
+          <textarea id="rechazo-razon" placeholder="Ej: Imagen borrosa, documento vencido, no es DPI ni pasaporte..." style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:0.9rem;resize:vertical;min-height:90px;outline:none;margin-bottom:1rem"></textarea>
+          <input type="hidden" id="rechazo-id">
+          <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+            <button class="btn" onclick="cerrarModalRechazo()" style="background:var(--card-bg);color:var(--text-muted);border:1px solid var(--border)">Cancelar</button>
+            <button class="btn" onclick="confirmarRechazo()" style="background:var(--danger);color:#fff;border:none">Rechazar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2253,7 +2293,8 @@
 <div id="toast"></div>
 
 <script>
-const API = 'https://inmobia.site/api';
+const BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://inmobia.site';
+const API = BASE_URL + '/api';
 let token = localStorage.getItem('inmobia_token');
 
 // SQLite guarda fechas en UTC sin sufijo 'Z' — mismo helper que panel-asesor
@@ -2320,6 +2361,7 @@ function mostrarApp() {
   cargarContactos();
   cargarAsesores();
   cargarNotificaciones();
+  cargarDpiPendientes();
 }
 
 // Si una llamada autenticada devuelve 401, el token está inválido o vencido:
@@ -2361,6 +2403,7 @@ function irA(seccion) {
   if (seccion === 'notificaciones') cargarNotificaciones();
   if (seccion === 'consultas-wa') cargarConsultasPendientes();
   if (seccion === 'configuracion') cargarConfiguracion();
+  if (seccion === 'dpi') cargarDpiPendientes();
 }
 
 function switchPagoTab(modo) {
@@ -2389,6 +2432,119 @@ async function cargarConfiguracion() {
     switchPagoTab(data.pago_modo || 'recurrente');
     actualizarPreviaSoporte();
   } catch { toast('Error al cargar configuración', 'error'); }
+}
+
+// ── DPI VERIFICATION ─────────────────────────────────────────
+let dpiEstadoActual = 'pendiente';
+let dpiTodosLos = [];
+
+async function cargarDpiPendientes() {
+  try {
+    const r = await fetch(`${API}/auth/admin/dpi-pendientes`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!r.ok) throw new Error();
+    dpiTodosLos = await r.json();
+    const pendientes = dpiTodosLos.filter(d => !d.dpi_estado || d.dpi_estado === 'pendiente').length;
+    const badge = document.getElementById('nav-dpi-badge');
+    badge.textContent = pendientes;
+    badge.style.display = pendientes > 0 ? '' : 'none';
+    filtrarDpi(dpiEstadoActual);
+  } catch { toast('Error al cargar documentos', 'error'); }
+}
+
+function filtrarDpi(estado) {
+  dpiEstadoActual = estado;
+  ['pendiente','aprobado','rechazado'].forEach(e => {
+    const btn = document.getElementById(`dpi-tab-${e}`);
+    if (!btn) return;
+    btn.style.background = e === estado ? 'var(--gold)' : 'var(--card-bg)';
+    btn.style.color      = e === estado ? '#fff' : 'var(--text-muted)';
+    btn.style.border     = `1px solid ${e === estado ? 'var(--gold)' : 'var(--border)'}`;
+  });
+  const lista = dpiTodosLos.filter(d => {
+    const s = d.dpi_estado || 'pendiente';
+    return s === estado;
+  });
+  const contenedor = document.getElementById('dpi-lista');
+  const vacio = document.getElementById('dpi-empty');
+  if (!lista.length) {
+    contenedor.innerHTML = '';
+    vacio.style.display = '';
+    return;
+  }
+  vacio.style.display = 'none';
+  contenedor.innerHTML = lista.map(d => {
+    const fotoUrl = d.dpi_archivo ? `${API.replace('/api','')}/${d.dpi_archivo}` : null;
+    const estadoBadge = d.dpi_estado === 'aprobado'
+      ? `<span style="background:rgba(46,204,113,0.15);color:#2ecc71;padding:2px 10px;border-radius:20px;font-size:0.75rem;font-weight:600">✓ Aprobado</span>`
+      : d.dpi_estado === 'rechazado'
+      ? `<span style="background:rgba(231,76,60,0.15);color:#e74c3c;padding:2px 10px;border-radius:20px;font-size:0.75rem;font-weight:600">✕ Rechazado</span>`
+      : `<span style="background:rgba(243,156,18,0.15);color:#f39c12;padding:2px 10px;border-radius:20px;font-size:0.75rem;font-weight:600">⏳ Pendiente</span>`;
+    const fechaSubido = d.dpi_subido_en ? new Date(d.dpi_subido_en).toLocaleString('es-GT') : '—';
+    const razonHtml = d.dpi_rechazado_razon
+      ? `<p style="margin-top:0.5rem;font-size:0.8rem;color:#e74c3c;background:rgba(231,76,60,0.08);padding:6px 10px;border-radius:6px">Motivo: ${d.dpi_rechazado_razon}</p>` : '';
+    const botonesHtml = d.dpi_estado !== 'aprobado'
+      ? `<button class="btn" onclick="aprobarDpi(${d.id})" style="flex:1;background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3);font-size:0.82rem;padding:7px">✓ Aprobar</button>` : '';
+    const btnRechazar = d.dpi_estado !== 'rechazado'
+      ? `<button class="btn" onclick="abrirModalRechazo(${d.id})" style="flex:1;background:rgba(231,76,60,0.12);color:#e74c3c;border:1px solid rgba(231,76,60,0.3);font-size:0.82rem;padding:7px">✕ Rechazar</button>` : '';
+    return `
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      ${fotoUrl ? `<div style="height:200px;overflow:hidden;cursor:pointer" onclick="window.open('${fotoUrl}','_blank')">
+        <img src="${fotoUrl}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div style=&quot;height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem&quot;>Sin vista previa</div>'">
+      </div>` : `<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem">Sin archivo</div>`}
+      <div style="padding:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
+          <strong style="font-size:0.95rem">${d.nombre || '—'}</strong>
+          ${estadoBadge}
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem">${d.email || '—'}</p>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.75rem">Subido: ${fechaSubido}</p>
+        ${razonHtml}
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+          ${botonesHtml}
+          ${btnRechazar}
+          ${fotoUrl ? `<button class="btn" onclick="window.open('${fotoUrl}','_blank')" style="background:var(--input-bg);color:var(--text-muted);border:1px solid var(--border);font-size:0.82rem;padding:7px">&#128269; Ver</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function aprobarDpi(id) {
+  if (!confirm('¿Aprobar este documento?')) return;
+  try {
+    const r = await fetch(`${API}/auth/admin/dpi/${id}/aprobar`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` } });
+    if (!r.ok) throw new Error();
+    toast('Documento aprobado');
+    cargarDpiPendientes();
+  } catch { toast('Error al aprobar', 'error'); }
+}
+
+function abrirModalRechazo(id) {
+  document.getElementById('rechazo-id').value = id;
+  document.getElementById('rechazo-razon').value = '';
+  const m = document.getElementById('modal-rechazo');
+  m.style.display = 'flex';
+}
+
+function cerrarModalRechazo() {
+  document.getElementById('modal-rechazo').style.display = 'none';
+}
+
+async function confirmarRechazo() {
+  const id = document.getElementById('rechazo-id').value;
+  const razon = document.getElementById('rechazo-razon').value.trim();
+  if (!razon) { toast('Debe escribir un motivo de rechazo', 'error'); return; }
+  try {
+    const r = await fetch(`${API}/auth/admin/dpi/${id}/rechazar`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ razon })
+    });
+    if (!r.ok) throw new Error();
+    cerrarModalRechazo();
+    toast('Documento rechazado');
+    cargarDpiPendientes();
+  } catch { toast('Error al rechazar', 'error'); }
 }
 
 function actualizarPreviaSoporte() {
@@ -2715,7 +2871,7 @@ const ESTADO_LABEL = { activo:'Activo', inactivo:'Inactivo', vendido:'Vendido', 
 
 function filaProp(p, compact = false) {
   const img = p.imagen_principal
-    ? `<img src="https://inmobia.site${p.imagen_principal}" class="prop-thumb" onerror="this.style.background='var(--border)';this.src=''">`
+    ? `<img src="${BASE_URL}${p.imagen_principal}" class="prop-thumb" onerror="this.style.background='var(--border)';this.src=''">`
     : `<div class="prop-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:18px">⌂</div>`;
 
   if (compact) return `
@@ -2781,6 +2937,10 @@ function filaProp(p, compact = false) {
       <td style="color:var(--text-muted);font-size:0.78rem">${fechaStr}</td>
       <td><div class="td-actions">
         ${btnCompartir}
+        ${!esDeAdmin ? (p.publicado_inmobia
+          ? `<button class="btn btn-sm" id="btn-pub-${p.id}" style="background:rgba(34,197,94,0.15);color:#16a34a;border:1px solid rgba(34,197,94,0.3);font-size:0.7rem" onclick="togglePubInmobiaAdmin(${p.id},false)" title="Ocultar del portal InmobIA">● InmobIA</button>`
+          : `<button class="btn btn-sm" id="btn-pub-${p.id}" style="background:rgba(100,116,139,0.12);color:var(--text-muted);border:1px solid rgba(100,116,139,0.2);font-size:0.7rem" onclick="togglePubInmobiaAdmin(${p.id},true)" title="Publicar en portal InmobIA">○ InmobIA</button>`)
+          : ''}
         <button class="btn btn-secondary btn-sm" onclick="editarProp(${p.id})">Editar</button>
         <button class="btn btn-sm" style="background:rgba(201,168,76,0.12);color:var(--gold);border:1px solid rgba(201,168,76,0.25)" onclick="abrirModalComision(${p.id})" title="Configurar comisión">%</button>
         <button class="btn btn-danger btn-sm" onclick="pedirEliminar(${p.id})">Borrar</button>
@@ -2891,6 +3051,39 @@ async function toggleCompartir1D(propId, compartir) {
     if (p) p.compartido_1d = compartir ? 1 : 0;
     toast(compartir ? 'Propiedad compartida con asesores' : 'Propiedad dejó de compartirse', 'success');
     renderTablaAgrupada();
+  } catch { toast('Error de conexión', 'error'); }
+}
+
+// ── TOGGLE PUBLICADO INMOBIA (admin sobre propiedades de asesores) ───
+async function togglePubInmobiaAdmin(propId, publicado) {
+  try {
+    const r = await fetch(`${API}/propiedades/${propId}/toggle-inmobia-admin`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ publicado })
+    });
+    if (!r.ok) { const d = await r.json(); toast(d.error || 'Error', 'error'); return; }
+    const p = propiedades.find(x => x.id === propId);
+    if (p) p.publicado_inmobia = publicado ? 1 : 0;
+    const btn = document.getElementById(`btn-pub-${propId}`);
+    if (btn) {
+      if (publicado) {
+        btn.style.background = 'rgba(34,197,94,0.15)';
+        btn.style.color = '#16a34a';
+        btn.style.border = '1px solid rgba(34,197,94,0.3)';
+        btn.title = 'Ocultar del portal InmobIA';
+        btn.textContent = '● InmobIA';
+        btn.onclick = () => togglePubInmobiaAdmin(propId, false);
+      } else {
+        btn.style.background = 'rgba(100,116,139,0.12)';
+        btn.style.color = 'var(--text-muted)';
+        btn.style.border = '1px solid rgba(100,116,139,0.2)';
+        btn.title = 'Publicar en portal InmobIA';
+        btn.textContent = '○ InmobIA';
+        btn.onclick = () => togglePubInmobiaAdmin(propId, true);
+      }
+    }
+    toast(publicado ? 'Propiedad visible en InmobIA' : 'Propiedad ocultada de InmobIA', 'success');
   } catch { toast('Error de conexión', 'error'); }
 }
 

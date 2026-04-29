@@ -3159,8 +3159,8 @@ user-select: none;
   });
 
   // ── CARGA DE PROPIEDADES DESDE API ────────────────────────────
-  const API_URL = 'https://inmobia.site';
-  const API = 'https://inmobia.site/api';
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://inmobia.site';
+  const API = API_URL + '/api';
 
   function formatearPrecio(precio, moneda, operacion) {
     const sym  = moneda === 'USD' ? '$' : 'Q';

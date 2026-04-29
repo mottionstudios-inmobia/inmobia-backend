@@ -228,8 +228,8 @@ router.get('/score-detalle', authMiddleware, (req, res) => {
     WHERE p.usuario_id = ?
     GROUP BY p.id
   `).all(asesorId);
-  const areaPropiedades = propsRaw.length === 0 ? 0
-    : Math.round((propsRaw.filter(p => p.cnt >= 5).length / propsRaw.length) * 5 * 10) / 10;
+  const props5fotos = propsRaw.filter(p => p.cnt >= 5).length;
+  const areaPropiedades = Math.round(Math.min(props5fotos / 2, 1) * 5 * 10) / 10;
 
   // 3. Cierres — usa el mes actual si hay datos, sino el mes anterior (para no arrancar en 0 el día 1)
   const cierresActual = db.prepare(`SELECT COUNT(*) as c FROM leads WHERE asesor_id = ? AND etapa = 'cerrado' AND cerrado_en >= ?`).get(asesorId, inicioMes).c;
@@ -294,7 +294,7 @@ router.get('/score-detalle', authMiddleware, (req, res) => {
     mes, score: scoreFinal,
     areas: {
       perfil:         { stars: areaPerfil,      label: 'Perfil completo',           meta: faltantes.length === 0 ? '9/9 campos completos ✓' : `${llenos}/${totalCampos} · Falta: ${faltantes.map(c => camposPerfilLabels[c]).join(', ')}`, accion: 'perfil' },
-      propiedades:    { stars: areaPropiedades,  label: 'Propiedades con 5+ fotos',  meta: propsRaw.length > 0 ? `${propsRaw.filter(p=>p.cnt>=5).length}/${propsRaw.length} propiedades` : 'Sin propiedades', accion: 'propiedades' },
+      propiedades:    { stars: areaPropiedades,  label: 'Propiedades con 5+ fotos',  meta: `${props5fotos}/2 propiedades`, props5fotos, accion: 'propiedades' },
       cierres:        { stars: areaCierres,      label: 'Promedio de cierres',           meta: `${cierres} cierre${cierres !== 1 ? 's' : ''}${cierresActual === 0 && cierresPasado > 0 ? ' (mes anterior)' : ''}`, accion: 'crm' },
       calificaciones: { stars: areaCali,         label: 'Calificación de clientes',  meta: calAvg > 0 ? `${Math.round(calAvg*10)/10}★ promedio` : 'Sin calificaciones', accion: null },
       visitas:        { stars: areaVisitas,       label: 'Visitas atendidas',         meta: visitasTotal > 0 ? `${visitasAtend}/${visitasTotal} visitas` : 'Sin visitas este mes', accion: 'crm' },

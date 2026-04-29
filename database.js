@@ -334,6 +334,13 @@ db.exec(`
 // Columna calificacion_cliente en leads
 try { db.exec(`ALTER TABLE leads ADD COLUMN calificacion_cliente INTEGER DEFAULT NULL`); } catch {}
 
+// Columnas extendidas en calificaciones (detalle de la visita)
+try { db.exec(`ALTER TABLE calificaciones ADD COLUMN interes TEXT DEFAULT ''`); } catch {}
+try { db.exec(`ALTER TABLE calificaciones ADD COLUMN asesor_estrellas INTEGER DEFAULT NULL`); } catch {}
+try { db.exec(`ALTER TABLE calificaciones ADD COLUMN asesor_razones TEXT DEFAULT ''`); } catch {}
+try { db.exec(`ALTER TABLE calificaciones ADD COLUMN asesor_comentario TEXT DEFAULT ''`); } catch {}
+try { db.exec(`ALTER TABLE calificaciones ADD COLUMN recomendaria TEXT DEFAULT ''`); } catch {}
+
 // Columnas de cierre en leads
 try { db.exec(`ALTER TABLE leads ADD COLUMN valor_cierre REAL DEFAULT NULL`); } catch {}
 try { db.exec(`ALTER TABLE leads ADD COLUMN comision_pct REAL DEFAULT NULL`); } catch {}
@@ -630,8 +637,32 @@ try { db.exec(`ALTER TABLE leads ADD COLUMN asesor_interes_en TEXT DEFAULT NULL`
 // referidor_id en usuarios: quién refirió a este asesor
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN referidor_id INTEGER DEFAULT NULL`); } catch {}
 
+// Requerimientos originados por clientes desde panel-cliente
+try { db.exec(`ALTER TABLE requerimientos ADD COLUMN fuente TEXT DEFAULT 'asesor'`); } catch {}
+try { db.exec(`ALTER TABLE requerimientos ADD COLUMN cliente_origen_email TEXT DEFAULT NULL`); } catch {}
+
 // leads_bonus_referidos: leads extra acumulados por referir asesores
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN leads_bonus_referidos INTEGER DEFAULT 0`); } catch {}
+
+// Perfil de búsqueda del cliente (ajustable desde panel-cliente)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS perfiles_cliente (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    email               TEXT UNIQUE NOT NULL,
+    tipo                TEXT DEFAULT '',
+    operacion           TEXT DEFAULT '',
+    presupuesto_max     REAL DEFAULT NULL,
+    moneda              TEXT DEFAULT 'GTQ',
+    zonas               TEXT DEFAULT '',
+    habitaciones_min    INTEGER DEFAULT 0,
+    banos_min           REAL DEFAULT 0,
+    acepta_mascotas     INTEGER DEFAULT 0,
+    acepta_financiamiento INTEGER DEFAULT 0,
+    activo_en_red       INTEGER DEFAULT 0,
+    notas               TEXT DEFAULT '',
+    actualizado_en      TEXT DEFAULT (datetime('now'))
+  )
+`);
 
 // Tabla de notificaciones internas del asesor
 db.exec(`

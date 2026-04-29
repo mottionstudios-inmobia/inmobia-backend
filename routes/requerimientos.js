@@ -197,7 +197,16 @@ router.get('/mios', authMiddleware, (req, res) => {
 router.get('/activos', authMiddleware, (req, res) => {
   const hoy = new Date().toISOString();
   const filas = db.prepare(`
-    SELECT r.*, u.nombre AS asesor_nombre, u.slug AS asesor_slug, u.codigo_asesor AS asesor_codigo
+    SELECT
+      r.id, r.fuente, r.estado, r.vence_en, r.creado_en, r.actualizado_en, r.renovaciones,
+      r.tipo_propiedad, r.operacion, r.municipio, r.zona, r.colonia,
+      r.precio_min, r.precio_max, r.moneda,
+      r.habitaciones, r.banos, r.metros_min, r.caracteristicas, r.notas,
+      r.cliente_nombre,
+      -- email y teléfono del cliente nunca se exponen a otros asesores
+      CASE WHEN r.fuente = 'cliente' THEN NULL ELSE r.cliente_email     END AS cliente_email,
+      CASE WHEN r.fuente = 'cliente' THEN NULL ELSE r.cliente_telefono  END AS cliente_telefono,
+      u.nombre AS asesor_nombre, u.slug AS asesor_slug, u.codigo_asesor AS asesor_codigo
     FROM requerimientos r
     LEFT JOIN usuarios u ON u.id = r.asesor_id
     WHERE r.estado = 'activo' AND r.vence_en > ? AND r.asesor_id != ?

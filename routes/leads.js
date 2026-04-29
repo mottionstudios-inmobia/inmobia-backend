@@ -875,6 +875,15 @@ router.post('/:id/cerrar', authMiddleware, (req, res) => {
   if (!lead) return res.status(404).json({ error: 'Lead no encontrado' });
   if (lead.asesor_id !== req.usuario.id) return res.status(403).json({ error: 'Sin permiso' });
 
+  // Verificar que el asesor tenga DPI aprobado antes de declarar cierre
+  const asesorDpi = db.prepare('SELECT dpi_estado, dpi_archivo FROM usuarios WHERE id = ?').get(req.usuario.id);
+  if (!asesorDpi?.dpi_archivo) {
+    return res.status(403).json({ error: 'Para declarar un cierre debe subir su DPI o pasaporte primero. Vaya a Mi Perfil → Documento de identificación.' });
+  }
+  if (asesorDpi.dpi_estado !== 'aprobado') {
+    return res.status(403).json({ error: 'Su documento de identificación está pendiente de verificación por el equipo InmobIA. Recibirá una notificación cuando sea aprobado.' });
+  }
+
   // Obtener configuración de comisión de la propiedad
   let prop = null;
   if (lead.propiedad_id) {

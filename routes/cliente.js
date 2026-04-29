@@ -160,7 +160,7 @@ router.get('/verify/:token', (req, res) => {
 
   const leads = leadsIds.length ? db.prepare(`
     SELECT l.*,
-      u.nombre AS asesor_nombre, u.telefono AS asesor_telefono,
+      u.nombre AS asesor_nombre,
       u.foto AS asesor_foto, u.slug AS asesor_slug, u.empresa AS asesor_empresa,
       (SELECT url FROM imagenes WHERE propiedad_id = l.propiedad_id AND principal = 1 LIMIT 1) AS prop_imagen,
       p.precio AS prop_precio, p.moneda AS prop_moneda, p.zona AS prop_zona,
@@ -168,7 +168,9 @@ router.get('/verify/:token', (req, res) => {
       p.habitaciones AS prop_hab, p.banos AS prop_banos, p.metros AS prop_metros,
       p.nombre_proyecto AS prop_proyecto, p.colonia AS prop_colonia,
       c.estrellas AS calificacion_estrellas, c.razones AS calificacion_razones,
-      c.comentario AS calificacion_comentario
+      c.comentario AS calificacion_comentario, c.interes AS calificacion_interes,
+      c.asesor_estrellas AS cal_asesor_estrellas, c.asesor_razones AS cal_asesor_razones,
+      c.asesor_comentario AS cal_asesor_comentario, c.recomendaria AS cal_recomendaria
     FROM leads l
     LEFT JOIN usuarios u ON u.id = l.asesor_id
     LEFT JOIN propiedades p ON p.id = l.propiedad_id
@@ -185,89 +187,184 @@ router.get('/verify/:token', (req, res) => {
   });
 });
 
-// ── GET /api/cliente/propiedades-sugeridas  (pública con email — propiedades para el feed)
+// ── GET /api/cliente/propiedades-sugeridas  (pública con email)
 router.get('/propiedades-sugeridas', (req, res) => {
   const { email } = req.query;
   if (!email) return res.status(400).json({ error: 'Email requerido' });
 
-  // Tomar el último lead del cliente para inferir preferencias
+  const emailLower = email.toLowerCase().trim();
+
+  // Preferencias guardadas por el cliente (prioridad 1)
+  const perfilGuardado = db.prepare('SELECT * FROM perfiles_cliente WHERE LOWER(email) = ?').get(emailLower);
+
+  // Último lead como fallback (prioridad 2)
   const ultimoLead = db.prepare(`
-    SELECT l.*, p.tipo AS p_tipo, p.operacion AS p_op, p.zona AS p_zona, p.municipio AS p_municipio,
+    SELECT l.*, p.tipo AS p_tipo, p.operacion AS p_op, p.zona AS p_zona,
            p.precio AS p_precio, p.habitaciones AS p_hab
     FROM leads l
     LEFT JOIN propiedades p ON p.id = l.propiedad_id
     WHERE LOWER(l.email) = ?
     ORDER BY l.creado_en DESC LIMIT 1
-  `).get(email.toLowerCase().trim());
+  `).get(emailLower);
 
-  // IDs de propiedades que el cliente ya tiene en sus leads (excluir del feed)
+  // Preferencias efectivas (perfil > lead > nada)
+  const pref = perfilGuardado || (ultimoLead ? {
+    tipo: ultimoLead.p_tipo, operacion: ultimoLead.p_op,
+    presupuesto_max: ultimoLead.p_precio ? ultimoLead.p_precio * 1.3 : null,
+    habitaciones_min: 0, acepta_mascotas: 0, zonas: ''
+  } : null);
+
+  // IDs de propiedades ya en leads del cliente (excluir del feed)
   const propIdsVisitadas = db.prepare(
     `SELECT DISTINCT propiedad_id FROM leads WHERE LOWER(email) = ? AND propiedad_id IS NOT NULL`
-  ).all(email.toLowerCase().trim()).map(r => r.propiedad_id);
+  ).all(emailLower).map(r => r.propiedad_id);
 
-  let sql = `
-    SELECT p.*,
-      (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) AS imagen_principal,
-      u.nombre AS asesor_nombre, u.slug AS asesor_slug
-    FROM propiedades p
-    LEFT JOIN usuarios u ON u.id = p.usuario_id
-    WHERE p.publicado_inmobia = 1 AND p.estado IN ('activo','pendiente')
-  `;
-  const params = [];
+  // Parsear zonas: "Zona 10, Miraflores, Santa Catarina Pinula" → ['zona 10','miraflores','santa catarina pinula']
+  const zonasTokens = (pref?.zonas || '')
+    .split(',').map(z => z.trim().toLowerCase()).filter(Boolean);
 
-  // Excluir propiedades ya visitadas/agendadas por este cliente
-  if (propIdsVisitadas.length) {
-    sql += ` AND p.id NOT IN (${propIdsVisitadas.map(() => '?').join(',')})`;
-    params.push(...propIdsVisitadas);
+  // Parsear tipos: "casa,apartamento" → ['casa','apartamento']
+  const tiposArray = (pref?.tipo || '').split(',').map(t => t.trim()).filter(Boolean);
+
+  // Helper para construir la query con filtros aplicados
+  function buildQuery({ tipos, operacion, presupuesto, habMin, zonas, excluirIds, limit }) {
+    let q = `
+      SELECT p.*,
+        (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) AS imagen_principal,
+        u.nombre AS asesor_nombre, u.slug AS asesor_slug
+      FROM propiedades p
+      LEFT JOIN usuarios u ON u.id = p.usuario_id
+      WHERE p.publicado_inmobia = 1 AND p.estado IN ('activo','pendiente')
+    `;
+    const p = [];
+
+    if (excluirIds.length) {
+      q += ` AND p.id NOT IN (${excluirIds.map(() => '?').join(',')})`;
+      p.push(...excluirIds);
+    }
+    // Tipo: IN para multi-select
+    if (tipos && tipos.length) {
+      q += ` AND p.tipo IN (${tipos.map(() => '?').join(',')})`;
+      p.push(...tipos);
+    }
+    if (operacion)  { q += ' AND p.operacion = ?';  p.push(operacion); }
+    if (presupuesto){ q += ' AND p.precio <= ?';    p.push(presupuesto); }
+    if (habMin > 0) { q += ' AND p.habitaciones >= ?'; p.push(habMin); }
+
+    // Zona: OR entre tokens contra municipio, zona y colonia
+    if (zonas.length) {
+      const conds = zonas.map(() =>
+        '(LOWER(COALESCE(p.municipio,"")) LIKE ? OR LOWER(COALESCE(p.zona,"")) LIKE ? OR LOWER(COALESCE(p.colonia,"")) LIKE ?)'
+      ).join(' OR ');
+      q += ` AND (${conds})`;
+      zonas.forEach(z => p.push(`%${z}%`, `%${z}%`, `%${z}%`));
+    }
+
+    q += ` ORDER BY p.creado_en DESC LIMIT ${parseInt(limit)}`;
+    return { q, p };
   }
 
-  if (ultimoLead) {
-    if (ultimoLead.p_tipo)  { sql += ' AND p.tipo = ?';       params.push(ultimoLead.p_tipo); }
-    if (ultimoLead.p_op)    { sql += ' AND p.operacion = ?';  params.push(ultimoLead.p_op); }
-    if (ultimoLead.p_precio){ sql += ' AND p.precio <= ?';    params.push(ultimoLead.p_precio * 1.3); }
+  // Filtros duros: todos los criterios del perfil
+  const { q: qDuro, p: pDuro } = buildQuery({
+    tipos: tiposArray,
+    operacion: pref?.operacion || null,
+    presupuesto: pref?.presupuesto_max || null,
+    habMin: pref?.habitaciones_min || 0,
+    zonas: zonasTokens,
+    excluirIds: propIdsVisitadas,
+    limit: 18
+  });
+  let propiedades = db.prepare(qDuro).all(...pDuro);
+
+  // Relleno escalonado si hay pocos resultados — relajar filtros de a uno
+  if (pref && propiedades.length < 6) {
+    // Ronda 2: quitar filtro de habitaciones
+    const idsYa2 = propiedades.map(p => p.id).concat(propIdsVisitadas);
+    if (propiedades.length < 6) {
+      const { q: q2, p: p2 } = buildQuery({
+        tipos: tiposArray, operacion: pref?.operacion || null,
+        presupuesto: pref?.presupuesto_max || null,
+        habMin: 0, zonas: zonasTokens,
+        excluirIds: idsYa2, limit: 6 - propiedades.length
+      });
+      propiedades = [...propiedades, ...db.prepare(q2).all(...p2)];
+    }
+
+    // Ronda 3: quitar zona también
+    const idsYa3 = propiedades.map(p => p.id).concat(propIdsVisitadas);
+    if (propiedades.length < 6) {
+      const { q: q3, p: p3 } = buildQuery({
+        tipos: tiposArray, operacion: pref?.operacion || null,
+        presupuesto: pref?.presupuesto_max ? pref.presupuesto_max * 1.3 : null,
+        habMin: 0, zonas: [],
+        excluirIds: idsYa3, limit: 6 - propiedades.length
+      });
+      propiedades = [...propiedades, ...db.prepare(q3).all(...p3)];
+    }
+
+    // Ronda 4: solo operación — sin tipo, zona, hab ni presupuesto
+    const idsYa4 = propiedades.map(p => p.id).concat(propIdsVisitadas);
+    if (propiedades.length < 4) {
+      const { q: q4, p: p4 } = buildQuery({
+        tipos: [], operacion: pref?.operacion || null, presupuesto: null,
+        habMin: 0, zonas: [],
+        excluirIds: idsYa4, limit: 12 - propiedades.length
+      });
+      propiedades = [...propiedades, ...db.prepare(q4).all(...p4)];
+    }
   }
 
-  sql += ' ORDER BY p.creado_en DESC LIMIT 12';
-
-  const propiedades = db.prepare(sql).all(...params);
-  res.json({ propiedades, preferencias: ultimoLead ? { tipo: ultimoLead.p_tipo, operacion: ultimoLead.p_op } : null });
+  res.json({ propiedades, preferencias: pref });
 });
 
 // ── POST /api/cliente/calificar  (pública — cliente califica al asesor)
 router.post('/calificar', (req, res) => {
-  const { token, lead_id, estrellas, razones, comentario } = req.body;
+  const {
+    token, lead_id, estrellas, razones, comentario,
+    interes, asesor_estrellas, asesor_razones, asesor_comentario, recomendaria
+  } = req.body;
 
   if (!token || !lead_id || !estrellas)
     return res.status(400).json({ error: 'Datos incompletos' });
 
-  // Verificar que el token pertenece a este lead
   const ml = db.prepare('SELECT * FROM magic_links WHERE token = ?').get(token);
   if (!ml) return res.status(403).json({ error: 'No autorizado' });
 
   const lead = db.prepare('SELECT * FROM leads WHERE id = ? AND LOWER(email) = ?').get(lead_id, ml.email);
   if (!lead) return res.status(403).json({ error: 'Lead no encontrado' });
 
-  // Insertar o actualizar calificación
-  db.prepare(`
-    INSERT INTO calificaciones (lead_id, asesor_id, estrellas, razones, comentario)
-    VALUES (?, ?, ?, ?, ?)
-    ON CONFLICT(lead_id) DO UPDATE SET
-      estrellas = excluded.estrellas,
-      razones = excluded.razones,
-      comentario = excluded.comentario
-  `).run(lead_id, lead.asesor_id, Number(estrellas),
-    Array.isArray(razones) ? razones.join(',') : (razones || ''),
-    comentario || '');
+  const propRazones  = Array.isArray(razones)       ? razones.join(',')       : (razones || '');
+  const asRazones    = Array.isArray(asesor_razones) ? asesor_razones.join(',') : (asesor_razones || '');
+  const asEstrellas  = asesor_estrellas ? Number(asesor_estrellas) : null;
 
-  // Actualizar calificacion_cliente en el lead
+  db.prepare(`
+    INSERT INTO calificaciones
+      (lead_id, asesor_id, estrellas, razones, comentario, interes, asesor_estrellas, asesor_razones, asesor_comentario, recomendaria)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(lead_id) DO UPDATE SET
+      estrellas        = excluded.estrellas,
+      razones          = excluded.razones,
+      comentario       = excluded.comentario,
+      interes          = excluded.interes,
+      asesor_estrellas = excluded.asesor_estrellas,
+      asesor_razones   = excluded.asesor_razones,
+      asesor_comentario= excluded.asesor_comentario,
+      recomendaria     = excluded.recomendaria
+  `).run(lead_id, lead.asesor_id, Number(estrellas),
+    propRazones, comentario || '', interes || '',
+    asEstrellas, asRazones, asesor_comentario || '', recomendaria || '');
+
   db.prepare('UPDATE leads SET calificacion_cliente = ? WHERE id = ?').run(Number(estrellas), lead_id);
 
-  // Sumar score al asesor según estrellas (+0.8 si 5★, +0.3 si 4★)
-  const stars = Number(estrellas);
-  const scoreDelta = stars === 5 ? 0.8 : stars === 4 ? 0.3 : 0;
-  if (scoreDelta > 0) {
-    db.prepare('UPDATE usuarios SET score = MIN(5.0, MAX(1.0, ROUND(score + ?, 2))) WHERE id = ?')
-      .run(scoreDelta, lead.asesor_id);
+  // Score asesor: estrellas de la propiedad + estrellas del servicio del asesor
+  const propStars = Number(estrellas);
+  const asStars   = asEstrellas || 0;
+  const propDelta = propStars === 5 ? 0.4 : propStars === 4 ? 0.15 : 0;
+  const asDelta   = asStars   === 5 ? 0.4 : asStars   === 4 ? 0.15 : asStars <= 2 ? -0.3 : 0;
+  const totalDelta = propDelta + asDelta;
+  if (totalDelta !== 0) {
+    db.prepare('UPDATE usuarios SET score = MIN(5.0, MAX(0.0, ROUND(score + ?, 2))) WHERE id = ?')
+      .run(totalDelta, lead.asesor_id);
   }
 
   res.json({ ok: true });
@@ -346,6 +443,144 @@ router.post('/disputar-cierre', (req, res) => {
   console.warn(`🚨 Cliente disputó cierre de lead ${lead.id} (asesor ${lead.asesor_id}) — motivo: ${motivo || '—'}`);
 
   res.json({ ok: true, disputado_en: ahora });
+});
+
+// ── GET /api/cliente/busqueda  — perfil de búsqueda del cliente
+router.get('/busqueda', (req, res) => {
+  const token = req.query.token;
+  if (!token) return res.status(400).json({ error: 'Token requerido' });
+  const ml = db.prepare('SELECT email FROM magic_links WHERE token = ?').get(token);
+  if (!ml) return res.status(403).json({ error: 'Token inválido' });
+
+  const perfil = db.prepare('SELECT * FROM perfiles_cliente WHERE LOWER(email) = ?').get(ml.email.toLowerCase());
+  if (!perfil) return res.json({ email: ml.email });
+
+  res.json(perfil);
+});
+
+// ── PATCH /api/cliente/busqueda  — actualizar perfil de búsqueda
+router.patch('/busqueda', (req, res) => {
+  const {
+    token, tipo, operacion, presupuesto_max, moneda,
+    zonas, habitaciones_min, banos_min,
+    acepta_mascotas, acepta_financiamiento, activo_en_red, notas
+  } = req.body;
+
+  if (!token) return res.status(400).json({ error: 'Token requerido' });
+  const ml = db.prepare('SELECT email, lead_id FROM magic_links WHERE token = ?').get(token);
+  if (!ml) return res.status(403).json({ error: 'Token inválido' });
+
+  const email = ml.email.toLowerCase();
+
+  // Obtener nombre del cliente desde su lead más reciente
+  const leadCliente = db.prepare(
+    `SELECT nombre, telefono FROM leads WHERE LOWER(email) = ? ORDER BY creado_en DESC LIMIT 1`
+  ).get(email);
+
+  const existe = db.prepare('SELECT id FROM perfiles_cliente WHERE LOWER(email) = ?').get(email);
+
+  if (existe) {
+    db.prepare(`UPDATE perfiles_cliente SET
+      tipo = ?, operacion = ?, presupuesto_max = ?, moneda = ?,
+      zonas = ?, habitaciones_min = ?, banos_min = ?,
+      acepta_mascotas = ?, acepta_financiamiento = ?, activo_en_red = ?,
+      notas = ?, actualizado_en = datetime('now')
+      WHERE LOWER(email) = ?`).run(
+      tipo || '', operacion || '', presupuesto_max || null, moneda || 'GTQ',
+      zonas || '', habitaciones_min || 0, banos_min || 0,
+      acepta_mascotas ? 1 : 0, acepta_financiamiento ? 1 : 0, activo_en_red ? 1 : 0,
+      (notas || '').slice(0, 500), email
+    );
+  } else {
+    db.prepare(`INSERT INTO perfiles_cliente
+      (email, tipo, operacion, presupuesto_max, moneda, zonas, habitaciones_min, banos_min,
+       acepta_mascotas, acepta_financiamiento, activo_en_red, notas)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+      email, tipo || '', operacion || '', presupuesto_max || null, moneda || 'GTQ',
+      zonas || '', habitaciones_min || 0, banos_min || 0,
+      acepta_mascotas ? 1 : 0, acepta_financiamiento ? 1 : 0, activo_en_red ? 1 : 0,
+      (notas || '').slice(0, 500)
+    );
+  }
+
+  // ── AUTOMATIZACIÓN: publicar en la red de asesores ──────────────
+  if (activo_en_red) {
+    try {
+      // Obtener admin para usar como asesor_id del requerimiento del cliente
+      const admin = db.prepare(`SELECT id FROM usuarios WHERE rol = 'admin' LIMIT 1`).get();
+      if (admin) {
+        const vence = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        const zonasStr = (zonas || '').slice(0, 200);
+        const notasReq = [(notas || '').trim(), acepta_mascotas ? 'Acepta mascotas' : '', acepta_financiamiento ? 'Acepta financiamiento' : ''].filter(Boolean).join(' · ');
+
+        // Crear o reemplazar requerimiento activo del cliente en la red
+        const reqExistente = db.prepare(
+          `SELECT id FROM requerimientos WHERE cliente_origen_email = ? AND fuente = 'cliente' AND estado = 'activo' LIMIT 1`
+        ).get(email);
+
+        if (reqExistente) {
+          db.prepare(`UPDATE requerimientos SET
+            tipo_propiedad = ?, operacion = ?, precio_max = ?, moneda = ?,
+            zona = ?, habitaciones = ?, banos = ?, notas = ?,
+            cliente_nombre = ?, cliente_email = ?,
+            vence_en = ?, actualizado_en = datetime('now')
+            WHERE id = ?`).run(
+            tipo || null, operacion || null, presupuesto_max || null, moneda || 'GTQ',
+            zonasStr || null, habitaciones_min || null, banos_min || null, notasReq || null,
+            leadCliente?.nombre || null, email,
+            vence, reqExistente.id
+          );
+        } else {
+          db.prepare(`INSERT INTO requerimientos
+            (asesor_id, fuente, cliente_origen_email, cliente_nombre, cliente_email, cliente_telefono,
+             tipo_propiedad, operacion, precio_max, moneda, zona, habitaciones, banos, notas,
+             estado, vence_en)
+            VALUES (?, 'cliente', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'activo', ?)`).run(
+            admin.id, email,
+            leadCliente?.nombre || null, email, leadCliente?.telefono || null,
+            tipo || null, operacion || null, presupuesto_max || null, moneda || 'GTQ',
+            zonasStr || null, habitaciones_min || null, banos_min || null, notasReq || null,
+            vence
+          );
+        }
+
+        // Notificar a asesores con propiedades que coinciden
+        let sqlMatch = `SELECT DISTINCT u.id, u.nombre FROM propiedades p
+          JOIN usuarios u ON u.id = p.usuario_id
+          WHERE p.publicado_inmobia = 1 AND p.estado = 'activo'`;
+        const params = [];
+        if (tipo)      { sqlMatch += ' AND p.tipo = ?';      params.push(tipo); }
+        if (operacion) { sqlMatch += ' AND p.operacion = ?'; params.push(operacion); }
+        if (presupuesto_max) { sqlMatch += ' AND p.precio <= ?'; params.push(presupuesto_max * 1.2); }
+
+        const asesoresMatch = db.prepare(sqlMatch).all(...params);
+
+        const monedaSim = (moneda || 'GTQ') === 'USD' ? '$' : 'Q';
+        const presupuestoStr = presupuesto_max
+          ? ` · hasta ${monedaSim}${Number(presupuesto_max).toLocaleString('es-GT')}`
+          : '';
+        const titulo = `🔍 Cliente InmobIA buscando ${tipo || 'propiedad'} en ${zonasStr || 'Guatemala'}`;
+        const mensaje = `Un cliente registrado en InmobIA busca: ${[tipo, operacion, zonasStr].filter(Boolean).join(' · ')}${presupuestoStr}. Si cierras con este cliente, aplica comisión InmobIA del 30%. Revisa si tienes una propiedad que encaje.`;
+
+        const insertNotif = db.prepare(`INSERT INTO notificaciones
+          (usuario_id, tipo, titulo, mensaje) VALUES (?, 'requerimiento_cliente', ?, ?)`);
+        for (const asesor of asesoresMatch) {
+          insertNotif.run(asesor.id, titulo, mensaje);
+        }
+
+        console.log(`[Red] Requerimiento de cliente ${email} publicado → ${asesoresMatch.length} asesores notificados`);
+      }
+    } catch(e) {
+      console.error('[Red] Error al publicar requerimiento:', e.message);
+    }
+  } else {
+    // Si desactivó la red, marcar requerimiento como inactivo
+    try {
+      db.prepare(`UPDATE requerimientos SET estado = 'inactivo' WHERE cliente_origen_email = ? AND fuente = 'cliente'`).run(email);
+    } catch {}
+  }
+
+  res.json({ ok: true });
 });
 
 export default router;

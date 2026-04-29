@@ -218,6 +218,15 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
   0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
   100% { transform: translateY(80px) rotate(360deg); opacity: 0; }
 }
+@keyframes confettiDrop {
+  0%   { transform: translateY(0) rotate(0deg) scaleX(1); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg) scaleX(0.6); opacity: 0; }
+}
+@keyframes guiaFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .score-celeb-modal {
   position: fixed; inset: 0; background: rgba(0,0,0,0.55);
   z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem;
@@ -1590,10 +1599,42 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
           <div style="font-size:0.78rem;color:rgba(255,255,255,0.78);line-height:1.5">
             Cada grupo de <strong style="color:#fff">5 propiedades</strong> compartidas con InmobIA le da <strong style="color:#fde68a">+1 lead adicional</strong> este mes — sin costo extra.
           </div>
+          <div id="banner-pm-counter" style="margin-top:0.65rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem">
+              <span id="banner-pm-progtext" style="font-size:0.72rem;color:rgba(255,255,255,0.65)">0 de 5 propiedades</span>
+              <span id="banner-pm-faltantext" style="font-size:0.72rem;color:#fde68a;font-weight:700">Faltan 5 → +1 lead</span>
+            </div>
+            <div style="height:5px;border-radius:99px;background:rgba(255,255,255,0.15);overflow:hidden">
+              <div id="banner-pm-bar" style="height:100%;border-radius:99px;background:linear-gradient(90deg,#f6bf0c,#fde68a);width:0%;transition:width 0.6s ease"></div>
+            </div>
+          </div>
         </div>
         <button onclick="irA('propiedades')" style="flex-shrink:0;background:#f6bf0c;border:none;border-radius:99px;padding:0.6rem 1.1rem;font-size:0.78rem;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;transition:background 0.18s,box-shadow 0.18s;box-shadow:0 2px 8px rgba(246,191,12,0.35)" onmouseenter="this.style.background='#d9a80a';this.style.boxShadow='0 4px 14px rgba(246,191,12,0.55)'" onmouseleave="this.style.background='#f6bf0c';this.style.boxShadow='0 2px 8px rgba(246,191,12,0.35)'">Subir propiedades →</button>
-        <button onclick="document.getElementById('banner-primer-mes').style.display='none'"
-          style="position:absolute;top:0.6rem;right:0.75rem;background:rgba(255,255,255,0.15);border:none;color:rgba(255,255,255,0.7);cursor:pointer;border-radius:50%;width:22px;height:22px;font-size:0.75rem;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+
+      <!-- Banner siguiente logro: referido (oculto, aparece al completar los 3 pasos) -->
+      <div id="banner-referido" style="display:none;margin-bottom:1.25rem;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#2a1f06 0%,#3a2a08 50%,#2a1f06 100%);padding:1.2rem 1.5rem;border-left:4px solid #c9a84c;border-top:1px solid rgba(201,168,76,0.25);border-right:1px solid rgba(201,168,76,0.15);border-bottom:1px solid rgba(201,168,76,0.15)">
+        <div style="display:flex;align-items:flex-start;gap:1.25rem">
+          <div style="width:46px;height:46px;border-radius:12px;background:rgba(201,168,76,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(201,168,76,0.3)">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(201,168,76,0.65);margin-bottom:0.2rem">Siguiente logro</div>
+            <div style="font-weight:800;font-size:0.97rem;color:#fde68a;margin-bottom:0.25rem">Trae un referido y gana 1 mes Premium gratis</div>
+            <div style="font-size:0.77rem;color:rgba(255,255,255,0.65);line-height:1.5;margin-bottom:0.85rem">Comparte tu link con otro asesor. Si se registra y activa Premium, <strong style="color:#fde68a">recibes 1 mes gratis automáticamente</strong> — sin condiciones.</div>
+            <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
+              <div id="banner-ref-link" style="flex:1;min-width:0;font-size:0.78rem;color:#f0d078;font-weight:600;background:rgba(255,255,255,0.06);border-radius:8px;padding:0.5rem 0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:1px solid rgba(201,168,76,0.25)">—</div>
+              <button onclick="copiarBannerRef()" style="flex-shrink:0;background:#c9a84c;color:#1a1200;border:none;border-radius:8px;padding:0.5rem 1rem;font-size:0.77rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:0.35rem;transition:background 0.18s" onmouseenter="this.style.background='#b8963e'" onmouseleave="this.style.background='#c9a84c'">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                Copiar link
+              </button>
+              <button onclick="compartirRefWhatsApp()" style="flex-shrink:0;background:#25d366;color:#fff;border:none;border-radius:8px;padding:0.5rem 1rem;font-size:0.77rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:0.35rem;transition:background 0.18s" onmouseenter="this.style.background='#1eb358'" onmouseleave="this.style.background='#25d366'">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Próximos pasos -->
@@ -1605,26 +1646,63 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
             <h3 style="margin:0;font-size:1.08rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:0.5rem"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Próximos pasos para cerrar su primer negocio</h3>
             <p style="margin:0.3rem 0 0;font-size:0.76rem;color:rgba(255,255,255,0.55)">Completar estos 3 pasos aumenta hasta 3× sus posibilidades de recibir leads calificados</p>
           </div>
-          <button onclick="document.getElementById('guia-inicio').style.display='none'" style="flex-shrink:0;background:rgba(255,255,255,0.12);border:none;color:rgba(255,255,255,0.6);cursor:pointer;border-radius:50%;width:26px;height:26px;font-size:0.85rem;display:flex;align-items:center;justify-content:center;margin-top:2px">✕</button>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;position:relative">
-          <div id="guia-paso-perfil" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.25rem 1.15rem 1.15rem;position:relative;overflow:hidden;transition:all 0.4s ease">
+          <div id="guia-paso-perfil" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.25rem 1.15rem 1.15rem;position:relative;overflow:hidden;transition:all 0.4s ease;display:flex;flex-direction:column">
             <div id="guia-paso-perfil-num" style="position:absolute;top:-0.4rem;right:0.7rem;font-size:4.5rem;font-weight:900;color:rgba(201,168,76,0.18);line-height:1;user-select:none;pointer-events:none">1</div>
             <div id="guia-paso-perfil-titulo" style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.3rem;position:relative">Complete su perfil</div>
-            <div id="guia-paso-perfil-desc" style="font-size:0.73rem;color:rgba(255,255,255,0.58);line-height:1.5;margin-bottom:1rem;position:relative">Foto, bio y zonas de trabajo. Los clientes confían 3× más en asesores con perfil completo.</div>
-            <button id="guia-paso-perfil-btn" onclick="irA('perfil')" style="font-size:0.76rem;font-weight:700;color:#fff;background:#c98615;border:none;border-radius:99px;padding:0.5rem 1rem;cursor:pointer;width:100%;text-align:center;transition:all 0.3s;box-shadow:0 2px 8px rgba(201,134,21,0.35)" onmouseenter="this.style.background='#b07510';this.style.boxShadow='0 4px 14px rgba(201,134,21,0.55)'" onmouseleave="this.style.background='#c98615';this.style.boxShadow='0 2px 8px rgba(201,134,21,0.35)'">Ir a mi perfil →</button>
+            <div id="guia-paso-perfil-desc" style="font-size:0.73rem;color:rgba(255,255,255,0.58);line-height:1.5;margin-bottom:1rem;position:relative;flex:1">Foto, bio y zonas de trabajo. Los clientes confían 3× más en asesores con perfil completo.</div>
+            <button id="guia-paso-perfil-btn" onclick="irA('perfil')" style="font-size:0.76rem;font-weight:700;color:#fff;background:#c98615;border:none;border-radius:99px;padding:0.5rem 1rem;cursor:pointer;width:100%;text-align:center;transition:all 0.3s;box-shadow:0 2px 8px rgba(201,134,21,0.35);margin-top:auto" onmouseenter="this.style.background='#b07510';this.style.boxShadow='0 4px 14px rgba(201,134,21,0.55)'" onmouseleave="this.style.background='#c98615';this.style.boxShadow='0 2px 8px rgba(201,134,21,0.35)'">Ir a mi perfil →</button>
           </div>
-          <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.25rem 1.15rem 1.15rem;position:relative;overflow:hidden">
-            <div style="position:absolute;top:-0.4rem;right:0.7rem;font-size:4.5rem;font-weight:900;color:rgba(201,168,76,0.18);line-height:1;user-select:none;pointer-events:none">2</div>
-            <div style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.3rem;position:relative">Publique su primera propiedad</div>
-            <div style="font-size:0.73rem;color:rgba(255,255,255,0.58);line-height:1.5;margin-bottom:1rem;position:relative">Active el toggle "En InmobIA" y su propiedad aparece en el buscador — empieza a generar leads al instante.</div>
-            <button onclick="irA('propiedades')" style="font-size:0.76rem;font-weight:700;color:#fff;background:#c9a811;border:none;border-radius:99px;padding:0.5rem 1rem;cursor:pointer;width:100%;text-align:center;transition:background 0.18s,box-shadow 0.18s;box-shadow:0 2px 8px rgba(201,168,17,0.35)" onmouseenter="this.style.background='#b0920e';this.style.boxShadow='0 4px 14px rgba(201,168,17,0.55)'" onmouseleave="this.style.background='#c9a811';this.style.boxShadow='0 2px 8px rgba(201,168,17,0.35)'">Subir propiedad →</button>
+          <div id="guia-paso-prop" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.25rem 1.15rem 1.15rem;position:relative;overflow:hidden;transition:all 0.4s ease;display:flex;flex-direction:column">
+            <div id="guia-paso-prop-num" style="position:absolute;top:-0.4rem;right:0.7rem;font-size:4.5rem;font-weight:900;color:rgba(201,168,76,0.18);line-height:1;user-select:none;pointer-events:none">2</div>
+            <div id="guia-paso-prop-titulo" style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.3rem;position:relative">Publique su primera propiedad</div>
+            <div id="guia-paso-prop-desc" style="font-size:0.73rem;color:rgba(255,255,255,0.58);line-height:1.5;margin-bottom:1rem;position:relative;flex:1">Active el toggle "En InmobIA" y su propiedad aparece en el buscador — empieza a generar leads al instante.</div>
+            <button id="guia-paso-prop-btn" onclick="irA('propiedades')" style="font-size:0.76rem;font-weight:700;color:#fff;background:#c9a811;border:none;border-radius:99px;padding:0.5rem 1rem;cursor:pointer;width:100%;text-align:center;transition:background 0.18s,box-shadow 0.18s;box-shadow:0 2px 8px rgba(201,168,17,0.35);margin-top:auto" onmouseenter="this.style.background='#b0920e';this.style.boxShadow='0 4px 14px rgba(201,168,17,0.55)'" onmouseleave="this.style.background='#c9a811';this.style.boxShadow='0 2px 8px rgba(201,168,17,0.35)'">Subir propiedad →</button>
           </div>
-          <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.25rem 1.15rem 1.15rem;position:relative;overflow:hidden">
-            <div style="position:absolute;top:-0.4rem;right:0.7rem;font-size:4.5rem;font-weight:900;color:rgba(201,168,76,0.18);line-height:1;user-select:none;pointer-events:none">3</div>
-            <div style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.3rem;position:relative">Impulse su score</div>
-            <div style="font-size:0.73rem;color:rgba(255,255,255,0.58);line-height:1.5;margin-bottom:1rem;position:relative">Un score alto le da más leads, prioridad en la red y mayor credibilidad ante los clientes.</div>
-            <button onclick="abrirModalScoreAcciones()" style="font-size:0.76rem;font-weight:700;color:#fff;background:#f6bf0c;border:none;border-radius:99px;padding:0.5rem 1rem;cursor:pointer;width:100%;text-align:center;transition:background 0.18s,box-shadow 0.18s;display:flex;align-items:center;justify-content:center;gap:0.35rem;box-shadow:0 2px 8px rgba(246,191,12,0.35)" onmouseenter="this.style.background='#d9a80a';this.style.boxShadow='0 4px 14px rgba(246,191,12,0.55)'" onmouseleave="this.style.background='#f6bf0c';this.style.boxShadow='0 2px 8px rgba(246,191,12,0.35)'"><svg viewBox="0 0 24 24" width="13" height="13" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Subir mi score →</button>
+          <div id="guia-paso-score" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.25rem 1.15rem 1.15rem;position:relative;overflow:hidden;transition:all 0.4s ease;display:flex;flex-direction:column">
+            <div id="guia-paso-score-num" style="position:absolute;top:-0.4rem;right:0.7rem;font-size:4.5rem;font-weight:900;color:rgba(201,168,76,0.18);line-height:1;user-select:none;pointer-events:none">3</div>
+            <div id="guia-paso-score-titulo" style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.3rem;position:relative">Impulse su score</div>
+            <div id="guia-paso-score-desc" style="font-size:0.73rem;color:rgba(255,255,255,0.58);line-height:1.5;margin-bottom:1rem;position:relative;flex:1">Un score alto le da más leads, prioridad en la red y mayor credibilidad ante los clientes.</div>
+            <button id="guia-paso-score-btn" onclick="abrirModalScoreAcciones()" style="font-size:0.76rem;font-weight:700;color:#fff;background:#f6bf0c;border:none;border-radius:99px;padding:0.5rem 1rem;cursor:pointer;width:100%;text-align:center;transition:background 0.18s,box-shadow 0.18s;display:flex;align-items:center;justify-content:center;gap:0.35rem;box-shadow:0 2px 8px rgba(246,191,12,0.35);margin-top:auto" onmouseenter="this.style.background='#d9a80a';this.style.boxShadow='0 4px 14px rgba(246,191,12,0.55)'" onmouseleave="this.style.background='#f6bf0c';this.style.boxShadow='0 2px 8px rgba(246,191,12,0.35)'"><svg viewBox="0 0 24 24" width="13" height="13" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Subir mi score →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner siguiente nivel (aparece cuando se completan los 3 pasos iniciales) -->
+      <div id="guia-siguiente-nivel" style="display:none;margin-bottom:1.25rem;background:linear-gradient(135deg,#0a1f14 0%,#0f2d1a 50%,#0f172a 100%);border-radius:14px;padding:1.75rem 1.5rem;position:relative;overflow:hidden;border:1px solid rgba(74,222,128,0.2)">
+        <button onclick="document.getElementById('guia-siguiente-nivel').style.display='none'" style="position:absolute;top:0.6rem;right:0.75rem;background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.55);cursor:pointer;border-radius:50%;width:26px;height:26px;font-size:0.85rem;display:flex;align-items:center;justify-content:center;z-index:2">✕</button>
+        <!-- Celebración -->
+        <div style="text-align:center;margin-bottom:1.4rem;position:relative">
+          <div style="font-size:2rem;margin-bottom:0.4rem">🎉</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#4ade80;margin-bottom:0.25rem">¡Excelente progreso, asesor verificado!</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.55);margin-bottom:0.85rem">Completó los 3 pasos iniciales — ahora enfóquese en su primer cierre</div>
+          <div style="display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap">
+            <span style="font-size:0.67rem;background:rgba(74,222,128,0.12);color:#4ade80;border:1px solid rgba(74,222,128,0.28);border-radius:99px;padding:0.22rem 0.65rem;font-weight:700">✓ Asesor Verificado</span>
+            <span style="font-size:0.67rem;background:rgba(74,222,128,0.12);color:#4ade80;border:1px solid rgba(74,222,128,0.28);border-radius:99px;padding:0.22rem 0.65rem;font-weight:700">✓ Propiedad en InmobIA</span>
+            <span style="font-size:0.67rem;background:rgba(74,222,128,0.12);color:#4ade80;border:1px solid rgba(74,222,128,0.28);border-radius:99px;padding:0.22rem 0.65rem;font-weight:700">✓ Score 2.5+</span>
+          </div>
+        </div>
+        <!-- Siguientes pasos -->
+        <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:0.85rem">Siguientes pasos para su primer cierre</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.85rem">
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:1rem;position:relative;overflow:hidden">
+            <div style="position:absolute;top:-0.3rem;right:0.6rem;font-size:3rem;font-weight:900;color:rgba(74,222,128,0.08);line-height:1;user-select:none">A</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#fff;margin-bottom:0.2rem;position:relative">Responda leads rápido</div>
+            <div style="font-size:0.69rem;color:rgba(255,255,255,0.52);line-height:1.5;margin-bottom:0.75rem;position:relative">Responder en menos de 2h aumenta 4× la probabilidad de cierre y sube tu score automáticamente.</div>
+            <button onclick="irA('crm')" style="font-size:0.73rem;font-weight:700;color:#fff;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);border-radius:99px;padding:0.42rem 0.9rem;cursor:pointer;width:100%;transition:background 0.18s" onmouseenter="this.style.background='rgba(255,255,255,0.14)'" onmouseleave="this.style.background='rgba(255,255,255,0.08)'">Ver CRM →</button>
+          </div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:1rem;position:relative;overflow:hidden">
+            <div style="position:absolute;top:-0.3rem;right:0.6rem;font-size:3rem;font-weight:900;color:rgba(74,222,128,0.08);line-height:1;user-select:none">B</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#fff;margin-bottom:0.2rem;position:relative">Atienda sus visitas</div>
+            <div style="font-size:0.69rem;color:rgba(255,255,255,0.52);line-height:1.5;margin-bottom:0.75rem;position:relative">Cada visita atendida a tiempo suma +0.2★ a tu score y refuerza tu historial ante los clientes.</div>
+            <button onclick="irA('crm')" style="font-size:0.73rem;font-weight:700;color:#fff;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);border-radius:99px;padding:0.42rem 0.9rem;cursor:pointer;width:100%;transition:background 0.18s" onmouseenter="this.style.background='rgba(255,255,255,0.14)'" onmouseleave="this.style.background='rgba(255,255,255,0.08)'">Ver agenda →</button>
+          </div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:1rem;position:relative;overflow:hidden">
+            <div style="position:absolute;top:-0.3rem;right:0.6rem;font-size:3rem;font-weight:900;color:rgba(201,168,76,0.1);line-height:1;user-select:none">C</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#fde68a;margin-bottom:0.2rem;position:relative">Declare su primer cierre</div>
+            <div style="font-size:0.69rem;color:rgba(255,255,255,0.52);line-height:1.5;margin-bottom:0.75rem;position:relative">Al declarar el cierre en el CRM, InmobIA gestiona el cobro y emite la factura SAT automáticamente.</div>
+            <button onclick="irA('crm')" style="font-size:0.73rem;font-weight:700;color:#c9a84c;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:99px;padding:0.42rem 0.9rem;cursor:pointer;width:100%;transition:background 0.18s" onmouseenter="this.style.background='rgba(201,168,76,0.2)'" onmouseleave="this.style.background='rgba(201,168,76,0.12)'">Ir al CRM →</button>
           </div>
         </div>
       </div>
@@ -1860,14 +1938,17 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
           </div>
           <span id="perfil-progreso-msg" style="font-size:0.72rem;color:var(--text-muted)">Complete su perfil para recibir más leads</span>
         </div>
-        <!-- Motivación -->
-        <div style="font-size:0.72rem;color:#6b7a99;line-height:1.55;margin-bottom:0.6rem;padding:0.5rem 0.75rem;background:#faf8f3;border-radius:7px;border-left:3px solid #c9a84c">
-          Un perfil completo recibe <strong style="color:var(--charcoal)">3× más leads</strong>, aparece primero en búsquedas de clientes y suma hasta <strong style="color:#8b5cf6">+1.7★</strong> a su score — la diferencia entre hacer cierres y seguir buscando oportunidades.
+        <!-- Sección colapsable (se oculta al completar perfil) -->
+        <div id="perfil-progreso-collapsible" style="transition:opacity 0.4s ease,max-height 0.5s ease;overflow:hidden">
+          <!-- Motivación -->
+          <div style="font-size:0.72rem;color:#6b7a99;line-height:1.55;margin-bottom:0.6rem;padding:0.5rem 0.75rem;background:#faf8f3;border-radius:7px;border-left:3px solid #c9a84c">
+            Un perfil completo recibe <strong style="color:var(--charcoal)">3× más leads</strong>, aparece primero en búsquedas de clientes y suma hasta <strong style="color:#8b5cf6">+1.7★</strong> a su score — la diferencia entre hacer cierres y seguir buscando oportunidades.
+          </div>
+          <div style="background:#e8eaf2;border-radius:99px;height:7px;overflow:hidden">
+            <div id="perfil-progreso-bar" style="height:100%;border-radius:99px;background:linear-gradient(90deg,#c9a84c,#e0b94a);width:0%;transition:width 0.6s ease"></div>
+          </div>
+          <div id="perfil-progreso-pendientes" style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:0.75rem;align-items:flex-start"></div>
         </div>
-        <div style="background:#e8eaf2;border-radius:99px;height:7px;overflow:hidden">
-          <div id="perfil-progreso-bar" style="height:100%;border-radius:99px;background:linear-gradient(90deg,#c9a84c,#e0b94a);width:0%;transition:width 0.6s ease"></div>
-        </div>
-        <div id="perfil-progreso-pendientes" style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:0.75rem;align-items:flex-start"></div>
 
         <!-- Logro: insignia Verificado -->
         <div id="perfil-badge-goal" style="margin-top:1rem;padding:0.7rem 1rem;border-radius:10px;border:1.5px dashed #e2e6f0;background:#fafbfc;display:flex;align-items:center;gap:0.85rem;transition:all 0.5s ease">
@@ -1884,9 +1965,33 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
             <div id="pbg-title" style="font-size:0.78rem;font-weight:700;color:var(--charcoal);margin-bottom:0.15rem">Tu logro al completar el perfil</div>
             <div id="pbg-desc" style="font-size:0.7rem;color:var(--text-muted);line-height:1.4">Complete todos los pasos y obtenga la insignia <strong>✓ Verificado</strong> visible en su portal público</div>
           </div>
-          <div style="flex-shrink:0;text-align:center;min-width:36px">
-            <div id="pbg-num" style="font-size:1.05rem;font-weight:800;color:#b0bcd4;line-height:1;transition:color 0.5s ease">0/8</div>
-            <div style="font-size:0.6rem;color:var(--text-muted);margin-top:0.1rem">pasos</div>
+          <div style="flex-shrink:0;text-align:right;min-width:fit-content">
+            <div id="pbg-logro-chip" style="display:none;font-size:0.68rem;font-weight:700;color:#16a34a;margin-bottom:0.25rem;white-space:nowrap">✓ Perfil completado</div>
+            <div style="display:flex;align-items:baseline;gap:0.15rem;justify-content:flex-end">
+              <div id="pbg-num" style="font-size:1.05rem;font-weight:800;color:#b0bcd4;line-height:1;transition:color 0.5s ease">0/9</div>
+            </div>
+            <div style="font-size:0.6rem;color:var(--text-muted);margin-top:0.1rem;text-align:right">pasos</div>
+          </div>
+        </div>
+
+        <!-- Siguiente logro (aparece al completar el perfil) -->
+        <div id="perfil-next-goal" style="display:none;margin-top:0.85rem;padding:0.75rem 1rem;border-radius:10px;background:linear-gradient(135deg,#fefdf8,#fdf8ec);border:1.5px solid rgba(201,168,76,0.3)">
+          <div style="display:flex;align-items:center;gap:0.75rem">
+            <div style="width:36px;height:36px;background:rgba(201,168,76,0.12);border:1.5px solid rgba(201,168,76,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(201,168,76,0.8);margin-bottom:0.15rem">Siguiente logro</div>
+              <div data-ng-title style="font-size:0.82rem;font-weight:700;color:var(--charcoal);margin-bottom:0.1rem">Sube 2 propiedades con 5+ fotos (1/2)</div>
+              <div data-ng-desc style="font-size:0.68rem;color:var(--text-muted);line-height:1.4;margin-bottom:0.5rem">Tienes 1 de 2 propiedades con galería completa. Completar este logro suma +0.5★ a tu score.</div>
+              <div style="display:flex;align-items:center;gap:0.5rem">
+                <div style="flex:1;background:rgba(201,168,76,0.15);border-radius:99px;height:5px;overflow:hidden">
+                  <div id="ng-progress-bar" style="height:100%;border-radius:99px;background:linear-gradient(90deg,#c9a84c,#e0b94a);width:50%;transition:width 0.6s ease"></div>
+                </div>
+                <span id="ng-progress-label" style="font-size:0.65rem;font-weight:700;color:#c9a84c;white-space:nowrap">1/2</span>
+              </div>
+            </div>
+            <button onclick="irA('propiedades')" style="flex-shrink:0;background:#c9a84c;color:#fff;border:none;border-radius:8px;padding:0.45rem 0.85rem;font-size:0.73rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.18s" onmouseenter="this.style.background='#b8963e'" onmouseleave="this.style.background='#c9a84c'">Ir a propiedades →</button>
           </div>
         </div>
       </div>
@@ -2267,10 +2372,13 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
                   <div style="font-size:0.68rem;color:var(--text-muted)">Promedio de 9 áreas · máx <strong>5.0★</strong></div>
                 </div>
               </div>
-              <div style="background:#fafafa;border:1px solid #eee;border-radius:8px;padding:0.65rem 0.9rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:0.6rem">
+              <div style="background:#fafafa;border:1px solid #eee;border-radius:8px;padding:0.65rem 0.9rem;margin-bottom:0.75rem;display:flex;align-items:flex-start;gap:0.6rem">
                 <span style="font-size:1rem;flex-shrink:0;margin-top:0.05rem">💡</span>
                 <p style="margin:0;font-size:0.76rem;color:#555;line-height:1.5">Un score alto te permitirá posicionarte entre las primeras opciones de <strong style="color:var(--charcoal)">oportunidades de negocio en InmobIA</strong>. El <strong style="color:var(--charcoal)">90% de los clientes</strong> prefieren y confían en un asesor con score arriba de <strong style="color:var(--charcoal)">4★</strong>.</p>
               </div>
+
+              <!-- Banner score portal -->
+              <div id="score-portal-banner" style="display:none;border-radius:8px;padding:0.7rem 1rem;margin-bottom:1rem;gap:0.75rem;align-items:center"></div>
 
               <!-- 9 áreas -->
               <div id="score-areas-wrap" style="display:flex;flex-direction:column;gap:0.28rem;margin-bottom:1rem">
@@ -4790,7 +4898,7 @@ async function cargarScoreDetalle() {
     // Renderizar las 9 áreas
     const wrap = document.getElementById('score-areas-wrap');
     if (wrap) {
-      const areasOrden = ['perfil','propiedades','cierres','calificaciones','visitas','leads','respuesta','referidos','colaborativos'];
+      const areasOrden = ['perfil','propiedades','respuesta','leads','visitas','calificaciones','cierres','referidos','colaborativos'];
       wrap.innerHTML = areasOrden.map(key => {
         const area = data.areas[key];
         const pct = Math.round((area.stars / 5) * 100);
@@ -4841,13 +4949,83 @@ async function cargarScoreDetalle() {
     if (mSS) mSS.innerHTML = renderStars(data.score, 'span', '1.1rem');
     if (mSN) mSN.textContent = document.getElementById('score-nivel-label')?.textContent || '';
 
+    // Banner score visible en portal
+    const portalBanner = document.getElementById('score-portal-banner');
+    if (portalBanner) {
+      const s = data.score;
+      if (s >= 4.0) {
+        portalBanner.style.display = 'flex';
+        portalBanner.style.background = 'linear-gradient(135deg,rgba(16,185,129,0.12),rgba(16,185,129,0.06))';
+        portalBanner.style.border = '1px solid rgba(16,185,129,0.35)';
+        portalBanner.innerHTML = `
+          <span style="font-size:1.4rem;flex-shrink:0">✅</span>
+          <div>
+            <div style="font-size:0.78rem;font-weight:700;color:#065f46;margin-bottom:0.15rem">¡Tu score ya es visible en tu portal!</div>
+            <div style="font-size:0.72rem;color:#047857;line-height:1.4">Los clientes que visiten tu página <strong>inmobia.com/asesor/${window._slugAsesor || 'tu-nombre'}</strong> pueden ver tu InmobIA Score de <strong>${s.toFixed(1)}★</strong>. Esto genera más confianza y aumenta tu tasa de contacto.</div>
+          </div>`;
+      } else {
+        const falta = Math.max(0, 4.0 - s);
+        const pct = Math.min(Math.round((s / 4.0) * 100), 100);
+        portalBanner.style.display = 'flex';
+        portalBanner.style.flexDirection = 'column';
+        portalBanner.style.background = 'linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.04))';
+        portalBanner.style.border = '1px solid rgba(245,158,11,0.3)';
+        portalBanner.innerHTML = `
+          <div style="display:flex;align-items:center;gap:0.75rem">
+            <span style="font-size:1.4rem;flex-shrink:0">🏅</span>
+            <div style="flex:1">
+              <div style="font-size:0.78rem;font-weight:700;color:#92400e;margin-bottom:0.15rem">Al llegar a 4★ tu score aparecerá en tu portal público</div>
+              <div style="font-size:0.71rem;color:#b45309;line-height:1.4">Los clientes podrán ver tu InmobIA Score directamente en tu página. Te faltan <strong>${falta.toFixed(1)}★</strong> — sigue completando tus áreas de evaluación.</div>
+            </div>
+          </div>
+          <div style="margin-top:0.6rem">
+            <div style="display:flex;justify-content:space-between;font-size:0.63rem;color:#b45309;margin-bottom:0.25rem">
+              <span>${s.toFixed(1)}★ actual</span><span>Meta: 4.0★</span>
+            </div>
+            <div style="height:6px;background:rgba(245,158,11,0.2);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:3px;transition:width 0.6s"></div>
+            </div>
+          </div>`;
+      }
+    }
+
+    // Milestone guía
+    checkGuiaMilestone(data.score);
+
+    // Actualizar card "siguiente logro" con datos reales de propiedades
+    const nextGoal = document.getElementById('perfil-next-goal');
+    if (nextGoal && nextGoal.style.display !== 'none') {
+      const p5 = data.areas?.propiedades?.props5fotos ?? 0;
+      const meta = 2;
+      const falta = Math.max(0, meta - p5);
+      const titleEl = nextGoal.querySelector('[data-ng-title]');
+      const descEl  = nextGoal.querySelector('[data-ng-desc]');
+      if (titleEl) {
+        titleEl.textContent = falta === 0
+          ? '¡Meta alcanzada! Sigue subiendo propiedades con 5+ fotos'
+          : `Sube ${falta} propiedad${falta > 1 ? 'es' : ''} más con 5+ fotos (${p5}/${meta})`;
+      }
+      if (descEl) {
+        descEl.textContent = falta === 0
+          ? 'Ya tienes 2 propiedades con galería completa. Sigue sumando para mantener el puntaje.'
+          : `Tienes ${p5} de ${meta} propiedades con galería completa. Completar este logro suma +0.5★ a tu score.`;
+      }
+      const ngBar = document.getElementById('ng-progress-bar');
+      const ngLbl = document.getElementById('ng-progress-label');
+      if (ngBar) ngBar.style.width = `${Math.min(Math.round(p5 / meta * 100), 100)}%`;
+      if (ngLbl) ngLbl.textContent = `${p5}/${meta}`;
+    }
+
   } catch (e) { console.warn('score-detalle error:', e); }
 }
 
 function generarMiniEstrellas(stars) {
+  const full = '★';
+  const empty = '☆';
+  const half = `<svg width="13" height="13" viewBox="0 0 24 24" style="vertical-align:middle;margin:0 1px"><defs><linearGradient id="hgm"><stop offset="50%" stop-color="#f59e0b"/><stop offset="50%" stop-color="rgba(255,255,255,0.2)"/></linearGradient></defs><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2" fill="url(#hgm)" stroke="none"/></svg>`;
   let s = '';
   for (let i = 1; i <= 5; i++) {
-    s += stars >= i ? '★' : stars >= i - 0.5 ? '½' : '☆';
+    s += stars >= i ? full : stars >= i - 0.5 ? half : empty;
   }
   return s;
 }
@@ -4878,6 +5056,7 @@ function actualizarUI() {
   const nombre = asesor.nombre || 'Asesor';
   const inicial = nombre.charAt(0).toUpperCase();
   const slug    = asesor.slug || nombre.toLowerCase().replace(/\s+/g, '-');
+  window._slugAsesor = slug;
   const score   = parseFloat(asesor.score) || 0;
   const plan    = asesor.plan || 'gratis';
   const portalUrl = `inmobia.site/asesor/${slug}`;
@@ -6335,6 +6514,20 @@ function actualizarProgresoPerfil() {
     badge.style.cssText += ';background:rgba(39,174,96,0.12);color:#27ae60;border-color:rgba(39,174,96,0.25)';
     bar.style.background = 'linear-gradient(90deg,#16a34a,#22c55e)';
     msg.textContent = '¡Perfil completo! Ya está en la mejor posición para recibir leads.';
+    // Mostrar chip de logro
+    const logroChip = document.getElementById('pbg-logro-chip');
+    if (logroChip) logroChip.style.display = 'block';
+    // Colapsar barra de progreso y mostrar siguiente logro
+    const collapsible = document.getElementById('perfil-progreso-collapsible');
+    if (collapsible && collapsible.style.display !== 'none') {
+      collapsible.style.opacity = '0';
+      setTimeout(() => {
+        collapsible.style.display = 'none';
+        const nextGoal = document.getElementById('perfil-next-goal');
+        if (nextGoal) nextGoal.style.display = 'block';
+      }, 400);
+    }
+    if (!_guiaFlags.perfil) { _guiaFlags.perfil = true; checkGuiaMilestone(); }
   } else if (pct >= 67) {
     bar.style.background = 'linear-gradient(90deg,#c9a84c,#e0b94a)';
     msg.textContent = `Casi listo — ${pendientes} paso${pendientes > 1 ? 's' : ''} para desbloquear tu insignia`;
@@ -6677,6 +6870,30 @@ async function cargarPropiedades() {
     if (_pmsg) _pmsg.textContent = todasLasPropiedades.length === 0 ? 'Sube la primera' : 'En mi portal';
     const _imsg = document.getElementById('props-inmobia-msg');
     if (_imsg) _imsg.textContent = enInmobia === 0 ? 'Activa el toggle' : 'En InmobIA';
+    // Guía paso 2 — "Logrado" cuando tiene al menos 1 propiedad publicada en InmobIA
+    if (enInmobia > 0 && !_guiaFlags.prop) { _guiaFlags.prop = true; checkGuiaMilestone(); }
+    const guiaProp = document.getElementById('guia-paso-prop');
+    if (guiaProp && enInmobia > 0) {
+      guiaProp.style.background = 'rgba(22,163,74,0.18)';
+      guiaProp.style.borderColor = 'rgba(22,163,74,0.5)';
+      const tit = document.getElementById('guia-paso-prop-titulo');
+      if (tit) { tit.textContent = '¡Propiedad publicada!'; tit.style.color = '#4ade80'; }
+      const desc = document.getElementById('guia-paso-prop-desc');
+      if (desc) { desc.textContent = 'Su propiedad ya aparece en el buscador de InmobIA — está generando visibilidad.'; desc.style.color = 'rgba(255,255,255,0.75)'; }
+      const btn = document.getElementById('guia-paso-prop-btn');
+      if (btn) {
+        btn.textContent = '✓ Logrado';
+        btn.style.background = 'rgba(22,163,74,0.3)';
+        btn.style.color = '#4ade80';
+        btn.style.boxShadow = 'none';
+        btn.style.cursor = 'default';
+        btn.removeAttribute('onclick');
+        btn.onmouseenter = null;
+        btn.onmouseleave = null;
+      }
+      const num = document.getElementById('guia-paso-prop-num');
+      if (num) num.style.color = 'rgba(74,222,128,0.2)';
+    }
     document.getElementById('portal-props').textContent = todasLasPropiedades.length;
     filtrarProps();
     cargarLeadsStats(); // actualiza leads extra al cambiar propiedades
@@ -7008,6 +7225,107 @@ function renderKanbanVacio() {
     </div>`).join('');
 }
 
+// ── MILESTONE GUÍA — 3 PASOS COMPLETOS ───────────────────────
+const _guiaFlags = { perfil: false, prop: false, score: 0, celebrado: false };
+
+function checkGuiaMilestone(scoreVal) {
+  if (scoreVal !== undefined) _guiaFlags.score = scoreVal;
+  if (_guiaFlags.celebrado) return;
+  if (!_guiaFlags.perfil || !_guiaFlags.prop) return;
+  if (_guiaFlags.score < 2.5) return;
+  _guiaFlags.celebrado = true;
+  activarMilestone2_5(_guiaFlags.score);
+}
+
+function activarMilestone2_5(score) {
+  // Paso 3 → Logrado
+  const paso = document.getElementById('guia-paso-score');
+  if (paso) {
+    paso.style.background   = 'rgba(22,163,74,0.18)';
+    paso.style.borderColor  = 'rgba(22,163,74,0.5)';
+    const tit = document.getElementById('guia-paso-score-titulo');
+    if (tit) { tit.textContent = '¡Score 2.5+ alcanzado!'; tit.style.color = '#4ade80'; }
+    const desc = document.getElementById('guia-paso-score-desc');
+    if (desc) { desc.textContent = `Score ${score.toFixed(1)} — ya recibe prioridad en la distribución de leads.`; desc.style.color = 'rgba(255,255,255,0.75)'; }
+    const btn = document.getElementById('guia-paso-score-btn');
+    if (btn) {
+      btn.textContent       = '✓ Logrado';
+      btn.style.background  = 'rgba(22,163,74,0.3)';
+      btn.style.color       = '#4ade80';
+      btn.style.boxShadow   = 'none';
+      btn.style.cursor      = 'default';
+      btn.style.display     = 'block';
+      btn.removeAttribute('onclick');
+      btn.onmouseenter = null; btn.onmouseleave = null;
+    }
+    const num = document.getElementById('guia-paso-score-num');
+    if (num) num.style.color = 'rgba(74,222,128,0.2)';
+  }
+
+  // Confetti
+  lanzarConfetti();
+
+  // Transición: banner primer mes → banner referido
+  const bannerPM  = document.getElementById('banner-primer-mes');
+  const bannerRef = document.getElementById('banner-referido');
+  const refLinkEl = document.getElementById('banner-ref-link');
+  if (refLinkEl) refLinkEl.textContent = refUrl();
+  if (bannerPM) {
+    bannerPM.style.transition = 'opacity 0.45s ease';
+    bannerPM.style.opacity    = '0';
+    setTimeout(() => {
+      bannerPM.style.display = 'none';
+      if (bannerRef) {
+        bannerRef.style.display   = 'block';
+        bannerRef.style.opacity   = '0';
+        bannerRef.style.transition = 'opacity 0.5s ease';
+        requestAnimationFrame(() => { bannerRef.style.opacity = '1'; });
+      }
+    }, 450);
+  }
+
+  // Transición: guia → siguiente nivel
+  setTimeout(() => {
+    const guia = document.getElementById('guia-inicio');
+    const sig  = document.getElementById('guia-siguiente-nivel');
+    if (!guia) return;
+    guia.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    guia.style.opacity    = '0';
+    guia.style.transform  = 'translateY(-6px)';
+    setTimeout(() => {
+      guia.style.display = 'none';
+      if (sig) {
+        sig.style.display   = 'block';
+        sig.style.animation = 'guiaFadeIn 0.5s ease forwards';
+      }
+    }, 500);
+  }, 2000);
+}
+
+function lanzarConfetti() {
+  const colors = ['#f6bf0c','#4ade80','#818cf8','#f87171','#fde68a','#c9a84c','#34d399','#60a5fa','#fb923c'];
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden';
+  document.body.appendChild(wrap);
+  for (let i = 0; i < 90; i++) {
+    const el    = document.createElement('div');
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const size  = Math.random() * 9 + 5;
+    const left  = Math.random() * 100;
+    const delay = Math.random() * 1.4;
+    const dur   = Math.random() * 1.8 + 1.6;
+    el.style.cssText = `
+      position:absolute;top:-15px;left:${left}%;
+      width:${size}px;height:${size * (Math.random() > 0.5 ? 1 : 0.4)}px;
+      background:${color};
+      border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+      animation:confettiDrop ${dur}s ${delay}s ease-in forwards;
+    `;
+    wrap.appendChild(el);
+  }
+  setTimeout(() => wrap.remove(), 4500);
+}
+
 // ── LEADS STATS (plan gratis) ─────────────────────────────────
 async function cargarLeadsStats() {
   if (!token) return;
@@ -7079,6 +7397,26 @@ function renderLeadsStats(s) {
   // Banner primer mes
   const banner = document.getElementById('banner-primer-mes');
   if (banner) banner.style.display = (!esPremium && s.es_primer_mes) ? 'flex' : 'none';
+
+  // Contador de progreso dentro del banner
+  if (!esPremium && s.es_primer_mes) {
+    const propsEnGrupo = props % 5 === 0 && props > 0 ? 5 : props % 5;
+    const pctBar = Math.round(propsEnGrupo / 5 * 100);
+    const elProg  = document.getElementById('banner-pm-progtext');
+    const elFalt  = document.getElementById('banner-pm-faltantext');
+    const elBar   = document.getElementById('banner-pm-bar');
+    if (elProg) elProg.textContent = `${props} propiedad${props !== 1 ? 'es' : ''} compartida${props !== 1 ? 's' : ''} en InmobIA`;
+    if (elFalt) {
+      if (propsParaSig === 0) {
+        elFalt.textContent = `¡+${extra} lead${extra !== 1 ? 's' : ''} extra ganado${extra !== 1 ? 's' : ''}!`;
+        elFalt.style.color = '#4ade80';
+      } else {
+        elFalt.textContent = `Faltan ${propsParaSig} → +1 lead`;
+        elFalt.style.color = '#fde68a';
+      }
+    }
+    if (elBar) elBar.style.width = `${pctBar}%`;
+  }
 
   // Modal de límite alcanzado (solo plan gratis, no primer ciclo ya mostrado)
   if (!esPremium && usados >= limite && !window._limitModalShown) {
@@ -11362,6 +11700,10 @@ function refUrl() {
 
 function copiarEnlaceReferido() {
   navigator.clipboard.writeText(refUrl()).then(() => toast('Enlace de referido copiado'));
+}
+
+function copiarBannerRef() {
+  navigator.clipboard.writeText(refUrl()).then(() => toast('Link de referido copiado'));
 }
 
 function compartirRefWhatsApp() {

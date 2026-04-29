@@ -235,7 +235,7 @@ nav {
 .prop-badge-op {
   position: absolute; top: 0.75rem; left: 0.75rem;
   font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase;
-  padding: 0.28rem 0.7rem; border-radius: 3px;
+  padding: 0.28rem 0.7rem; border-radius: 0;
   background: var(--charcoal); color: #fff;
 }
 .prop-badge-op.venta { background: var(--gold-dark, #b8963e); }
@@ -248,10 +248,10 @@ nav {
 }
 .prop-price-tag {
   position: absolute; bottom: 0.75rem; right: 0.75rem;
-  background: rgba(255,255,255,0.6); color: #000;
+  background: #fff; color: #000;
   font-family: var(--font-display); font-size: 0.95rem; font-weight: 700;
-  padding: 0.1rem 0.45rem; border-radius: 3px;
-  white-space: nowrap; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  padding: 0.1rem 0.45rem; border-radius: 0;
+  white-space: nowrap;
 }
 .prop-img-placeholder {
   width: 100%; height: 200px; background: var(--gray-light);
@@ -1058,11 +1058,13 @@ function renderHero(a) {
     else if (i === fullStars + 1 && halfStar) starsHtml += halfStarSvg;
     else starsHtml += `<span style="color:rgba(255,255,255,0.25);font-size:1.05rem">★</span>`;
   }
-  scoreEl.innerHTML = `
-    <div style="display:flex;align-items:center;gap:0.3rem">${starsHtml}</div>
-    <span style="font-size:0.78rem;font-weight:700;color:#f59e0b">${scoreRound.toFixed(1)}</span>
-    <span style="font-size:0.72rem;color:rgba(255,255,255,0.5)">InmobIA Score</span>`;
-  scoreEl.style.display = 'flex';
+  if (score >= 4.0) {
+    scoreEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.3rem">${starsHtml}</div>
+      <span style="font-size:0.78rem;font-weight:700;color:#f59e0b">${scoreRound.toFixed(1)}</span>
+      <span style="font-size:0.72rem;color:rgba(255,255,255,0.5)">InmobIA Score</span>`;
+    scoreEl.style.display = 'flex';
+  }
 
   // Badge CBR
   if (a.acred_cbr && a.acred_cbr_codigo) {
