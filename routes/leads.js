@@ -854,7 +854,7 @@ router.get('/:id/datos-cierre', authMiddleware, (req, res) => {
 
   let prop = null;
   if (lead.propiedad_id) {
-    prop = db.prepare('SELECT id, titulo, operacion, precio, moneda, comision_pct, descuenta_mantenimiento, valor_mantenimiento FROM propiedades WHERE id = ?').get(lead.propiedad_id);
+    prop = db.prepare('SELECT id, titulo, operacion, precio, moneda, comision_pct, descuenta_mantenimiento, valor_mantenimiento, origen_comision, comision_disponible_pct FROM propiedades WHERE id = ?').get(lead.propiedad_id);
   }
 
   let referente = null;
@@ -887,10 +887,11 @@ router.post('/:id/cerrar', authMiddleware, (req, res) => {
   // Obtener configuración de comisión de la propiedad
   let prop = null;
   if (lead.propiedad_id) {
-    prop = db.prepare('SELECT tipo, operacion, precio, comision_pct, descuenta_mantenimiento, valor_mantenimiento FROM propiedades WHERE id = ?').get(lead.propiedad_id);
+    prop = db.prepare('SELECT tipo, operacion, precio, comision_pct, descuenta_mantenimiento, valor_mantenimiento, origen_comision, comision_disponible_pct FROM propiedades WHERE id = ?').get(lead.propiedad_id);
   }
 
   const valor = Number(valor_cierre);
+  let comisionMercado;
   let comisionBruta;
   let comisionPct = null;
 
@@ -900,12 +901,16 @@ router.post('/:id/cerrar', authMiddleware, (req, res) => {
     const ratio = prop.descuenta_mantenimiento && prop.precio > 0
       ? (prop.precio - (prop.valor_mantenimiento || 0)) / prop.precio
       : 1;
-    comisionBruta = Math.max(0, Math.round(valor * ratio));
+    comisionMercado = Math.max(0, Math.round(valor * ratio));
   } else {
     // Venta: comisión = precio_cierre × comision_pct%
     comisionPct = prop?.comision_pct ?? 5;
-    comisionBruta = Math.round(valor * comisionPct / 100);
+    comisionMercado = Math.round(valor * comisionPct / 100);
   }
+  const disponiblePct = prop?.origen_comision === 'plus_one'
+    ? Math.max(0, Math.min(100, Number(prop.comision_disponible_pct) || 50))
+    : 100;
+  comisionBruta = Math.round(comisionMercado * disponiblePct / 100);
 
   // Split por modelo de negocio. Fallback a origen si el lead no tiene modelo (legacy).
   // 1D solo aplica si la propiedad fue subida directamente por un admin de InmobIA.
@@ -924,12 +929,13 @@ router.post('/:id/cerrar', authMiddleware, (req, res) => {
 
   const ahora = new Date().toISOString();
   db.prepare(`UPDATE leads SET etapa = 'cerrado', valor_cierre = ?, comision_pct = ?,
-    comision_bruta = ?, comision_inmobia = ?, comision_asesor = ?, comision_referente = ?, moneda_cierre = ?, modelo = ?,
+    comision_bruta = ?, comision_total_mercado = ?, comision_disponible_pct = ?,
+    comision_inmobia = ?, comision_asesor = ?, comision_referente = ?, moneda_cierre = ?, modelo = ?,
     cerrado_en = CURRENT_TIMESTAMP,
     cierre_declarado_en = ?,
     cierre_verificacion_estado = COALESCE(cierre_verificacion_estado, 'pendiente')
     WHERE id = ?`)
-    .run(valor, comisionPct, comisionBruta, comisionInmobia, comisionAsesor, comisionReferente, moneda || 'GTQ', modelo, ahora, req.params.id);
+    .run(valor, comisionPct, comisionBruta, comisionMercado, disponiblePct, comisionInmobia, comisionAsesor, comisionReferente, moneda || 'GTQ', modelo, ahora, req.params.id);
 
   if (lead.propiedad_id) {
     const asesor = db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(req.usuario.id);

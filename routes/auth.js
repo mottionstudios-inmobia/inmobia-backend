@@ -193,7 +193,7 @@ router.get('/me', (req, res) => {
   if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
   try {
     const { id } = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET || 'inmobia_secret_2024');
-    const u = db.prepare('SELECT id, nombre, email, rol, telefono, zona, tipo_asesor, nit, usuario, bio, foto, logo, empresa, plan, score, slug, tipos_ranking, tipo_doc, pais_origen, hero_color_izq, hero_color_der, hero_imagen, hero_opacidad, btn_estilo, btn_whatsapp, btn_agendar, btn_mensaje, red_fb, red_ig, red_tiktok, red_linkedin, vis_fb, vis_ig, vis_tiktok, vis_linkedin, servicios_activo, servicios_titulo, servicios_data, testimonios_activo, testimonios_titulo, testimonios_data, permitir_similares_otros, creado_en, codigo_asesor, premium_estado, premium_activado_en, premium_renovacion_en, recurrente_subscription_id, dpi_archivo, dpi_subido_en, dpi_estado, dpi_rechazado_razon, acred_cbr, acred_cbr_codigo, acred_gpi, acred_gpi_codigo, mostrar_zonas FROM usuarios WHERE id = ?').get(id);
+    const u = db.prepare('SELECT id, nombre, email, rol, telefono, zona, tipo_asesor, nit, usuario, bio, foto, logo, empresa, plan, score, slug, tipos_ranking, tipo_doc, pais_origen, hero_color_izq, hero_color_der, hero_imagen, hero_opacidad, btn_estilo, btn_whatsapp, btn_agendar, btn_mensaje, red_fb, red_ig, red_tiktok, red_linkedin, vis_fb, vis_ig, vis_tiktok, vis_linkedin, servicios_activo, servicios_titulo, servicios_data, testimonios_activo, testimonios_titulo, testimonios_data, permitir_similares_otros, creado_en, codigo_asesor, premium_estado, premium_activado_en, premium_renovacion_en, recurrente_subscription_id, dpi_archivo, dpi_subido_en, dpi_estado, dpi_rechazado_razon, acred_cbr, acred_cbr_codigo, acred_gpi, acred_gpi_codigo, mostrar_zonas, puede_plus_one, plus_one_aprobado_en, plus_one_notas FROM usuarios WHERE id = ?').get(id);
     if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
     res.json(u);
   } catch { res.status(401).json({ error: 'Token inválido' }); }
@@ -745,9 +745,11 @@ router.get('/admin/asesores', (req, res) => {
 
     const asesores = db.prepare(`
       SELECT u.id, u.nombre, u.email, u.usuario, u.telefono, u.plan, u.rol, u.creado_en, u.codigo_asesor,
+             u.puede_plus_one, u.plus_one_aprobado_en, u.plus_one_notas,
              u.score,
              COUNT(p.id) AS num_propiedades,
-             COUNT(CASE WHEN p.publicado_inmobia = 1 THEN 1 END) AS num_propiedades_inmobia
+             COUNT(CASE WHEN p.publicado_inmobia = 1 THEN 1 END) AS num_propiedades_inmobia,
+             COUNT(CASE WHEN p.origen_comision = 'plus_one' THEN 1 END) AS num_propiedades_plus_one
       FROM usuarios u
       LEFT JOIN propiedades p ON p.usuario_id = u.id
       WHERE u.rol = 'asesor'
@@ -792,7 +794,9 @@ router.get('/admin/asesores/:id', (req, res) => {
     const u = db.prepare(`
       SELECT u.id, u.nombre, u.email, u.usuario, u.telefono, u.plan, u.creado_en,
              u.codigo_asesor, u.slug, u.bio, u.empresa, u.zona, u.score,
-             COUNT(p.id) AS num_propiedades
+             u.puede_plus_one, u.plus_one_aprobado_en, u.plus_one_notas,
+             COUNT(p.id) AS num_propiedades,
+             COUNT(CASE WHEN p.origen_comision = 'plus_one' THEN 1 END) AS num_propiedades_plus_one
       FROM usuarios u
       LEFT JOIN propiedades p ON p.usuario_id = u.id
       WHERE u.id = ? AND u.rol = 'asesor'
@@ -959,6 +963,28 @@ router.get('/admin/dpi/:id/documento', (req, res) => {
     if (!resolvedFile) return res.status(404).json({ error: 'Archivo no encontrado' });
 
     res.sendFile(resolvedFile.file);
+  } catch { res.status(401).json({ error: 'Token inválido' }); }
+});
+
+// PATCH /api/auth/admin/asesores/:id/plus-one
+router.patch('/admin/asesores/:id/plus-one', (req, res) => {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET || 'inmobia_secret_2024');
+    const admin = db.prepare('SELECT rol FROM usuarios WHERE id = ?').get(decoded.id);
+    if (!admin || admin.rol !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    const autorizado = req.body.autorizado ? 1 : 0;
+    const notas = (req.body.notas || '').trim().slice(0, 500);
+    db.prepare(`
+      UPDATE usuarios
+      SET puede_plus_one = ?,
+          plus_one_aprobado_en = CASE WHEN ? = 1 THEN COALESCE(NULLIF(plus_one_aprobado_en, ''), datetime('now')) ELSE '' END,
+          plus_one_notas = ?
+      WHERE id = ? AND rol = 'asesor'
+    `).run(autorizado, autorizado, notas, req.params.id);
+    res.json({ ok: true, autorizado });
   } catch { res.status(401).json({ error: 'Token inválido' }); }
 });
 

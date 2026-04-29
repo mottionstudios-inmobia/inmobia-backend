@@ -4162,6 +4162,10 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
             <span style="color:#4a5568">Comisión total bruta</span>
             <span style="font-weight:600;color:var(--charcoal)" id="res-bruta">—</span>
           </div>
+          <div id="fila-plus-one" style="display:none;justify-content:space-between;font-size:0.85rem">
+            <span style="color:#0284c7">Base disponible +1 (50%)</span>
+            <span style="font-weight:600;color:#0284c7" id="res-plus-one">-</span>
+          </div>
           <div id="fila-inmobia" style="display:none;flex;justify-content:space-between;font-size:0.85rem">
             <span id="fila-inmobia-label" style="color:#8b5cf6">Comisión Inmobia (30%)</span>
             <span style="font-weight:600;color:#8b5cf6" id="res-inmobia">—</span>
@@ -4259,6 +4263,15 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
               <option value="GTQ">Q Quetzales (GTQ)</option>
               <option value="USD">$ Dólares (USD)</option>
             </select>
+          </div>
+          <div class="form-field full" id="np-plus-one-wrap" style="display:none;background:#eff8ff;border:1px solid #bae6fd;border-left:3px solid #38bdf8;border-radius:8px;padding:0.8rem 0.9rem">
+            <label class="form-label" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;margin-bottom:0.25rem">
+              <input type="checkbox" id="np-plus-one" style="width:16px;height:16px;accent-color:#38bdf8;cursor:pointer">
+              Propiedad +1 compartida externa
+            </label>
+            <div style="font-size:0.76rem;color:#475569;line-height:1.45">
+              Use esta opcion solo en casos aprobados por InmobIA. La comision disponible para usted sera el 50% de la comision total del negocio; cualquier reparto InmobIA se calculara sobre esa base disponible.
+            </div>
           </div>
           <div class="form-field" id="np-zona-wrap">
             <label class="form-label">Zona <span style="font-weight:400;color:#999">(ciudad de Guatemala)</span></label>
@@ -6962,11 +6975,13 @@ function filtrarProps() {
     const estadoMap = { activo: 'activo', pendiente: 'pendiente', vendido: 'vendido', inactivo: 'inactivo' };
     const estadoCls = estadoMap[p.estado] || 'activo';
     const fecha = p.creado_en ? new Date(p.creado_en).toLocaleDateString('es-GT', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+    const esPlusOne = p.origen_comision === 'plus_one';
+    const plusOneBadge = esPlusOne ? `<span style="display:inline-flex;align-items:center;gap:0.25rem;margin-left:0.4rem;background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;border-radius:999px;padding:1px 7px;font-size:0.65rem;font-weight:800;vertical-align:middle">+1</span>` : '';
     return `
       <div class="prop-list-item" id="prop-row-${p.id}">
         <img class="prop-thumb" src="${img}" onerror="this.style.background='#e2e6f0';this.src=''">
         <div class="prop-info">
-          <div class="prop-titulo">${p.titulo}</div>
+          <div class="prop-titulo">${p.titulo}${plusOneBadge}</div>
           ${p.nombre_proyecto ? `<div style="font-size:0.75rem;font-weight:600;color:#7c3aed;margin-bottom:0.15rem">${p.nombre_proyecto}</div>` : ''}
           <div class="prop-meta">
             <span>${p.tipo}</span><span>·</span><span>${p.operacion}</span><span>·</span><span>${[p.colonia, p.zona || (p.municipio ? p.municipio.trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase() : 'Sin zona')].filter(Boolean).join(' · ')}</span>
@@ -6995,7 +7010,7 @@ function filtrarProps() {
 Al activar, la propiedad aparece también en el buscador general de InmobIA y genera leads con trazabilidad automática.
 
 Comisión al cerrar:
-• Lead InmobIA → 70% usted · 30% InmobIA
+• Lead InmobIA → 70% usted · 30% InmobIA${esPlusOne ? '\n• Propiedad +1 → el reparto se calcula sobre el 50% disponible' : ''}
 • Cliente directo de su portal → 100% usted">
             <span class="toggle-label" id="tl-${p.id}">${p.publicado_inmobia ? 'Mi portal + InmobIA' : 'Mi portal'}</span>
             <label class="toggle-switch portal-toggle-switch">
@@ -11213,6 +11228,7 @@ async function abrirModalCierre(lead) {
   document.getElementById('fila-inmobia').style.display         = (lead.origen === 'inmobia' || esTri) ? 'flex' : 'none';
   document.getElementById('fila-inmobia-label').textContent     = esTri ? 'Comisión Inmobia (20%)' : 'Comisión Inmobia (30%)';
   document.getElementById('fila-referente').style.display       = esTri ? 'flex' : 'none';
+  document.getElementById('fila-plus-one').style.display        = 'none';
   document.getElementById('cierre-resumen').style.display = 'none';
   document.getElementById('btn-confirmar-cierre').disabled = true;
   document.getElementById('btn-confirmar-cierre').style.opacity = '0.5';
@@ -11265,19 +11281,24 @@ function calcularComisionCierre() {
   const fmt = n => `${monedaSym}${Number(n).toLocaleString('es-GT')}`;
 
   const precio = propCierreData?.precio || 0;
+  let brutaMercado = 0;
   let bruta = 0;
 
   if (esRenta) {
     const descuenta = propCierreData.descuenta_mantenimiento;
     const mant = propCierreData.valor_mantenimiento || 0;
-    bruta = Math.max(0, Math.round(descuenta ? precio - mant : precio));
+    brutaMercado = Math.max(0, Math.round(descuenta ? precio - mant : precio));
   } else {
     const pct = propCierreData?.comision_pct ?? 5;
-    bruta = Math.round(precio * pct / 100);
+    brutaMercado = Math.round(precio * pct / 100);
   }
 
   // Si el asesor pidió convertir USD→GTQ, multiplicar por tipo de cambio
-  if (convertir) bruta = Math.round(bruta * tc);
+  if (convertir) brutaMercado = Math.round(brutaMercado * tc);
+  const disponiblePct = propCierreData?.origen_comision === 'plus_one'
+    ? Number(propCierreData.comision_disponible_pct || 50)
+    : 100;
+  bruta = Math.round(brutaMercado * disponiblePct / 100);
 
   let inmobia = 0, referente = 0;
   if (lead?.origen === 'tripartito') {
@@ -11294,7 +11315,12 @@ function calcularComisionCierre() {
   document.getElementById('cierre-moneda').value = monedaFinal;
   document.getElementById('cierre-valor').value  = convertir ? Math.round(precio * tc) : precio;
 
-  document.getElementById('res-bruta').textContent   = fmt(bruta);
+  document.getElementById('res-bruta').textContent   = fmt(brutaMercado);
+  const filaPlusOne = document.getElementById('fila-plus-one');
+  if (filaPlusOne) {
+    filaPlusOne.style.display = disponiblePct < 100 ? 'flex' : 'none';
+    document.getElementById('res-plus-one').textContent = fmt(bruta);
+  }
   document.getElementById('res-inmobia').textContent  = fmt(inmobia);
   document.getElementById('res-asesor').textContent   = fmt(asesor);
   document.getElementById('cierre-resumen').style.display = '';
@@ -13677,8 +13703,18 @@ function abrirModalNueva() {
   convenioAceptado = null;
   document.querySelector('#modal-nueva .modal-head h2').textContent = '+ Nueva Propiedad';
   limpiarFormNueva();
+  actualizarCampoPlusOne();
   document.getElementById('modal-nueva').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function actualizarCampoPlusOne() {
+  const wrap = document.getElementById('np-plus-one-wrap');
+  const chk = document.getElementById('np-plus-one');
+  if (!wrap || !chk) return;
+  const autorizado = !!Number(asesor?.puede_plus_one || 0);
+  wrap.style.display = autorizado ? '' : 'none';
+  if (!autorizado) chk.checked = false;
 }
 
 function cerrarModalNueva() {
@@ -13980,6 +14016,7 @@ async function guardarPropiedad() {
   form.append('descripcion_persuasiva',document.getElementById('np-desc-persuasiva').value.trim());
   form.append('descripcion',           document.getElementById('np-descripcion').value.trim());
   form.append('publicado_inmobia',     document.getElementById('np-publicado').checked ? 1 : 0);
+  form.append('origen_comision',        document.getElementById('np-plus-one')?.checked ? 'plus_one' : 'directa');
   if (document.getElementById('np-publicado').checked && convenioAceptado) {
     form.append('convenio_aceptado', 1);
     if (convenioAceptado.comision_pct != null) form.append('comision_pct', convenioAceptado.comision_pct);
@@ -14063,6 +14100,9 @@ function limpiarFormNueva() {
    'np-req-contrato-1ano','np-req-notario']
     .forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
   document.getElementById('np-publicado').checked = false;
+  const plusOne = document.getElementById('np-plus-one');
+  if (plusOne) plusOne.checked = false;
+  actualizarCampoPlusOne();
   seleccionarPublicacion(false);
   document.getElementById('np-estado').value = 'activo';
   document.getElementById('np-img-principal').value = '';
@@ -14226,6 +14266,9 @@ async function editarPropiedad(id) {
     document.getElementById('np-desc-persuasiva').value       = p.descripcion_persuasiva || '';
     document.getElementById('np-descripcion').value           = p.descripcion || '';
     document.getElementById('np-publicado').checked           = !!p.publicado_inmobia;
+    actualizarCampoPlusOne();
+    const plusOne = document.getElementById('np-plus-one');
+    if (plusOne) plusOne.checked = p.origen_comision === 'plus_one';
     seleccionarPublicacion(!!p.publicado_inmobia);
     document.getElementById('np-estado').value                = p.estado || 'activo';
 

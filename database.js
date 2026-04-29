@@ -180,6 +180,8 @@ try { db.exec(`ALTER TABLE propiedades ADD COLUMN deck INTEGER DEFAULT 0`); } ca
 
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN usuario_id INTEGER DEFAULT NULL`); } catch {}
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN publicado_inmobia INTEGER DEFAULT 0`); } catch {}
+try { db.exec(`ALTER TABLE propiedades ADD COLUMN origen_comision TEXT DEFAULT 'directa'`); } catch {}
+try { db.exec(`ALTER TABLE propiedades ADD COLUMN comision_disponible_pct REAL DEFAULT 100`); } catch {}
 
 // Columnas adicionales para asesores
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN telefono TEXT DEFAULT ''`); } catch {}
@@ -345,6 +347,8 @@ try { db.exec(`ALTER TABLE calificaciones ADD COLUMN recomendaria TEXT DEFAULT '
 try { db.exec(`ALTER TABLE leads ADD COLUMN valor_cierre REAL DEFAULT NULL`); } catch {}
 try { db.exec(`ALTER TABLE leads ADD COLUMN comision_pct REAL DEFAULT NULL`); } catch {}
 try { db.exec(`ALTER TABLE leads ADD COLUMN comision_bruta REAL DEFAULT NULL`); } catch {}
+try { db.exec(`ALTER TABLE leads ADD COLUMN comision_total_mercado REAL DEFAULT NULL`); } catch {}
+try { db.exec(`ALTER TABLE leads ADD COLUMN comision_disponible_pct REAL DEFAULT 100`); } catch {}
 try { db.exec(`ALTER TABLE leads ADD COLUMN comision_inmobia REAL DEFAULT NULL`); } catch {}
 try { db.exec(`ALTER TABLE leads ADD COLUMN comision_asesor REAL DEFAULT NULL`); } catch {}
 try { db.exec(`ALTER TABLE leads ADD COLUMN cerrado_en TEXT DEFAULT NULL`); } catch {}
@@ -473,6 +477,9 @@ try { db.exec(`ALTER TABLE usuarios ADD COLUMN acred_cbr_codigo TEXT DEFAULT ''`
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN acred_gpi INTEGER DEFAULT 0`); } catch {}
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN acred_gpi_codigo TEXT DEFAULT ''`); } catch {}
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN mostrar_zonas INTEGER DEFAULT 1`); } catch {}
+try { db.exec(`ALTER TABLE usuarios ADD COLUMN puede_plus_one INTEGER DEFAULT 0`); } catch {}
+try { db.exec(`ALTER TABLE usuarios ADD COLUMN plus_one_aprobado_en TEXT DEFAULT ''`); } catch {}
+try { db.exec(`ALTER TABLE usuarios ADD COLUMN plus_one_notas TEXT DEFAULT ''`); } catch {}
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN sexo TEXT DEFAULT ''`); } catch {}
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN hero_opacidad REAL DEFAULT 0.45`); } catch {}
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN codigo_asesor TEXT DEFAULT ''`); } catch {}

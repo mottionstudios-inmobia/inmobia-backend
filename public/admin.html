@@ -1198,10 +1198,11 @@
             <th>Código</th>
             <th>Teléfono</th>
             <th>Plan</th>
+            <th>+1</th>
             <th title="Total activas / Compartidas con InmobIA">Propiedades</th>
             <th>Score</th>
             <th>Registro</th>
-            <th style="width:140px">Acciones</th>
+            <th style="width:260px">Acciones</th>
           </tr></thead>
           <tbody id="asesores-tabla"></tbody>
         </table>
@@ -3135,6 +3136,9 @@ async function abrirPerfilAsesor(usuarioId, modelo) {
     document.getElementById('amp-badge-plan').innerHTML = a.plan === 'premium'
       ? `<span style="background:#e5a50d20;color:#e5a50d;border:1px solid #e5a50d40;border-radius:10px;padding:0.15rem 0.6rem;font-size:0.68rem;font-weight:700">★ Premium</span>`
       : `<span style="background:#33415520;color:#94a3b8;border:1px solid #33415540;border-radius:10px;padding:0.15rem 0.6rem;font-size:0.68rem">Gratis</span>`;
+    document.getElementById('amp-modelo-badge').innerHTML = a.puede_plus_one
+      ? `<span style="background:#0ea5e920;color:#38bdf8;border:1px solid #0ea5e940;border-radius:10px;padding:0.15rem 0.6rem;font-size:0.68rem;font-weight:700">+1 autorizado</span>`
+      : `<span style="background:#33415520;color:#94a3b8;border:1px solid #33415540;border-radius:10px;padding:0.15rem 0.6rem;font-size:0.68rem">+1 no autorizado</span>`;
 
     // Datos
     const fila = (label, val) => val ? `
@@ -3151,6 +3155,7 @@ async function abrirPerfilAsesor(usuarioId, modelo) {
       fila('Código asesor', a.codigo_asesor) +
       fila('Zona de trabajo', a.zona) +
       fila('Propiedades', a.num_propiedades) +
+      fila('Propiedades +1', a.num_propiedades_plus_one) +
       fila('Score', score) +
       fila('Miembro desde', miembro);
 
@@ -4375,6 +4380,7 @@ function renderAsesores() {
 
   lista.forEach(a => {
     const esPremium = a.plan === 'premium';
+    const plusOne = !!a.puede_plus_one;
     const fecha = a.creado_en ? new Date(a.creado_en).toLocaleDateString('es-GT') : '—';
     tbody.insertAdjacentHTML('beforeend', `
       <tr>
@@ -4398,6 +4404,14 @@ function renderAsesores() {
             ${esPremium ? '★ Premium' : 'Gratis'}
           </span>
         </td>
+        <td>
+          <span title="${plusOne ? 'Autorizado para propiedades +1' : 'No autorizado para propiedades +1'}" style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.7rem;font-weight:800;
+            background:${plusOne ? 'rgba(14,165,233,0.16)' : 'rgba(122,154,181,0.10)'};
+            color:${plusOne ? '#38bdf8' : 'var(--text-muted)'};
+            border:1px solid ${plusOne ? 'rgba(56,189,248,0.35)' : 'rgba(122,154,181,0.18)'}">
+            ${plusOne ? '+1 autorizado' : '+1 no'}
+          </span>
+        </td>
         <td style="text-align:center;font-weight:700;font-size:0.88rem;white-space:nowrap">
           <span style="color:#38bdf8">${a.num_propiedades ?? 0}</span><span style="color:#475569;font-weight:400;font-size:0.78rem;margin:0 2px">/</span><span style="color:#f97316">${a.num_propiedades_inmobia ?? 0}</span>
         </td>
@@ -4414,6 +4428,14 @@ function renderAsesores() {
               border-color:${esPremium ? 'rgba(231,76,60,0.3)' : 'rgba(201,168,76,0.35)'};
               color:${esPremium ? '#e74c3c' : 'var(--gold)'}">
             ${esPremium ? 'Bajar a Gratis' : 'Subir a Premium'}
+          </button>
+          <button onclick="togglePlusOneAsesor(${a.id}, ${plusOne ? 1 : 0})"
+            title="${plusOne ? 'Desactivar autorización +1' : 'Autorizar propiedades +1'}"
+            style="font-size:0.72rem;padding:4px 9px;border-radius:6px;border:1px solid;cursor:pointer;
+              background:${plusOne ? 'rgba(231,76,60,0.08)' : 'rgba(14,165,233,0.12)'};
+              border-color:${plusOne ? 'rgba(231,76,60,0.3)' : 'rgba(14,165,233,0.35)'};
+              color:${plusOne ? '#e74c3c' : '#38bdf8'}">
+            ${plusOne ? 'Quitar +1' : 'Autorizar +1'}
           </button>
           <button onclick="eliminarAsesor(${a.id}, '${(a.nombre||'').replace(/'/g,"\\'")}')"
             title="Eliminar asesor"
@@ -4442,6 +4464,30 @@ async function togglePlanAsesor(id, planActual) {
       toast(`Plan actualizado a ${nuevoPlan}`, 'success');
     }
   } catch(e) { toast('Error al actualizar plan', 'error'); }
+}
+
+async function togglePlusOneAsesor(id, autorizadoActual) {
+  const autorizar = !autorizadoActual;
+  const msg = autorizar
+    ? '¿Autorizar a este asesor para trabajar casos especiales de propiedades +1?'
+    : '¿Quitar la autorización +1 a este asesor? Las propiedades +1 existentes se mantienen marcadas.';
+  if (!confirm(msg)) return;
+  const notas = autorizar ? (prompt('Notas internas de autorización (opcional):') || '') : '';
+  try {
+    const r = await fetch(`${API}/auth/admin/asesores/${id}/plus-one`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ autorizado: autorizar, notas })
+    });
+    if (!r.ok) throw new Error();
+    const a = todosAsesores.find(x => x.id === id);
+    if (a) {
+      a.puede_plus_one = autorizar ? 1 : 0;
+      a.plus_one_notas = notas;
+    }
+    renderAsesores();
+    toast(autorizar ? 'Asesor autorizado para +1' : 'Autorización +1 desactivada', 'success');
+  } catch(e) { toast('Error al actualizar autorización +1', 'error'); }
 }
 
 async function eliminarAsesor(id, nombre) {

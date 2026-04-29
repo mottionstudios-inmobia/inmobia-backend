@@ -28,6 +28,33 @@ function validarGestionPropiedad(req, res, propiedad) {
   return true;
 }
 
+function resolverOrigenComision(req, propExistente = null) {
+  const solicitado = req.body.origen_comision === 'plus_one' ? 'plus_one' : 'directa';
+  const existentePlusOne = propExistente?.origen_comision === 'plus_one';
+  if (solicitado === 'plus_one' && existentePlusOne) {
+    return { origen_comision: 'plus_one', comision_disponible_pct: 50 };
+  }
+  if (solicitado !== 'plus_one') {
+    if (existentePlusOne && req.usuario?.rol !== 'admin') {
+      const asesor = db.prepare('SELECT puede_plus_one FROM usuarios WHERE id = ? AND rol = ?').get(req.usuario.id, 'asesor');
+      if (!asesor?.puede_plus_one) {
+        return { origen_comision: 'plus_one', comision_disponible_pct: 50 };
+      }
+    }
+    return { origen_comision: 'directa', comision_disponible_pct: 100 };
+  }
+  if (req.usuario?.rol === 'admin') {
+    return { origen_comision: 'plus_one', comision_disponible_pct: 50 };
+  }
+  const asesor = db.prepare('SELECT puede_plus_one FROM usuarios WHERE id = ? AND rol = ?').get(req.usuario.id, 'asesor');
+  if (!asesor?.puede_plus_one) {
+    const err = new Error('Las propiedades +1 requieren aprobación previa de InmobIA.');
+    err.status = 403;
+    throw err;
+  }
+  return { origen_comision: 'plus_one', comision_disponible_pct: 50 };
+}
+
 // Configuración de subida de imágenes
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -308,6 +335,12 @@ router.post('/', authMiddleware, uploadFieldsSafe, (req, res) => {
 
   // Propiedades subidas por admin siempre van publicadas en InmobIA (modelo 1D)
   const publicado_inmobia = req.usuario?.rol === 'admin' ? 1 : Number(_pub);
+  let origenCfg;
+  try {
+    origenCfg = resolverOrigenComision(req);
+  } catch (e) {
+    return res.status(e.status || 400).json({ error: e.message });
+  }
 
   const codigoProp = generarCodigoProp(usuario_id, tipo, operacion, zona, municipio);
 
@@ -358,6 +391,8 @@ router.post('/', authMiddleware, uploadFieldsSafe, (req, res) => {
   // Campo adicional: precio alternativo sin línea blanca
   db.prepare('UPDATE propiedades SET precio_sin_linea_blanca = ? WHERE id = ?')
     .run(Number(req.body.precio_sin_linea_blanca) || 0, propiedadId);
+  db.prepare('UPDATE propiedades SET origen_comision = ?, comision_disponible_pct = ? WHERE id = ?')
+    .run(origenCfg.origen_comision, origenCfg.comision_disponible_pct, propiedadId);
 
   // Convenio de comisión (se guarda al aceptar el convenio desde el formulario)
   if (req.body.convenio_aceptado === '1' || req.body.convenio_aceptado === 1) {
@@ -394,7 +429,7 @@ router.post('/', authMiddleware, uploadFieldsSafe, (req, res) => {
 // ── PUT /api/propiedades/:id  (protegida)
 router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
   const { id } = req.params;
-  const propExistente = db.prepare('SELECT id, codigo, usuario_id FROM propiedades WHERE id = ?').get(id);
+  const propExistente = db.prepare('SELECT id, codigo, usuario_id, origen_comision FROM propiedades WHERE id = ?').get(id);
   if (!validarGestionPropiedad(req, res, propExistente)) return;
 
   const {
@@ -423,6 +458,12 @@ router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
   } = req.body;
 
   const publicado_inmobia = req.usuario?.rol === 'admin' ? 1 : Number(_pub2);
+  let origenCfg;
+  try {
+    origenCfg = resolverOrigenComision(req, propExistente);
+  } catch (e) {
+    return res.status(e.status || 400).json({ error: e.message });
+  }
 
   // Regenerar código si la propiedad no tenía uno
   if (!propExistente.codigo && tipo && operacion) {
@@ -479,6 +520,8 @@ router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
   // Campo adicional: precio alternativo sin línea blanca
   db.prepare('UPDATE propiedades SET precio_sin_linea_blanca = ? WHERE id = ?')
     .run(Number(req.body.precio_sin_linea_blanca) || 0, id);
+  db.prepare('UPDATE propiedades SET origen_comision = ?, comision_disponible_pct = ? WHERE id = ?')
+    .run(origenCfg.origen_comision, origenCfg.comision_disponible_pct, id);
 
   // Convenio de comisión
   if (req.body.convenio_aceptado === '1' || req.body.convenio_aceptado === 1) {
