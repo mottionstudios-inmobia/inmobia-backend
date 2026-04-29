@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), '.env') });
 import express from 'express';
 import cors from 'cors';
-import { readdirSync, mkdirSync } from 'fs';
+import { readdirSync, mkdirSync, existsSync } from 'fs';
 import propiedadesRouter from './routes/propiedades.js';
 import authRouter from './routes/auth.js';
 import contactosRouter from './routes/contactos.js';
@@ -44,7 +44,9 @@ mkdirSync(path.join(uploadsDir, 'mascotas'), { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
 
 // Fondos de galería
-const fondosDir = path.join(__dirname, '../fondos');
+const fondosDirPublic = path.join(__dirname, './public/fondos');
+const fondosDirLegacy = path.join(__dirname, '../fondos');
+const fondosDir = existsSync(fondosDirPublic) ? fondosDirPublic : fondosDirLegacy;
 app.use('/fondos', express.static(fondosDir));
 
 // Archivos HTML del frontend
