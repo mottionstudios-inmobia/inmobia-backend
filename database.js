@@ -407,6 +407,7 @@ db.exec(`
 `);
 try { db.prepare("INSERT OR IGNORE INTO platform_settings (clave, valor) VALUES ('soporte_whatsapp', '')").run(); } catch {}
 try { db.prepare("INSERT OR IGNORE INTO platform_settings (clave, valor) VALUES ('soporte_nombre', 'InmobIA')").run(); } catch {}
+try { db.prepare("INSERT OR IGNORE INTO platform_settings (clave, valor) VALUES ('wa_consultas', '50242683255')").run(); } catch {}
 
 // Rechazo de convenio colaborativo — persiste para notificaciones fiables
 try { db.exec(`ALTER TABLE leads ADD COLUMN convenio_rechazado_por TEXT DEFAULT NULL`); } catch {}

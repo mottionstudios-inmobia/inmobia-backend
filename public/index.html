@@ -1241,7 +1241,7 @@ user-select: none;
     <li><a href="#como-funciona">Búsqueda personalizada</a></li>
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#testimonios">Testimonios</a></li>
-    <li><a href="https://wa.me/50242683255?text=Hola,%20quisiera%20m%C3%A1s%20informaci%C3%B3n" target="_blank">Contacto</a></li>
+    <li><a href="https://wa.me/50242683255?text=Hola,%20quisiera%20m%C3%A1s%20informaci%C3%B3n" target="_blank" data-wa-contact data-wa-msg="Hola, quisiera más información">Contacto</a></li>
   </ul>
   <div style="display:flex;align-items:center;gap:0.6rem">
     <div class="nav-cta-wrap" id="nav-cta-wrap">
@@ -1266,7 +1266,7 @@ user-select: none;
     <li><a href="#busqueda-personalizada" onclick="toggleMenu()">Búsqueda personalizada</a></li>
     <li><a href="#servicios" onclick="toggleMenu()">Servicios</a></li>
     <li><a href="#testimonios" onclick="toggleMenu()">Testimonios</a></li>
-    <li><a href="https://wa.me/50242683255" target="_blank">Contacto</a></li>
+    <li><a href="https://wa.me/50242683255" target="_blank" data-wa-contact data-wa-msg="Hola, quisiera más información">Contacto</a></li>
     <li class="drawer-sep"></li>
     <li class="drawer-cta-wrap">
       <button class="drawer-cta-btn" onclick="toggleDrawerCta(event)">Área de asesores ▾</button>
@@ -2068,7 +2068,7 @@ user-select: none;
       <div class="footer-social">
         <a href="https://facebook.com/urbainmueble" class="social-link" target="_blank">f</a>
         <a href="https://instagram.com/urba.inmueble/" class="social-link" target="_blank">in</a>
-        <a href="https://wa.me/50242683255" class="social-link" target="_blank">w</a>
+        <a href="https://wa.me/50242683255" class="social-link" target="_blank" data-wa-contact data-wa-msg="Hola, quisiera más información">w</a>
       </div>
     </div>
     <div class="footer-col">
@@ -2093,7 +2093,7 @@ user-select: none;
     <div class="footer-col">
       <h4>Contacto</h4>
       <ul class="footer-links">
-        <li><a href="https://wa.me/50242683255" target="_blank">+502 4268-3255</a></li>
+        <li><a href="https://wa.me/50242683255" target="_blank" data-wa-contact data-wa-msg="Hola, quisiera más información" data-wa-label>+502 4268-3255</a></li>
         <li><a href="mailto:propiedades@inmobia.site">propiedades@inmobia.site</a></li>
         <li><a href="https://facebook.com/urbainmueble" target="_blank">Facebook</a></li>
         <li><a href="https://instagram.com/urba.inmueble/" target="_blank">Instagram</a></li>
@@ -2107,7 +2107,7 @@ user-select: none;
 </footer>
  
 <!-- WHATSAPP FLOAT -->
-<a href="https://wa.me/50242683255?text=Hola,%20me%20interesa%20una%20propiedad" class="whatsapp-float" target="_blank" title="Contactar por WhatsApp">
+<a href="https://wa.me/50242683255?text=Hola,%20me%20interesa%20una%20propiedad" class="whatsapp-float" target="_blank" title="Contactar por WhatsApp" data-wa-contact data-wa-msg="Hola, me interesa una propiedad">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 0C5.373 0 0 5.373 0 12c0 2.117.554 4.105 1.523 5.824L0 24l6.335-1.502C8.01 23.449 9.963 24 11.999 24 18.626 24 18.627 24 24 12c0-6.628-5.374-12-12.001-12zm0 21.818c-1.895 0-3.673-.511-5.201-1.403l-.373-.22-3.862.915.959-3.762-.244-.387C2.308 15.387 1.82 13.743 1.82 12c0-5.617 4.564-10.182 10.179-10.182S22.18 6.383 22.18 12c0 5.617-4.563 10.182-10.181 10.182z"/></svg>
 </a>
  
@@ -3121,8 +3121,7 @@ user-select: none;
       msg += `*Fotos mascota:* ${fotos_mascota} — enviadas al correo\n`;
     }
 
-    const numero = '50242683255';
-    window.open(`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(crearWhatsappAtencionUrl(msg), '_blank');
     document.getElementById('modal').classList.add('active');
     form.reset();
   }
@@ -3149,7 +3148,7 @@ user-select: none;
       `_Enviado desde urbainmueble.com_`
     );
  
-    window.open(`https://wa.me/50242683255?text=${msg}`, '_blank');
+    window.open(crearWhatsappAtencionUrl(decodeURIComponent(msg)), '_blank');
     document.getElementById('modal').classList.add('active');
     form.reset();
   }
@@ -3167,6 +3166,48 @@ user-select: none;
   // ── CARGA DE PROPIEDADES DESDE API ────────────────────────────
   const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://inmobia.site';
   const API = API_URL + '/api';
+  const WA_ATENCION_DEFAULT = '50242683255';
+  let waAtencionCliente = WA_ATENCION_DEFAULT;
+
+  function limpiarNumeroWhatsapp(numero) {
+    return String(numero || '').replace(/\D/g, '') || WA_ATENCION_DEFAULT;
+  }
+
+  function formatearNumeroWhatsapp(numero) {
+    const digits = limpiarNumeroWhatsapp(numero);
+    if (digits.length === 11 && digits.startsWith('502')) {
+      return `+502 ${digits.slice(3, 7)}-${digits.slice(7)}`;
+    }
+    return `+${digits}`;
+  }
+
+  function crearWhatsappAtencionUrl(mensaje = 'Hola, quisiera más información') {
+    return `https://wa.me/${waAtencionCliente}?text=${encodeURIComponent(mensaje)}`;
+  }
+
+  function aplicarWhatsappAtencionCliente() {
+    document.querySelectorAll('[data-wa-contact]').forEach(link => {
+      const msg = link.dataset.waMsg || 'Hola, quisiera más información';
+      link.href = crearWhatsappAtencionUrl(msg);
+      if (link.hasAttribute('data-wa-label')) {
+        link.textContent = formatearNumeroWhatsapp(waAtencionCliente);
+      }
+    });
+  }
+
+  async function cargarWhatsappAtencionCliente() {
+    aplicarWhatsappAtencionCliente();
+    try {
+      const r = await fetch(`${API}/settings`);
+      if (!r.ok) throw new Error('settings');
+      const settings = await r.json();
+      waAtencionCliente = limpiarNumeroWhatsapp(settings.wa_consultas);
+      aplicarWhatsappAtencionCliente();
+    } catch {
+      waAtencionCliente = WA_ATENCION_DEFAULT;
+      aplicarWhatsappAtencionCliente();
+    }
+  }
 
   function formatearPrecio(precio, moneda, operacion) {
     const sym  = moneda === 'USD' ? '$' : 'Q';
@@ -3460,6 +3501,7 @@ user-select: none;
 
   // Iniciar carga al cargar la página
   cargarPropiedadesAPI();
+  cargarWhatsappAtencionCliente();
   cargarMetricasHero();
   iniciarHeroSlideshow();
 
