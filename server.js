@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), '.env') });
 import express from 'express';
 import cors from 'cors';
-import { readdirSync, mkdirSync, existsSync } from 'fs';
+import { readdirSync, mkdirSync, existsSync, statSync } from 'fs';
 import propiedadesRouter from './routes/propiedades.js';
 import authRouter from './routes/auth.js';
 import contactosRouter from './routes/contactos.js';
@@ -60,7 +60,10 @@ app.get('/api/fondos', (_req, res) => {
   try {
     const ext = /\.(jpg|jpeg|png|webp)$/i;
     const archivos = readdirSync(fondosDir).filter(f => ext.test(f));
-    res.json(archivos.map(f => ({ nombre: f, url: `/fondos/${f}` })));
+    res.json(archivos.map(f => ({
+      nombre: f,
+      url: `/fondos/${encodeURIComponent(f)}?v=${Math.round(statSync(path.join(fondosDir, f)).mtimeMs)}`,
+    })));
   } catch {
     res.json([]);
   }
