@@ -8,6 +8,9 @@
     "dev": "node --experimental-sqlite --watch server.js",
     "setup": "node --experimental-sqlite setup.js"
   },
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
