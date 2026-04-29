@@ -2610,6 +2610,29 @@ user-select: none;
     const maxPrecio  = parsearPresupuesto(selPresupuesto);
     const minPrecio  = parsearPresupuestoMin(selPresupuesto);
 
+    const opTabMap = { 'Renta / Alquiler': 'renta', 'Compra / Venta': 'venta' };
+    const propTabMap = {
+      'Apartamentos': 'apartamento', 'Casas': 'casa', 'Terrenos': 'terreno',
+      'Oficinas': 'oficina', 'Locales Comerciales': 'local'
+    };
+    const opTab = opTabMap[selOperacion] || null;
+    const propTab = propTabMap[selPropiedad] || null;
+
+    tabsActivos.delete('todos');
+    tabsActivos.delete('renta');
+    tabsActivos.delete('venta');
+    if (opTab) tabsActivos.add(opTab);
+
+    tabsActivos.delete('apartamento');
+    tabsActivos.delete('casa');
+    tabsActivos.delete('terreno');
+    tabsActivos.delete('oficina');
+    tabsActivos.delete('local');
+    if (propTab) tabsActivos.add(propTab);
+
+    if (!selOperacion && !selPropiedad) tabsActivos.add('todos');
+    if (tabsActivos.size === 0) tabsActivos.add('todos');
+
     // Construir filtros desde tabs (usar la lógica de aplicarFiltrosMultiples)
     const operaciones = new Set();
     const propiedades = new Set();
@@ -2645,28 +2668,6 @@ user-select: none;
     selectsBar[1].value = selPropiedad;
     selectsBar[2].value = selZona;
     selectsBar[3].value = selPresupuesto;
-
-    // Sincronizar tabs con los selects de la barra SOLO si se seleccionó operación o propiedad
-    const opTabMap = { 'Renta / Alquiler': 'renta', 'Compra / Venta': 'venta' };
-    const propTabMap = {
-      'Apartamentos': 'apartamento', 'Casas': 'casa', 'Terrenos': 'terreno',
-      'Oficinas': 'oficina', 'Locales Comerciales': 'local'
-    };
-    const opTab = opTabMap[selOperacion] || null;
-    const propTab = propTabMap[selPropiedad] || null;
-
-    // Actualizar tabsActivos por categoría: solo tocar la categoría que la barra cambió
-    if (selOperacion) {
-      tabsActivos.delete('renta'); tabsActivos.delete('venta');
-      if (opTab) tabsActivos.add(opTab);
-    }
-    if (selPropiedad) {
-      tabsActivos.delete('apartamento'); tabsActivos.delete('casa');
-      tabsActivos.delete('terreno'); tabsActivos.delete('oficina'); tabsActivos.delete('local');
-      if (propTab) tabsActivos.add(propTab);
-    }
-    tabsActivos.delete('todos');
-    if (tabsActivos.size === 0) tabsActivos.add('todos');
 
     // Actualizar visual de tabs según tabsActivos actual
     document.querySelectorAll('.filter-tab').forEach(tab => {
