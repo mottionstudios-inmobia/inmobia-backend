@@ -3317,17 +3317,9 @@ user-select: none;
         }
       } catch {}
 
-      // 3. Si no hay nada de ninguna fuente, usar cualquier propiedad con imagen
+      // 3. Si no hay destacados reales, mantener el hero estático.
+      // No se debe promocionar automáticamente una propiedad normal como destacada.
       let items = [...premiumItems, ...adminItems];
-      if (!items.length) {
-        try {
-          const rp = await fetch(`${API_URL}/api/propiedades?limit=12`);
-          if (rp.ok) {
-            const { propiedades } = await rp.json();
-            items = (propiedades || []).filter(p => p.imagen_principal);
-          }
-        } catch {}
-      }
       if (!items.length) return;
 
       const wrap      = document.getElementById('hero-image-wrap');
