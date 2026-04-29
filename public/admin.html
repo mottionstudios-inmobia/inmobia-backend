@@ -2000,14 +2000,20 @@
               <label class="checkbox-item"><input type="checkbox" id="f-area-social"> Área Social</label>
               <label class="checkbox-item"><input type="checkbox" id="f-areas-verdes"> Áreas verdes</label>
               <label class="checkbox-item"><input type="checkbox" id="f-bbq-lounge"> BBQ Lounge</label>
+              <label class="checkbox-item"><input type="checkbox" id="f-bar-deck"> Bar Deck</label>
               <label class="checkbox-item"><input type="checkbox" id="f-bistro-lounge"> Bistro Lounge</label>
               <label class="checkbox-item"><input type="checkbox" id="f-bosque"> Bosque</label>
               <label class="checkbox-item"><input type="checkbox" id="f-business-center"> Business Center</label>
+              <label class="checkbox-item"><input type="checkbox" id="f-cancha-polideportiva"> Cancha polideportiva</label>
+              <label class="checkbox-item"><input type="checkbox" id="f-casa-club"> Casa club</label>
               <label class="checkbox-item"><input type="checkbox" id="f-churrasqueras"> Churrasqueras</label>
               <label class="checkbox-item"><input type="checkbox" id="f-coworking"> Co-Working</label>
+              <label class="checkbox-item"><input type="checkbox" id="f-deck"> Deck</label>
+              <label class="checkbox-item"><input type="checkbox" id="f-doble-garita-seguridad"> Doble garita de seguridad</label>
               <label class="checkbox-item"><input type="checkbox" id="f-firepit"> Firepit</label>
               <label class="checkbox-item"><input type="checkbox" id="f-gimnasio"> Gimnasio</label>
               <label class="checkbox-item"><input type="checkbox" id="f-parque"> Parque</label>
+              <label class="checkbox-item"><input type="checkbox" id="f-parque-mascotas"> Parque para mascotas</label>
               <label class="checkbox-item"><input type="checkbox" id="f-parqueo-visitas"> Parqueo de visitas</label>
               <label class="checkbox-item"><input type="checkbox" id="f-pergola"> Pérgola</label>
               <label class="checkbox-item"><input type="checkbox" id="f-piscina"> Piscina</label>
@@ -4612,11 +4618,17 @@ async function editarProp(id) {
     document.getElementById('f-bosque').checked               = !!p.bosque;
     document.getElementById('f-parque').checked               = !!p.parque;
     document.getElementById('f-bbq-lounge').checked           = !!p.bbq_lounge;
+    document.getElementById('f-bar-deck').checked             = !!p.bar_deck;
     document.getElementById('f-bistro-lounge').checked        = !!p.bistro_lounge;
+    document.getElementById('f-cancha-polideportiva').checked = !!p.cancha_polideportiva;
+    document.getElementById('f-casa-club').checked            = !!p.casa_club;
+    document.getElementById('f-doble-garita-seguridad').checked = !!p.doble_garita_seguridad;
     document.getElementById('f-terraza-jardin').checked       = !!p.terraza_jardin;
     document.getElementById('f-salon-lounge').checked         = !!p.salon_lounge;
     document.getElementById('f-areas-verdes').checked         = !!p.areas_verdes;
     document.getElementById('f-parqueo-visitas').checked      = !!p.parqueo_visitas;
+    document.getElementById('f-parque-mascotas').checked      = !!p.parque_mascotas;
+    document.getElementById('f-deck').checked                 = !!p.deck;
     document.getElementById('f-otra-amenidad').value          = p.otra_amenidad || '';
     document.getElementById('f-estado').value     = p.estado || 'activo';
     document.getElementById('f-destacado').value  = p.destacado || 0;
@@ -4957,11 +4969,17 @@ async function guardarPropiedad() {
   fd.append('bosque',             chk('f-bosque'));
   fd.append('parque',             chk('f-parque'));
   fd.append('bbq_lounge',         chk('f-bbq-lounge'));
+  fd.append('bar_deck',           chk('f-bar-deck'));
   fd.append('bistro_lounge',      chk('f-bistro-lounge'));
+  fd.append('cancha_polideportiva', chk('f-cancha-polideportiva'));
+  fd.append('casa_club',          chk('f-casa-club'));
+  fd.append('doble_garita_seguridad', chk('f-doble-garita-seguridad'));
   fd.append('terraza_jardin',     chk('f-terraza-jardin'));
   fd.append('salon_lounge',       chk('f-salon-lounge'));
   fd.append('areas_verdes',       chk('f-areas-verdes'));
   fd.append('parqueo_visitas',    chk('f-parqueo-visitas'));
+  fd.append('parque_mascotas',    chk('f-parque-mascotas'));
+  fd.append('deck',               chk('f-deck'));
   fd.append('otra_amenidad',      document.getElementById('f-otra-amenidad').value.trim());
   fd.append('estado',       document.getElementById('f-estado').value);
   fd.append('destacado',    document.getElementById('f-destacado').value);

@@ -177,6 +177,10 @@ try { db.exec(`ALTER TABLE propiedades ADD COLUMN parqueo_visitas INTEGER DEFAUL
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN inc_aire_acondicionado INTEGER DEFAULT 0`); } catch {}
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN parque_mascotas INTEGER DEFAULT 0`); } catch {}
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN deck INTEGER DEFAULT 0`); } catch {}
+try { db.exec(`ALTER TABLE propiedades ADD COLUMN casa_club INTEGER DEFAULT 0`); } catch {}
+try { db.exec(`ALTER TABLE propiedades ADD COLUMN bar_deck INTEGER DEFAULT 0`); } catch {}
+try { db.exec(`ALTER TABLE propiedades ADD COLUMN doble_garita_seguridad INTEGER DEFAULT 0`); } catch {}
+try { db.exec(`ALTER TABLE propiedades ADD COLUMN cancha_polideportiva INTEGER DEFAULT 0`); } catch {}
 
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN usuario_id INTEGER DEFAULT NULL`); } catch {}
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN publicado_inmobia INTEGER DEFAULT 0`); } catch {}

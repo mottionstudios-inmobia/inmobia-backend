@@ -4467,12 +4467,16 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
           <label class="check-inline"><input type="checkbox" id="np-area-social"> Área Social</label>
           <label class="check-inline"><input type="checkbox" id="np-areas-verdes"> Áreas verdes</label>
           <label class="check-inline"><input type="checkbox" id="np-bbq-lounge"> BBQ Lounge</label>
+          <label class="check-inline"><input type="checkbox" id="np-bar-deck"> Bar Deck</label>
           <label class="check-inline"><input type="checkbox" id="np-bistro-lounge"> Bistro Lounge</label>
           <label class="check-inline"><input type="checkbox" id="np-bosque"> Bosque</label>
           <label class="check-inline"><input type="checkbox" id="np-business-center"> Business Center</label>
+          <label class="check-inline"><input type="checkbox" id="np-cancha-polideportiva"> Cancha polideportiva</label>
+          <label class="check-inline"><input type="checkbox" id="np-casa-club"> Casa club</label>
           <label class="check-inline"><input type="checkbox" id="np-churrasqueras"> Churrasqueras</label>
           <label class="check-inline"><input type="checkbox" id="np-coworking"> Co-Working</label>
           <label class="check-inline"><input type="checkbox" id="np-deck"> Deck</label>
+          <label class="check-inline"><input type="checkbox" id="np-doble-garita-seguridad"> Doble garita de seguridad</label>
           <label class="check-inline"><input type="checkbox" id="np-firepit"> Firepit</label>
           <label class="check-inline"><input type="checkbox" id="np-gimnasio"> Gimnasio</label>
           <label class="check-inline"><input type="checkbox" id="np-parque"> Parque</label>
@@ -4507,7 +4511,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
           <label class="check-inline"><input type="checkbox" id="np-req-constancia"> Constancia laboral</label>
           <label class="check-inline"><input type="checkbox" id="np-req-estados-cuenta"> Últimos 3 estados de cuenta</label>
           <label class="check-inline"><input type="checkbox" id="np-req-formulario"> Formulario con referencias</label>
-          <label class="check-inline"><input type="checkbox" id="np-req-fiador"> Fiador</label>
+          <label class="check-inline"><input type="checkbox" id="np-req-fiador"> Fiador con los mismos requisitos</label>
           <label class="check-inline"><input type="checkbox" id="np-req-antecedentes"> Antecedentes penales</label>
           <label class="check-inline"><input type="checkbox" id="np-req-renas"> Renas</label>
           <label class="check-inline"><input type="checkbox" id="np-req-infornet"> Autorización Infornet</label>
@@ -13985,8 +13989,12 @@ async function guardarPropiedad() {
   form.append('senderos',             chk('np-senderos'));
   form.append('pergola',              chk('np-pergola'));
   form.append('bbq_lounge',           chk('np-bbq-lounge'));
+  form.append('bar_deck',             chk('np-bar-deck'));
   form.append('bistro_lounge',        chk('np-bistro-lounge'));
+  form.append('cancha_polideportiva', chk('np-cancha-polideportiva'));
+  form.append('casa_club',            chk('np-casa-club'));
   form.append('churrasqueras',        chk('np-churrasqueras'));
+  form.append('doble_garita_seguridad', chk('np-doble-garita-seguridad'));
   form.append('firepit',              chk('np-firepit'));
   form.append('sky_lounge',           chk('np-sky-lounge'));
   form.append('terraza_jardin',       chk('np-terraza-jardin'));
@@ -14092,9 +14100,10 @@ function limpiarFormNueva() {
    'np-piscina','np-piscina-techada','np-piscina-climatizada','np-gimnasio','np-salon-social',
    'np-salon-lounge','np-business-center','np-coworking','np-juegos-ninos','np-area-social',
    'np-areas-verdes','np-parque','np-bosque','np-senderos','np-pergola','np-bbq-lounge',
-   'np-bistro-lounge','np-churrasqueras','np-firepit','np-sky-lounge','np-terraza-jardin',
+   'np-bistro-lounge','np-bar-deck','np-cancha-polideportiva','np-casa-club',
+   'np-churrasqueras','np-doble-garita-seguridad','np-firepit','np-sky-lounge','np-terraza-jardin',
    'np-terraza-panoramica','np-sala-reuniones','np-yoga-deck','np-tiendas','np-seguridad',
-   'np-parqueo-visitas',
+   'np-parqueo-visitas','np-parque-mascotas','np-deck',
    'np-req-dpi','np-req-constancia','np-req-estados-cuenta','np-req-formulario','np-req-fiador',
    'np-req-antecedentes','np-req-renas','np-req-infornet','np-req-deposito',
    'np-req-contrato-1ano','np-req-notario']
@@ -14235,8 +14244,12 @@ async function editarPropiedad(id) {
     document.getElementById('np-senderos').checked            = !!p.senderos;
     document.getElementById('np-pergola').checked             = !!p.pergola;
     document.getElementById('np-bbq-lounge').checked          = !!p.bbq_lounge;
+    document.getElementById('np-bar-deck').checked            = !!p.bar_deck;
     document.getElementById('np-bistro-lounge').checked       = !!p.bistro_lounge;
+    document.getElementById('np-cancha-polideportiva').checked = !!p.cancha_polideportiva;
+    document.getElementById('np-casa-club').checked           = !!p.casa_club;
     document.getElementById('np-churrasqueras').checked       = !!p.churrasqueras;
+    document.getElementById('np-doble-garita-seguridad').checked = !!p.doble_garita_seguridad;
     document.getElementById('np-firepit').checked             = !!p.firepit;
     document.getElementById('np-sky-lounge').checked          = !!p.sky_lounge;
     document.getElementById('np-terraza-jardin').checked      = !!p.terraza_jardin;
