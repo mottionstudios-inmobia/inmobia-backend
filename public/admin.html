@@ -2506,7 +2506,7 @@ function filtrarDpi(estado) {
       ? `<button class="btn" onclick="abrirModalRechazo(${d.id})" style="flex:1;background:rgba(231,76,60,0.12);color:#e74c3c;border:1px solid rgba(231,76,60,0.3);font-size:0.82rem;padding:7px">✕ Rechazar</button>` : '';
     return `
     <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-      ${tieneArchivo ? `<div id="dpi-preview-${d.id}" data-dpi-id="${d.id}" data-dpi-pdf="${esPdf ? '1' : '0'}" style="height:200px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;background:rgba(15,23,42,0.18)" onclick="abrirDpiDocumento(${d.id})">Cargando documento...</div>` : `<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem">Sin archivo</div>`}
+      ${tieneArchivo ? `<div id="dpi-preview-${d.id}" data-dpi-id="${d.id}" data-dpi-pdf="${esPdf ? '1' : '0'}" data-dpi-nombre="${nombreArchivo}" style="height:200px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;background:rgba(15,23,42,0.18)" onclick="abrirDpiDocumento(${d.id})">Cargando documento...</div>` : `<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem">Sin archivo</div>`}
       <div style="padding:1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
           <strong style="font-size:0.95rem">${d.nombre || '—'}</strong>
@@ -2528,38 +2528,139 @@ function filtrarDpi(estado) {
 }
 
 const dpiBlobUrls = new Map();
+let dpiViewerState = { zoom: 1, x: 0, y: 0, dragging: false, startX: 0, startY: 0 };
 
-async function obtenerDpiBlobUrl(id) {
+function inferirMimeDpi(nombre = '', header = '') {
+  const tipo = (header || '').split(';')[0].trim().toLowerCase();
+  if (tipo && tipo !== 'application/octet-stream') return tipo;
+  if (/\.pdf$/i.test(nombre)) return 'application/pdf';
+  if (/\.png$/i.test(nombre)) return 'image/png';
+  if (/\.webp$/i.test(nombre)) return 'image/webp';
+  if (/\.gif$/i.test(nombre)) return 'image/gif';
+  return 'image/jpeg';
+}
+
+async function obtenerDpiBlob(id) {
   if (dpiBlobUrls.has(id)) return dpiBlobUrls.get(id);
+  const card = document.getElementById(`dpi-preview-${id}`);
+  const nombre = card?.dataset.dpiNombre || '';
   const r = await fetch(`${API}/auth/admin/dpi/${id}/documento`, { headers: { Authorization: `Bearer ${token}` } });
   if (!r.ok) throw new Error('No se pudo cargar el documento');
-  const blob = await r.blob();
-  const url = URL.createObjectURL(blob);
-  dpiBlobUrls.set(id, url);
-  return url;
+  const raw = await r.blob();
+  const type = inferirMimeDpi(nombre, r.headers.get('Content-Type') || raw.type || '');
+  const blob = raw.type === type ? raw : new Blob([raw], { type });
+  const data = { url: URL.createObjectURL(blob), type, nombre };
+  dpiBlobUrls.set(id, data);
+  return data;
+}
+
+async function obtenerDpiBlobUrl(id) {
+  const data = await obtenerDpiBlob(id);
+  return data.url;
 }
 
 async function cargarPreviewsDpi(lista) {
-  for (const d of lista) {
-    const el = document.getElementById(`dpi-preview-${d.id}`);
-    if (!el) continue;
-    if (el.dataset.dpiPdf === '1') {
-      el.innerHTML = '<div style="text-align:center"><div style="font-size:1.8rem;margin-bottom:0.35rem">📄</div><div>PDF listo para revisar</div></div>';
-      continue;
-    }
+  await Promise.all((lista || []).map(async d => {
+    const card = document.getElementById(`dpi-preview-${d.id}`);
+    if (!card || !d.dpi_archivo) return;
     try {
-      const url = await obtenerDpiBlobUrl(d.id);
-      el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
-    } catch {
-      el.innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;text-align:center;line-height:1.45;padding:1rem"><div><strong style="color:#f59e0b">Archivo no disponible</strong><br>El registro existe, pero el archivo no está en el servidor. Solicite al asesor re-subir el DPI.</div></div>';
+      const data = await obtenerDpiBlob(d.id);
+      const esPdf = data.type === 'application/pdf' || card.dataset.dpiPdf === '1';
+      if (esPdf) {
+        card.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem"><span style="font-size:2rem">PDF</span><span>Ver documento</span></div>';
+      } else {
+        card.innerHTML = `<img src="${data.url}" alt="DPI" style="width:100%;height:100%;object-fit:cover;display:block">`;
+      }
+    } catch (e) {
+      card.style.cursor = 'default';
+      card.innerHTML = '<div style="text-align:center;padding:1rem;color:#e74c3c">Archivo no disponible<br><span style="font-size:0.75rem;color:var(--text-muted)">Solicite al asesor re-subir el DPI.</span></div>';
     }
+  }));
+}
+
+function cerrarDpiViewerModal() {
+  const modal = document.getElementById('dpi-viewer-modal');
+  if (modal) modal.remove();
+}
+
+function aplicarDpiViewerTransform() {
+  const img = document.getElementById('dpi-viewer-img');
+  const zoomLabel = document.getElementById('dpi-viewer-zoom');
+  if (!img) return;
+  img.style.transform = `translate(${dpiViewerState.x}px, ${dpiViewerState.y}px) scale(${dpiViewerState.zoom})`;
+  if (zoomLabel) zoomLabel.textContent = Math.round(dpiViewerState.zoom * 100) + '%';
+}
+
+function zoomDpiViewer(delta) {
+  dpiViewerState.zoom = Math.min(5, Math.max(0.5, dpiViewerState.zoom + delta));
+  aplicarDpiViewerTransform();
+}
+
+function resetDpiViewer() {
+  dpiViewerState.zoom = 1;
+  dpiViewerState.x = 0;
+  dpiViewerState.y = 0;
+  aplicarDpiViewerTransform();
+}
+
+function iniciarDpiPan(e) {
+  if (e.button !== undefined && e.button !== 0) return;
+  dpiViewerState.dragging = true;
+  dpiViewerState.startX = e.clientX - dpiViewerState.x;
+  dpiViewerState.startY = e.clientY - dpiViewerState.y;
+  e.currentTarget.setPointerCapture?.(e.pointerId);
+}
+
+function moverDpiPan(e) {
+  if (!dpiViewerState.dragging) return;
+  dpiViewerState.x = e.clientX - dpiViewerState.startX;
+  dpiViewerState.y = e.clientY - dpiViewerState.startY;
+  aplicarDpiViewerTransform();
+}
+
+function finalizarDpiPan() {
+  dpiViewerState.dragging = false;
+}
+
+function abrirDpiViewerModal(data) {
+  cerrarDpiViewerModal();
+  const esPdf = data.type === 'application/pdf';
+  dpiViewerState = { zoom: 1, x: 0, y: 0, dragging: false, startX: 0, startY: 0 };
+  const modal = document.createElement('div');
+  modal.id = 'dpi-viewer-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.92);z-index:9999;display:flex;flex-direction:column;padding:1rem';
+  modal.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:0.75rem;color:#fff">
+      <div>
+        <div style="font-size:1.05rem;font-weight:700">Documento de identidad</div>
+        <div style="font-size:0.78rem;color:#94a3b8">${data.nombre || 'DPI / pasaporte'}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;justify-content:flex-end">
+        ${!esPdf ? `<button class="btn" onclick="zoomDpiViewer(-0.25)" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:0.45rem 0.7rem">-</button><span id="dpi-viewer-zoom" style="font-size:0.8rem;color:#cbd5e1;min-width:42px;text-align:center">100%</span><button class="btn" onclick="zoomDpiViewer(0.25)" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:0.45rem 0.7rem">+</button><button class="btn" onclick="resetDpiViewer()" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:0.45rem 0.8rem">Restablecer</button>` : ''}
+        <button class="btn" onclick="cerrarDpiViewerModal()" style="background:#e74c3c;color:#fff;border:1px solid #e74c3c;padding:0.45rem 0.8rem">Cerrar</button>
+      </div>
+    </div>
+    <div id="dpi-viewer-stage" style="flex:1;min-height:0;background:#0f172a;border:1px solid #334155;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:${esPdf ? 'default' : 'grab'}">
+      ${esPdf ? `<iframe src="${data.url}" title="Documento DPI" style="width:100%;height:100%;border:0;background:#fff"></iframe>` : `<img id="dpi-viewer-img" src="${data.url}" alt="Documento DPI" style="max-width:96%;max-height:96%;object-fit:contain;transform-origin:center center;transition:transform 80ms ease;user-select:none;pointer-events:none">`}
+    </div>
+  `;
+  modal.addEventListener('click', e => { if (e.target === modal) cerrarDpiViewerModal(); });
+  document.body.appendChild(modal);
+  const stage = document.getElementById('dpi-viewer-stage');
+  if (stage && !esPdf) {
+    stage.addEventListener('pointerdown', iniciarDpiPan);
+    stage.addEventListener('pointermove', moverDpiPan);
+    stage.addEventListener('pointerup', finalizarDpiPan);
+    stage.addEventListener('pointercancel', finalizarDpiPan);
+    stage.addEventListener('wheel', e => { e.preventDefault(); zoomDpiViewer(e.deltaY > 0 ? -0.15 : 0.15); }, { passive: false });
   }
+  aplicarDpiViewerTransform();
 }
 
 async function abrirDpiDocumento(id) {
   try {
-    const url = await obtenerDpiBlobUrl(id);
-    window.open(url, '_blank');
+    const data = await obtenerDpiBlob(id);
+    abrirDpiViewerModal(data);
   } catch {
     toast('No se pudo abrir el documento. Solicite al asesor re-subir el DPI.', 'error');
   }
