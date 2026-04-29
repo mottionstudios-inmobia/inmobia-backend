@@ -1784,17 +1784,16 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
         </div>
       </div>
 
-      <!-- Cierres del mes — acordeón -->
+      <!-- Cierres del mes -->
       <div class="card" id="card-cierres-mes" style="margin-bottom:1.5rem;background:linear-gradient(135deg,#f0fdf4,#ffffff);border-left:3px solid #10b981">
-        <div class="card-header" onclick="toggleCierresMes()" style="border-bottom:none;gap:1rem;flex-wrap:wrap;cursor:pointer;user-select:none;transition:background 0.15s" onmouseenter="this.style.background='#f0fdf4'" onmouseleave="this.style.background=''">
+        <div class="card-header" style="border-bottom:none;gap:1rem;flex-wrap:wrap">
           <h3 style="display:flex;align-items:center;gap:0.5rem">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#10b981" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
             Cierres del mes
           </h3>
           <span id="cierres-mes-periodo" style="font-size:0.78rem;color:var(--text-muted);font-weight:500;margin-left:auto"></span>
-          <svg id="cierres-mes-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#10b981" stroke-width="2.2" style="transition:transform 0.25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-        <div id="cierres-mes-body" style="display:none">
+        <div id="cierres-mes-body">
           <div style="border-top:1px solid #d1fae5;padding:0;display:grid;grid-template-columns:1fr 1px 1fr;gap:0;overflow:hidden">
             <!-- Columna GTQ -->
             <div style="padding:1.25rem 1.75rem 1.25rem 1.5rem;background:#f0fdf9">
@@ -1857,14 +1856,13 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
       <div class="grid-2">
         <!-- Leads recientes -->
         <div class="card">
-          <div class="card-header" onclick="toggleAcordion('leads-recientes-body','leads-recientes-chevron')" style="cursor:pointer;user-select:none">
+          <div class="card-header">
             <h3>Leads recientes</h3>
             <div style="display:flex;align-items:center;gap:10px">
-              <button class="btn-sm" onclick="event.stopPropagation();irA('crm')">Ver todos →</button>
-              <svg id="leads-recientes-chevron" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+              <button class="btn-sm" onclick="irA('crm')">Ver todos →</button>
             </div>
           </div>
-          <div id="leads-recientes-body" style="display:none">
+          <div id="leads-recientes-body">
             <div class="card-body" style="padding:0 1.4rem" id="leads-recientes">
               <div class="empty-state">
                 <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -1877,11 +1875,10 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
 
         <!-- Actividad reciente -->
         <div class="card">
-          <div class="card-header" onclick="toggleAcordion('actividad-reciente-body','actividad-reciente-chevron')" style="cursor:pointer;user-select:none">
+          <div class="card-header">
             <h3>Actividad reciente</h3>
-            <svg id="actividad-reciente-chevron" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-          <div id="actividad-reciente-body" style="display:none">
+          <div id="actividad-reciente-body">
             <div class="card-body" style="padding:0.5rem 1.4rem">
               <div class="actividad-item">
                 <div class="actividad-dot" style="background:#8b5cf6"></div>
@@ -7951,23 +7948,6 @@ function renderCierresMes(leads) {
   });
 
   document.getElementById('cierres-mes-periodo').textContent = `${meses[ahora.getMonth()]} ${ahora.getFullYear()}`;
-}
-
-function toggleAcordion(bodyId, chevronId) {
-  const body = document.getElementById(bodyId);
-  const chevron = document.getElementById(chevronId);
-  if (!body) return;
-  const abierto = body.style.display !== 'none';
-  body.style.display = abierto ? 'none' : 'block';
-  if (chevron) chevron.style.transform = abierto ? '' : 'rotate(180deg)';
-}
-
-function toggleCierresMes() {
-  const body = document.getElementById('cierres-mes-body');
-  const chevron = document.getElementById('cierres-mes-chevron');
-  const abierto = body.style.display !== 'none';
-  body.style.display = abierto ? 'none' : 'block';
-  chevron.style.transform = abierto ? '' : 'rotate(180deg)';
 }
 
 function abrirDetalleCierres() {
