@@ -1094,12 +1094,12 @@ function renderHero(a) {
 
   // Especialidades (ranking de tipos de propiedad)
   const CAT_LABELS = {
-    residencial: { label: 'Residencial', icon: '/public/residencial.png' },
-    comercial:   { label: 'Comercial',   icon: '/public/comercial.png' },
-    industrial:  { label: 'Industrial',  icon: '/public/industrial.png' },
-    terrenos:    { label: 'Terrenos',    icon: '/public/terrenos.png' },
-    inversion:   { label: 'Inversión',   icon: '/public/inversion.png' },
-    otros:       { label: 'Otros nichos', icon: '/public/otros.png' },
+    residencial: { label: 'Residencial', icon: '/residencial.png' },
+    comercial:   { label: 'Comercial',   icon: '/comercial.png' },
+    industrial:  { label: 'Industrial',  icon: '/industrial.png' },
+    terrenos:    { label: 'Terrenos',    icon: '/terrenos.png' },
+    inversion:   { label: 'Inversión',   icon: '/inversion.png' },
+    otros:       { label: 'Otros nichos', icon: '/otros.png' },
   };
   try {
     const ranking = a.tipos_ranking ? (typeof a.tipos_ranking === 'string' ? JSON.parse(a.tipos_ranking) : a.tipos_ranking) : null;
