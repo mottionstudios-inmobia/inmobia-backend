@@ -2393,27 +2393,15 @@ function ocultarLoading() {
   document.getElementById('auth-loading').style.display = 'none';
 }
 
-async function intentarAutoLogin() {
+function intentarAutoLogin() {
   if (!token) {
     ocultarLoading();
     document.getElementById('login-screen').style.display = 'flex';
     return;
   }
-  // Intenta verificar token, con 1 reintento si falla la red
-  for (let intento = 0; intento < 2; intento++) {
-    try {
-      const r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
-      if (r.ok) { ocultarLoading(); mostrarApp(); return; }
-      // Error de servidor (401, 404, etc.) — no reintentar
-      localStorage.removeItem('inmobia_token'); token = null;
-      break;
-    } catch {
-      // Error de red — esperar y reintentar una vez
-      if (intento === 0) await new Promise(res => setTimeout(res, 1500));
-    }
-  }
+  // Token existe → cargamos directo. Si es inválido, cargarDashboard manejará el 401.
   ocultarLoading();
-  document.getElementById('login-screen').style.display = 'flex';
+  mostrarApp();
 }
 intentarAutoLogin();
 
@@ -2699,6 +2687,9 @@ async function cargarDashboard() {
       fetch(`${API}/leads/admin/todos?limit=50`, hdr),
       fetch(`${API}/auth/admin/asesores`, hdr)
     ]);
+
+    // Si cualquier endpoint protegido dice 401, el token expiró
+    if (rAsesores.status === 401 || rLeads.status === 401) { manejarSesionExpirada(); return; }
 
     // Stats
     const dTotal = await rTotal.json();
