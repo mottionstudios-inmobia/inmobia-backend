@@ -879,6 +879,12 @@
 <body>
 
 <!-- ══════════════════════════ LOGIN ══════════════════════════ -->
+<div id="auth-loading" style="display:none;position:fixed;inset:0;background:#0f1923;z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+  <div style="width:36px;height:36px;border:3px solid rgba(201,168,76,0.2);border-top-color:#c9a84c;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+  <span style="color:rgba(255,255,255,0.5);font-size:0.8rem;font-family:sans-serif">Verificando sesión...</span>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">
@@ -2296,8 +2302,11 @@
 const BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://inmobia.site';
 const API = BASE_URL + '/api';
 let token = localStorage.getItem('inmobia_token');
-// Si hay token, ocultar login de inmediato para evitar el flash al recargar
-if (token) document.getElementById('login-screen').style.display = 'none';
+// Si hay token, ocultar login y mostrar loading mientras verificamos sesión
+if (token) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('auth-loading').style.display = 'flex';
+}
 
 // SQLite guarda fechas en UTC sin sufijo 'Z' — mismo helper que panel-asesor
 function parseSQL(s) {
@@ -2380,15 +2389,30 @@ function manejarSesionExpirada() {
 document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') iniciarSesion(); });
 document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') iniciarSesion(); });
 
-// Auto-login: verifica que el token siga siendo válido antes de cargar la app.
-// El backend pudo haberse reiniciado con otro secret o el token pudo haber vencido (7d).
+function ocultarLoading() {
+  document.getElementById('auth-loading').style.display = 'none';
+}
+
 async function intentarAutoLogin() {
-  if (!token) { document.getElementById('login-screen').style.display = 'flex'; return; }
-  try {
-    const r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
-    if (r.ok) { mostrarApp(); return; }
-    localStorage.removeItem('inmobia_token'); token = null;
-  } catch {}
+  if (!token) {
+    ocultarLoading();
+    document.getElementById('login-screen').style.display = 'flex';
+    return;
+  }
+  // Intenta verificar token, con 1 reintento si falla la red
+  for (let intento = 0; intento < 2; intento++) {
+    try {
+      const r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+      if (r.ok) { ocultarLoading(); mostrarApp(); return; }
+      // Error de servidor (401, 404, etc.) — no reintentar
+      localStorage.removeItem('inmobia_token'); token = null;
+      break;
+    } catch {
+      // Error de red — esperar y reintentar una vez
+      if (intento === 0) await new Promise(res => setTimeout(res, 1500));
+    }
+  }
+  ocultarLoading();
   document.getElementById('login-screen').style.display = 'flex';
 }
 intentarAutoLogin();
