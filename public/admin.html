@@ -2296,6 +2296,8 @@
 const BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://inmobia.site';
 const API = BASE_URL + '/api';
 let token = localStorage.getItem('inmobia_token');
+// Si hay token, ocultar login de inmediato para evitar el flash al recargar
+if (token) document.getElementById('login-screen').style.display = 'none';
 
 // SQLite guarda fechas en UTC sin sufijo 'Z' — mismo helper que panel-asesor
 function parseSQL(s) {
@@ -2381,12 +2383,13 @@ document.getElementById('login-email').addEventListener('keydown', e => { if (e.
 // Auto-login: verifica que el token siga siendo válido antes de cargar la app.
 // El backend pudo haberse reiniciado con otro secret o el token pudo haber vencido (7d).
 async function intentarAutoLogin() {
-  if (!token) return;
+  if (!token) { document.getElementById('login-screen').style.display = 'flex'; return; }
   try {
     const r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
     if (r.ok) { mostrarApp(); return; }
-    if (r.status === 401) { localStorage.removeItem('inmobia_token'); token = null; }
+    localStorage.removeItem('inmobia_token'); token = null;
   } catch {}
+  document.getElementById('login-screen').style.display = 'flex';
 }
 intentarAutoLogin();
 
@@ -2441,14 +2444,14 @@ let dpiTodosLos = [];
 async function cargarDpiPendientes() {
   try {
     const r = await fetch(`${API}/auth/admin/dpi-pendientes`, { headers: { Authorization: `Bearer ${token}` } });
-    if (!r.ok) throw new Error();
+    if (!r.ok) return;
     dpiTodosLos = await r.json();
     const pendientes = dpiTodosLos.filter(d => !d.dpi_estado || d.dpi_estado === 'pendiente').length;
     const badge = document.getElementById('nav-dpi-badge');
     badge.textContent = pendientes;
     badge.style.display = pendientes > 0 ? '' : 'none';
     filtrarDpi(dpiEstadoActual);
-  } catch { toast('Error al cargar documentos', 'error'); }
+  } catch {}
 }
 
 function filtrarDpi(estado) {
