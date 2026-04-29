@@ -2491,6 +2491,7 @@ function filtrarDpi(estado) {
     const tieneArchivo = !!d.dpi_archivo;
     const nombreArchivo = d.dpi_archivo ? d.dpi_archivo.split('/').pop() : '';
     const esPdf = /\.pdf$/i.test(nombreArchivo);
+    const panelAsesorUrl = d.slug ? `/asesor/${d.slug}` : '';
     const estadoBadge = d.dpi_estado === 'aprobado'
       ? `<span style="background:rgba(46,204,113,0.15);color:#2ecc71;padding:2px 10px;border-radius:20px;font-size:0.75rem;font-weight:600">✓ Aprobado</span>`
       : d.dpi_estado === 'rechazado'
@@ -2518,6 +2519,7 @@ function filtrarDpi(estado) {
           ${botonesHtml}
           ${btnRechazar}
           ${tieneArchivo ? `<button class="btn" onclick="abrirDpiDocumento(${d.id})" style="background:var(--input-bg);color:var(--text-muted);border:1px solid var(--border);font-size:0.82rem;padding:7px">&#128269; Ver</button>` : ''}
+          ${panelAsesorUrl ? `<button class="btn" onclick="window.open('${panelAsesorUrl}','_blank')" style="background:rgba(139,92,246,0.14);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);font-size:0.82rem;padding:7px">Ver panel asesor</button>` : ''}
         </div>
       </div>
     </div>`;
@@ -2549,7 +2551,7 @@ async function cargarPreviewsDpi(lista) {
       const url = await obtenerDpiBlobUrl(d.id);
       el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
     } catch {
-      el.innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem">Sin vista previa</div>';
+      el.innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;text-align:center;line-height:1.45;padding:1rem"><div><strong style="color:#f59e0b">Archivo no disponible</strong><br>El registro existe, pero el archivo no está en el servidor. Solicite al asesor re-subir el DPI.</div></div>';
     }
   }
 }
@@ -2559,7 +2561,7 @@ async function abrirDpiDocumento(id) {
     const url = await obtenerDpiBlobUrl(id);
     window.open(url, '_blank');
   } catch {
-    toast('No se pudo abrir el documento', 'error');
+    toast('No se pudo abrir el documento. Solicite al asesor re-subir el DPI.', 'error');
   }
 }
 

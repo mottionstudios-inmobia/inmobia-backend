@@ -930,7 +930,7 @@ router.get('/admin/dpi-pendientes', (req, res) => {
     if (!admin || admin.rol !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
 
     const pendientes = db.prepare(`
-      SELECT id, nombre, email, telefono, foto, dpi_archivo, dpi_subido_en, dpi_estado, dpi_rechazado_razon, plan, codigo_asesor
+      SELECT id, nombre, email, telefono, foto, dpi_archivo, dpi_subido_en, dpi_estado, dpi_rechazado_razon, plan, codigo_asesor, slug
       FROM usuarios
       WHERE dpi_archivo IS NOT NULL AND dpi_archivo != ''
       ORDER BY CASE WHEN dpi_estado IS NULL OR dpi_estado = 'pendiente' THEN 0 ELSE 1 END, dpi_subido_en DESC
