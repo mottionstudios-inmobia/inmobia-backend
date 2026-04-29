@@ -700,6 +700,7 @@ select.form-input { cursor: pointer; }
 }
 .toggle-switch input:checked + .toggle-slider { background: var(--gold); }
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(17px); }
+.portal-toggle-switch .toggle-slider { background: #74b9ff; }
 
 .btn-sm {
   padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.74rem;
@@ -2598,7 +2599,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
         <div class="card-body" style="padding:1rem 1.4rem">
           <div class="toggle-legend">
             <div class="toggle-legend-item">
-              <div style="width:32px;height:18px;background:#c8d0e0;border-radius:10px;position:relative;flex-shrink:0"><div style="width:12px;height:12px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div></div>
+              <div style="width:32px;height:18px;background:#74b9ff;border-radius:10px;position:relative;flex-shrink:0"><div style="width:12px;height:12px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div></div>
               <span><strong>Mi portal</strong> — Solo visible en su portal. Sin comisión ni leads InmobIA.</span>
             </div>
             <div class="toggle-legend-item">
@@ -6997,7 +6998,7 @@ Comisión al cerrar:
 • Lead InmobIA → 70% usted · 30% InmobIA
 • Cliente directo de su portal → 100% usted">
             <span class="toggle-label" id="tl-${p.id}">${p.publicado_inmobia ? 'Mi portal + InmobIA' : 'Mi portal'}</span>
-            <label class="toggle-switch">
+            <label class="toggle-switch portal-toggle-switch">
               <input type="checkbox" ${p.publicado_inmobia ? 'checked' : ''} onchange="togglePublicacion(${p.id}, this)">
               <span class="toggle-slider"></span>
             </label>
