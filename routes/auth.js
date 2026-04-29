@@ -34,7 +34,10 @@ const storageLogo = multer.diskStorage({
 });
 const uploadLogo = multer({ storage: storageLogo, limits: { fileSize: 1 * 1024 * 1024 }, fileFilter: (req, file, cb) => cb(null, /jpeg|jpg|png|webp|svg/.test(file.mimetype)) });
 
-const dpiDir = path.join(__dirname, '../../private/dpi');
+const dpiDir = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'private/dpi')
+  : path.join(__dirname, '../../private/dpi');
+const dpiDirLegacy = path.join(__dirname, '../../private/dpi');
 fs.mkdirSync(dpiDir, { recursive: true });
 
 const storageDPI = multer.diskStorage({
@@ -933,6 +936,29 @@ router.get('/admin/dpi-pendientes', (req, res) => {
       ORDER BY CASE WHEN dpi_estado IS NULL OR dpi_estado = 'pendiente' THEN 0 ELSE 1 END, dpi_subido_en DESC
     `).all();
     res.json(pendientes);
+  } catch { res.status(401).json({ error: 'Token inválido' }); }
+});
+
+// GET /api/auth/admin/dpi/:id/documento — sirve el documento solo a admins autenticados
+router.get('/admin/dpi/:id/documento', (req, res) => {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET || 'inmobia_secret_2024');
+    if (decoded.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
+
+    const asesorId = parseInt(req.params.id);
+    const row = db.prepare("SELECT dpi_archivo FROM usuarios WHERE id = ? AND dpi_archivo IS NOT NULL AND dpi_archivo != ''").get(asesorId);
+    if (!row) return res.status(404).json({ error: 'Documento no encontrado' });
+
+    const nombre = path.basename(row.dpi_archivo);
+    const buscarEn = [dpiDir, dpiDirLegacy];
+    const resolvedFile = buscarEn
+      .map(dir => ({ dir: path.resolve(dir), file: path.resolve(path.join(dir, nombre)) }))
+      .find(({ dir, file }) => file.startsWith(dir + path.sep) && fs.existsSync(file));
+    if (!resolvedFile) return res.status(404).json({ error: 'Archivo no encontrado' });
+
+    res.sendFile(resolvedFile.file);
   } catch { res.status(401).json({ error: 'Token inválido' }); }
 });
 

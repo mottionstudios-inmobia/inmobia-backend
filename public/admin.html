@@ -2488,7 +2488,9 @@ function filtrarDpi(estado) {
   }
   vacio.style.display = 'none';
   contenedor.innerHTML = lista.map(d => {
-    const fotoUrl = d.dpi_archivo ? `${API.replace('/api','')}/${d.dpi_archivo}` : null;
+    const tieneArchivo = !!d.dpi_archivo;
+    const nombreArchivo = d.dpi_archivo ? d.dpi_archivo.split('/').pop() : '';
+    const esPdf = /\.pdf$/i.test(nombreArchivo);
     const estadoBadge = d.dpi_estado === 'aprobado'
       ? `<span style="background:rgba(46,204,113,0.15);color:#2ecc71;padding:2px 10px;border-radius:20px;font-size:0.75rem;font-weight:600">✓ Aprobado</span>`
       : d.dpi_estado === 'rechazado'
@@ -2503,9 +2505,7 @@ function filtrarDpi(estado) {
       ? `<button class="btn" onclick="abrirModalRechazo(${d.id})" style="flex:1;background:rgba(231,76,60,0.12);color:#e74c3c;border:1px solid rgba(231,76,60,0.3);font-size:0.82rem;padding:7px">✕ Rechazar</button>` : '';
     return `
     <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-      ${fotoUrl ? `<div style="height:200px;overflow:hidden;cursor:pointer" onclick="window.open('${fotoUrl}','_blank')">
-        <img src="${fotoUrl}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div style=&quot;height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem&quot;>Sin vista previa</div>'">
-      </div>` : `<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem">Sin archivo</div>`}
+      ${tieneArchivo ? `<div id="dpi-preview-${d.id}" data-dpi-id="${d.id}" data-dpi-pdf="${esPdf ? '1' : '0'}" style="height:200px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;background:rgba(15,23,42,0.18)" onclick="abrirDpiDocumento(${d.id})">Cargando documento...</div>` : `<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem">Sin archivo</div>`}
       <div style="padding:1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
           <strong style="font-size:0.95rem">${d.nombre || '—'}</strong>
@@ -2517,11 +2517,50 @@ function filtrarDpi(estado) {
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
           ${botonesHtml}
           ${btnRechazar}
-          ${fotoUrl ? `<button class="btn" onclick="window.open('${fotoUrl}','_blank')" style="background:var(--input-bg);color:var(--text-muted);border:1px solid var(--border);font-size:0.82rem;padding:7px">&#128269; Ver</button>` : ''}
+          ${tieneArchivo ? `<button class="btn" onclick="abrirDpiDocumento(${d.id})" style="background:var(--input-bg);color:var(--text-muted);border:1px solid var(--border);font-size:0.82rem;padding:7px">&#128269; Ver</button>` : ''}
         </div>
       </div>
     </div>`;
   }).join('');
+  cargarPreviewsDpi(lista);
+}
+
+const dpiBlobUrls = new Map();
+
+async function obtenerDpiBlobUrl(id) {
+  if (dpiBlobUrls.has(id)) return dpiBlobUrls.get(id);
+  const r = await fetch(`${API}/auth/admin/dpi/${id}/documento`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!r.ok) throw new Error('No se pudo cargar el documento');
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  dpiBlobUrls.set(id, url);
+  return url;
+}
+
+async function cargarPreviewsDpi(lista) {
+  for (const d of lista) {
+    const el = document.getElementById(`dpi-preview-${d.id}`);
+    if (!el) continue;
+    if (el.dataset.dpiPdf === '1') {
+      el.innerHTML = '<div style="text-align:center"><div style="font-size:1.8rem;margin-bottom:0.35rem">📄</div><div>PDF listo para revisar</div></div>';
+      continue;
+    }
+    try {
+      const url = await obtenerDpiBlobUrl(d.id);
+      el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+    } catch {
+      el.innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem">Sin vista previa</div>';
+    }
+  }
+}
+
+async function abrirDpiDocumento(id) {
+  try {
+    const url = await obtenerDpiBlobUrl(id);
+    window.open(url, '_blank');
+  } catch {
+    toast('No se pudo abrir el documento', 'error');
+  }
 }
 
 async function aprobarDpi(id) {
