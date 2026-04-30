@@ -130,9 +130,10 @@ function enviarPropiedadConPreview(req, res, next, id, publicPath) {
 <meta name="twitter:description" content="${escapeHtml(description)}">
 <meta name="twitter:image" content="${escapeHtml(image)}">`;
 
-    html = html
-      .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)} — InmobIA</title>`)
-      .replace('</head>', `${meta}\n</head>`);
+    html = html.replace(
+      /<title>[\s\S]*?<\/title>/i,
+      `<title>${escapeHtml(title)} — InmobIA</title>${meta}`
+    );
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
@@ -143,6 +144,11 @@ function enviarPropiedadConPreview(req, res, next, id, publicPath) {
 }
 
 // HTML dinámico para que WhatsApp/Facebook lean vista previa de cada propiedad
+app.get('/p/:id/:slug', (req, res, next) => {
+  const id = Number(req.params.id);
+  enviarPropiedadConPreview(req, res, next, id, req.originalUrl);
+});
+
 app.get('/p/:id', (req, res, next) => {
   const id = Number(req.params.id);
   const suffix = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
