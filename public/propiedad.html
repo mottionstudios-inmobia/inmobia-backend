@@ -1123,7 +1123,30 @@
     } catch { /* sin datos de asesor */ }
   }
 
-  function normalizarUrlMapa(url = '') {
+  let mapaActual = { embed: '', link: '' };
+
+  function crearConsultaMapa(data = {}) {
+    return [
+      data.nombre_proyecto,
+      data.direccion,
+      data.colonia,
+      data.zona,
+      data.municipio,
+      'Guatemala'
+    ].filter(Boolean).join(', ');
+  }
+
+  function esEnlaceCortoGoogleMaps(url = '') {
+    try {
+      const parsed = new URL(String(url || '').trim(), window.location.origin);
+      const host = parsed.hostname.toLowerCase();
+      return host === 'maps.app.goo.gl' || host === 'goo.gl';
+    } catch {
+      return false;
+    }
+  }
+
+  function normalizarUrlMapa(url = '', data = {}) {
     const original = String(url || '').trim();
     if (!original) return { embed: '', link: '' };
 
@@ -1134,11 +1157,15 @@
       const parsed = new URL(original, window.location.origin);
       link = parsed.href;
 
-      if (parsed.hostname.includes('google.') && parsed.pathname.includes('/maps/embed')) {
+      if (esEnlaceCortoGoogleMaps(parsed.href)) {
+        const q = crearConsultaMapa(data) || original;
+        embed = `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+      } else if (parsed.hostname.includes('google.') && parsed.pathname.includes('/maps/embed')) {
         embed = parsed.href;
         link = parsed.href.replace('/maps/embed', '/maps');
       } else if (parsed.hostname.includes('google.') && parsed.pathname.includes('/maps')) {
-        const coordMatch = parsed.href.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+        const coordMatch = parsed.href.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/)
+          || parsed.href.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
         if (coordMatch) {
           embed = `https://www.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&z=16&output=embed`;
         } else {
@@ -1155,6 +1182,31 @@
     }
 
     return { embed, link };
+  }
+
+  async function aplicarMapaPropiedad() {
+    if (!propData?.mapa_url) return;
+
+    mapaActual = normalizarUrlMapa(propData.mapa_url, propData);
+    document.getElementById('mapa-wrap').style.display = 'block';
+    document.getElementById('mapa-iframe-sidebar').src = mapaActual.embed;
+    document.getElementById('mapa-link').href = mapaActual.link;
+
+    if (!esEnlaceCortoGoogleMaps(propData.mapa_url)) return;
+
+    try {
+      const res = await fetch(`/api/propiedades/mapa/normalizar?url=${encodeURIComponent(propData.mapa_url)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data?.embed) return;
+      mapaActual = { embed: data.embed, link: data.link || propData.mapa_url };
+      document.getElementById('mapa-iframe-sidebar').src = mapaActual.embed;
+      document.getElementById('mapa-link').href = mapaActual.link;
+      const modalMapa = document.getElementById('mapa-iframe');
+      if (modalMapa?.src) modalMapa.src = mapaActual.embed;
+    } catch (err) {
+      console.warn('No se pudo resolver el enlace corto de Google Maps:', err);
+    }
   }
 
   // ── GALERÍA ─────────────────────────────────────────────────
@@ -1274,10 +1326,7 @@
 
     // Mapa
     if (propData.mapa_url) {
-      const mapa = normalizarUrlMapa(propData.mapa_url);
-      document.getElementById('mapa-wrap').style.display = 'block';
-      document.getElementById('mapa-iframe-sidebar').src = mapa.embed;
-      document.getElementById('mapa-link').href = mapa.link;
+      aplicarMapaPropiedad();
     }
 
     document.getElementById('prop-precio').textContent = `${sym}${num}`;
@@ -1638,7 +1687,7 @@
 
   // ── CONSULTA SOBRE LA PROPIEDAD ──────────────────────────────
   function abrirModalMapa() {
-    document.getElementById('mapa-iframe').src = normalizarUrlMapa(propData?.mapa_url || '').embed;
+    document.getElementById('mapa-iframe').src = mapaActual.embed || normalizarUrlMapa(propData?.mapa_url || '', propData || {}).embed;
     document.getElementById('modal-mapa').style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }

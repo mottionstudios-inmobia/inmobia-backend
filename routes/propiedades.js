@@ -13,6 +13,41 @@ const uploadsDir = process.env.DATA_DIR
   ? path.join(process.env.DATA_DIR, 'uploads')
   : path.join(__dirname, '../../public/uploads');
 
+const mapaUrlCache = new Map();
+
+function esHostGoogleMaps(hostname = '') {
+  const host = hostname.toLowerCase();
+  return host === 'maps.app.goo.gl'
+    || host === 'goo.gl'
+    || host === 'maps.google.com'
+    || host === 'www.google.com'
+    || host.endsWith('.google.com');
+}
+
+function normalizarMapaGoogle(url = '') {
+  const original = String(url || '').trim();
+  if (!original) return { embed: '', link: '' };
+
+  const parsed = new URL(original);
+  const href = parsed.href;
+  const exactMatch = href.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/);
+  const coordMatch = exactMatch || href.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+
+  if (coordMatch) {
+    return {
+      embed: `https://www.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&z=16&output=embed`,
+      link: href
+    };
+  }
+
+  const placeMatch = parsed.pathname.match(/\/maps\/place\/([^/@]+)/);
+  const q = parsed.searchParams.get('q') || (placeMatch ? decodeURIComponent(placeMatch[1].replace(/\+/g, ' ')) : '');
+  return {
+    embed: q ? `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed` : '',
+    link: href
+  };
+}
+
 function puedeGestionarPropiedad(req, propiedad) {
   return req.usuario?.rol === 'admin' || propiedad?.usuario_id === req.usuario?.id;
 }
@@ -295,6 +330,56 @@ router.post('/:id/solicitar-1d', authMiddleware, (req, res) => {
 router.delete('/:id/solicitar-1d', authMiddleware, (req, res) => {
   db.prepare('DELETE FROM solicitudes_1d WHERE propiedad_id = ? AND asesor_id = ?').run(Number(req.params.id), req.usuario.id);
   res.json({ ok: true });
+});
+
+// -- GET /api/propiedades/mapa/normalizar?url=... (publica)
+router.get('/mapa/normalizar', async (req, res) => {
+  const url = String(req.query.url || '').trim();
+  if (!url) return res.status(400).json({ error: 'URL requerida' });
+
+  try {
+    const parsed = new URL(url);
+    if (!['http:', 'https:'].includes(parsed.protocol) || !esHostGoogleMaps(parsed.hostname)) {
+      return res.status(400).json({ error: 'Solo se permiten enlaces de Google Maps' });
+    }
+
+    const cached = mapaUrlCache.get(parsed.href);
+    if (cached && cached.expira > Date.now()) {
+      return res.json(cached.data);
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 7000);
+    let finalUrl = parsed.href;
+    try {
+      const response = await fetch(parsed.href, {
+        method: 'GET',
+        redirect: 'manual',
+        signal: controller.signal,
+        headers: { 'user-agent': 'InmobIA/1.0 (+https://inmobia.site)' }
+      });
+      const location = response.headers.get('location');
+      if (location) finalUrl = new URL(location, parsed.href).href;
+      else if (response.url) finalUrl = response.url;
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    const finalParsed = new URL(finalUrl);
+    if (!esHostGoogleMaps(finalParsed.hostname)) {
+      return res.status(400).json({ error: 'La URL no redirige a Google Maps' });
+    }
+
+    const data = normalizarMapaGoogle(finalUrl);
+    if (!data.embed) return res.status(422).json({ error: 'No fue posible generar vista embebible del mapa' });
+
+    mapaUrlCache.set(parsed.href, { data, expira: Date.now() + 24 * 60 * 60 * 1000 });
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.json(data);
+  } catch (err) {
+    console.error('Error normalizando mapa:', err.message);
+    res.status(500).json({ error: 'No fue posible resolver el enlace de mapa' });
+  }
 });
 
 // ── GET /api/propiedades/:id  (pública)
