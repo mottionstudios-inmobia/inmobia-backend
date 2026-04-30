@@ -3405,7 +3405,7 @@ user-select: none;
     const ubicacion  = [p.colonia, p.zona, p.municipio].filter(Boolean).join(', ') || 'Guatemala';
     const tipoLabel  = p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1);
     const shareSlug = `${slugCompartirPropiedad(`${p.titulo || 'propiedad'} ${p.nombre_proyecto || ''}`)}-${Date.now()}`;
-    const shareUrl   = new URL(`/compartir/propiedad/${p.id}/${shareSlug}`, window.location.origin).href;
+    const shareUrl   = new URL(`/propiedad/${shareSlug}/${p.id}?shared=whatsapp`, window.location.origin).href;
     const shareText  = textoCompartirPropiedad(p.titulo, precio, ubicacion);
     const shareNative = typeof navigator !== 'undefined' && navigator.share
       ? `<button class="property-share-option" type="button" data-accion="native" onclick="compartirPropiedad(event,'native',this)"><span>↗</span> Compartir...</button>`

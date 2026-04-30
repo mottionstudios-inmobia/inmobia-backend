@@ -277,6 +277,11 @@ app.get('/p/:id/:slug', (req, res, next) => {
   enviarPropiedadConPreview(req, res, next, id, req.originalUrl);
 });
 
+app.get('/propiedad/:slug/:id', (req, res, next) => {
+  const id = Number(req.params.id);
+  enviarPropiedadConPreview(req, res, next, id, req.path);
+});
+
 app.get('/p/:id', (req, res, next) => {
   const id = Number(req.params.id);
   const suffix = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
