@@ -274,6 +274,7 @@
     .badge-activo   { background: rgba(46,204,113,0.15); color: var(--success); }
     .badge-inactivo { background: rgba(243,156,18,0.15); color: var(--warning); }
     .badge-vendido  { background: rgba(231,76,60,0.15); color: var(--danger); }
+    .badge-alquilado{ background: rgba(20,184,166,0.16); color: #2dd4bf; }
     .badge-pendiente{ background: rgba(100,130,220,0.18); color: #88aaff; }
     .badge-renta    { background: rgba(201,168,76,0.12); color: var(--gold); }
     .badge-venta    { background: rgba(30,45,74,0.5); color: #7ab3e0; }
@@ -1095,6 +1096,7 @@
             <option value="activo">Activo</option>
             <option value="pendiente">Pendiente</option>
             <option value="vendido">Vendido</option>
+            <option value="alquilado">Alquilado</option>
             <option value="inactivo">Inactivo</option>
           </select>
           <select class="search-input" style="width:auto" onchange="filtrarOp(this.value)">
@@ -1868,7 +1870,8 @@
             <select id="f-estado">
               <option value="activo">Activo</option>
               <option value="pendiente">Pendiente / Reservado</option>
-              <option value="vendido">Vendido / Rentado</option>
+              <option value="vendido">Vendido</option>
+              <option value="alquilado">Alquilado</option>
               <option value="inactivo">Inactivo</option>
             </select>
           </div>
@@ -3034,7 +3037,7 @@ function renderTablaAgrupada() {
   });
 }
 
-const ESTADO_LABEL = { activo:'Activo', inactivo:'Inactivo', vendido:'Vendido', pendiente:'Pendiente' };
+const ESTADO_LABEL = { activo:'Activo', inactivo:'Inactivo', vendido:'Vendido', pendiente:'Pendiente', alquilado:'Alquilado' };
 
 function filaProp(p, compact = false) {
   const img = p.imagen_principal
@@ -3098,6 +3101,7 @@ function filaProp(p, compact = false) {
           <option value="activo"   ${p.estado==='activo'   ?'selected':''}>Activo</option>
           <option value="pendiente"${p.estado==='pendiente'?'selected':''}>Pendiente</option>
           <option value="vendido"  ${p.estado==='vendido'  ?'selected':''}>Vendido</option>
+          <option value="alquilado"${p.estado==='alquilado'?'selected':''}>Alquilado</option>
           <option value="inactivo" ${p.estado==='inactivo' ?'selected':''}>Inactivo</option>
         </select>
       </td>
@@ -3198,9 +3202,14 @@ async function cambiarEstadoRapido(id, estado) {
       body: JSON.stringify({ estado })
     });
     if (r.ok) {
-      toast(`Estado actualizado: ${ESTADO_LABEL[estado]||estado}`, 'success');
+      const data = await r.json().catch(() => ({}));
+      const extra = estado === 'alquilado' && data.notificaciones_enviadas
+        ? ` · ${data.notificaciones_enviadas} asesor(es) notificado(s)`
+        : '';
+      toast(`Estado actualizado: ${ESTADO_LABEL[estado]||estado}${extra}`, 'success');
       const p = propiedades.find(x => x.id === id);
       if (p) p.estado = estado;
+      renderTablaAgrupada();
       // Si se marcó como vendido, abrir modal de transacción
       if (estado === 'vendido') {
         abrirModalTransaccion(id);

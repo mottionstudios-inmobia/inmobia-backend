@@ -12750,6 +12750,7 @@ function renderTodasMisProps() {
   grid.innerHTML = props.map(p => {
     const img = p.imagen_principal ? `${API.replace('/api','')}${p.imagen_principal}` : '';
     const compartida = !!p.compartir_tripartito;
+    const alquilada = p.estado === 'alquilado';
     const opLabel = (p.operacion||'').toLowerCase() === 'renta' ? 'RENTA' : 'VENTA';
     const opColor = (p.operacion||'').toLowerCase() === 'renta' ? '#0f766e' : '#1e2d4a';
     const precioFmt = `${sym(p)}${Number(p.precio).toLocaleString('es-GT')}`;
@@ -12777,9 +12778,10 @@ function renderTodasMisProps() {
                   onmouseout="this.style.opacity='0';this.previousElementSibling.style.background='rgba(0,0,0,0)'">
                <span style="background:rgba(255,255,255,0.95);color:#1e2d4a;font-size:0.72rem;font-weight:700;padding:0.4rem 0.9rem;border-radius:20px;pointer-events:none">👁 Ver detalle</span>
              </div>
-           </div>
-           <span style="position:absolute;top:8px;left:8px;background:${opColor};color:#fff;font-size:0.6rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.04em">${opLabel}</span>
-           <span style="position:absolute;bottom:8px;right:8px;background:#fff;color:#1e2d4a;font-size:0.78rem;font-weight:800;padding:3px 8px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.18)">${precioFmt}</span>
+              </div>
+              <span style="position:absolute;top:8px;left:8px;background:${opColor};color:#fff;font-size:0.6rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.04em">${opLabel}</span>
+              ${alquilada ? `<span style="position:absolute;top:8px;right:8px;background:#0f172a;color:#67e8f9;font-size:0.6rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.04em">ALQUILADA</span>` : ''}
+              <span style="position:absolute;bottom:8px;right:8px;background:#fff;color:#1e2d4a;font-size:0.78rem;font-weight:800;padding:3px 8px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.18)">${precioFmt}</span>
          </div>`
       : `<div style="height:150px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:0.78rem">Sin imagen</div>`;
     return `
@@ -13365,6 +13367,12 @@ async function cargarPropiedades1D() {
       const btnAction = solicitada
         ? `cancelarSolicitud1D(${p.id})`
         : `solicitarPropiedad1D(${p.id})`;
+      const alquilada = p.estado === 'alquilado';
+      const btnLabelFinal = alquilada ? 'Alquilada' : btnLabel;
+      const btnStyleFinal = alquilada
+        ? 'background:#64748b;color:#e2e8f0;border:none;cursor:not-allowed'
+        : btnStyle;
+      const btnActionFinal = alquilada ? '' : btnAction;
       const opLabel = (p.operacion||'').toLowerCase() === 'renta' ? 'RENTA' : 'VENTA';
       const opColor = (p.operacion||'').toLowerCase() === 'renta' ? '#0f766e' : '#1e2d4a';
       const imgBlock = imgUrl
@@ -13398,7 +13406,7 @@ async function cargarPropiedades1D() {
             </div>
             <div style="font-family:'Courier New',monospace;font-size:0.7rem;color:#6366f1;background:rgba(99,102,241,0.08);padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:0.8rem">${p.codigo || '—'}</div>
             <div>
-              <button onclick="${btnAction}" style="${btnStyle};width:100%;padding:0.55rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer">${btnLabel}</button>
+              <button ${alquilada ? 'disabled' : `onclick="${btnActionFinal}"`} style="${btnStyleFinal};width:100%;padding:0.55rem;border-radius:8px;font-size:0.82rem;font-weight:600;${alquilada ? '' : 'cursor:pointer'}">${btnLabelFinal}</button>
             </div>
           </div>
         </div>`;
@@ -13501,6 +13509,16 @@ function poblar1DModal(p, imagenes) {
   btn.onclick = solicitada
     ? () => { cerrarDetalle1D(); cancelarSolicitud1D(p.id); }
     : () => { cerrarDetalle1D(); solicitarPropiedad1D(p.id); };
+  if (p.estado === 'alquilado') {
+    btn.disabled = true;
+    btn.textContent = 'Alquilada';
+    btn.style.background = '#64748b';
+    btn.style.cursor = 'not-allowed';
+    btn.onclick = null;
+  } else {
+    btn.disabled = false;
+    btn.style.cursor = 'pointer';
+  }
 }
 
 function abrirDetalle1D(propId) {

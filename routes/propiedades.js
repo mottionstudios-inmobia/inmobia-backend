@@ -7,6 +7,7 @@ import { authMiddleware, leerUsuarioToken } from '../auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const router = Router();
+const ESTADOS_PROPIEDAD = ['activo', 'inactivo', 'vendido', 'pendiente', 'alquilado'];
 
 const uploadsDir = process.env.DATA_DIR
   ? path.join(process.env.DATA_DIR, 'uploads')
@@ -26,6 +27,30 @@ function validarGestionPropiedad(req, res, propiedad) {
     return false;
   }
   return true;
+}
+
+function notificarPropiedadAlquilada(propiedad) {
+  if (!propiedad?.id) return 0;
+  const solicitantes = db.prepare(`
+    SELECT DISTINCT s.asesor_id
+    FROM solicitudes_1d s
+    WHERE s.propiedad_id = ?
+  `).all(propiedad.id);
+  if (!solicitantes.length) return 0;
+
+  const stmt = db.prepare(`
+    INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje, creado_en)
+    VALUES (?, 'propiedad_alquilada', 'Propiedad InmobIA alquilada', ?, datetime('now'))
+  `);
+  const tx = db.transaction((rows) => {
+    rows.forEach(s => stmt.run(
+      s.asesor_id,
+      `La propiedad "${propiedad.titulo || 'Propiedad InmobIA'}" fue marcada como alquilada por InmobIA. Ya no está disponible para ofrecerla a nuevos clientes.`
+    ));
+    db.prepare("UPDATE solicitudes_1d SET estado = 'alquilada' WHERE propiedad_id = ?").run(propiedad.id);
+  });
+  tx(solicitantes);
+  return solicitantes.length;
 }
 
 function resolverOrigenComision(req, propExistente = null) {
@@ -167,7 +192,11 @@ router.get('/', (req, res) => {
 
   if (!mostrarTodos) {
     if (estadoFiltro) {
-      sql += ' AND p.estado = ? AND p.publicado_inmobia = 1'; params.push(estadoFiltro);
+      if (usuarioToken?.rol !== 'admin' && !['activo', 'pendiente'].includes(estadoFiltro)) {
+        sql += ' AND 1=0';
+      } else {
+        sql += ' AND p.estado = ? AND p.publicado_inmobia = 1'; params.push(estadoFiltro);
+      }
     } else {
       // Público: solo activo+pendiente y marcadas "En InmobIA"
       sql += " AND p.estado IN ('activo','pendiente') AND p.publicado_inmobia = 1";
@@ -188,7 +217,11 @@ router.get('/', (req, res) => {
   const countParams = [];
   if (!mostrarTodos) {
     if (estadoFiltro) {
-      countSql += ' AND p.estado = ? AND p.publicado_inmobia = 1'; countParams.push(estadoFiltro);
+      if (usuarioToken?.rol !== 'admin' && !['activo', 'pendiente'].includes(estadoFiltro)) {
+        countSql += ' AND 1=0';
+      } else {
+        countSql += ' AND p.estado = ? AND p.publicado_inmobia = 1'; countParams.push(estadoFiltro);
+      }
     } else {
       countSql += " AND p.estado IN ('activo','pendiente') AND p.publicado_inmobia = 1";
     }
@@ -220,7 +253,7 @@ router.get('/inmobia/compartidas', authMiddleware, (req, res) => {
       s.id AS solicitud_id, s.estado AS solicitud_estado
     FROM propiedades p
     LEFT JOIN solicitudes_1d s ON s.propiedad_id = p.id AND s.asesor_id = ?
-    WHERE p.compartido_1d = 1 AND p.estado IN ('activo','pendiente')
+    WHERE p.compartido_1d = 1 AND p.estado IN ('activo','pendiente','alquilado')
     ORDER BY p.creado_en DESC
   `).all(req.usuario.id);
 
@@ -247,8 +280,9 @@ router.get('/mis-propiedades-1d', authMiddleware, (req, res) => {
 // ── POST /api/propiedades/:id/solicitar-1d  (asesor — solicitar propiedad compartida 1D)
 router.post('/:id/solicitar-1d', authMiddleware, (req, res) => {
   const propId = Number(req.params.id);
-  const p = db.prepare('SELECT id, compartido_1d FROM propiedades WHERE id = ?').get(propId);
+  const p = db.prepare('SELECT id, compartido_1d, estado FROM propiedades WHERE id = ?').get(propId);
   if (!p || !p.compartido_1d) return res.status(404).json({ error: 'Propiedad no disponible' });
+  if (!['activo', 'pendiente'].includes(p.estado)) return res.status(400).json({ error: 'Esta propiedad ya no está disponible' });
   try {
     db.prepare('INSERT INTO solicitudes_1d (propiedad_id, asesor_id) VALUES (?, ?)').run(propId, req.usuario.id);
   } catch {
@@ -432,7 +466,7 @@ router.post('/', authMiddleware, uploadFieldsSafe, (req, res) => {
 // ── PUT /api/propiedades/:id  (protegida)
 router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
   const { id } = req.params;
-  const propExistente = db.prepare('SELECT id, codigo, usuario_id, origen_comision FROM propiedades WHERE id = ?').get(id);
+  const propExistente = db.prepare('SELECT id, codigo, usuario_id, origen_comision, estado, titulo FROM propiedades WHERE id = ?').get(id);
   if (!validarGestionPropiedad(req, res, propExistente)) return;
 
   const {
@@ -460,6 +494,10 @@ router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
     req_contrato_1ano = 0, req_notario = 0, req_valor_contrato = '', req_adicionales = '',
     publicado_inmobia: _pub2 = 0
   } = req.body;
+
+  if (!ESTADOS_PROPIEDAD.includes(estado)) {
+    return res.status(400).json({ error: 'Estado inválido' });
+  }
 
   const publicado_inmobia = req.usuario?.rol === 'admin' ? 1 : Number(_pub2);
   let origenCfg;
@@ -562,7 +600,11 @@ router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
     insertImg2.run(id, `/uploads/${file.filename}`, !hayPrincipal && !principalFiles2.length && i === 0 ? 1 : 0, i + 1);
   });
 
-  res.json({ mensaje: 'Propiedad actualizada exitosamente' });
+  const notificacionesEnviadas = estado === 'alquilado' && propExistente.estado !== 'alquilado'
+    ? notificarPropiedadAlquilada({ ...propExistente, titulo })
+    : 0;
+
+  res.json({ mensaje: 'Propiedad actualizada exitosamente', notificaciones_enviadas: notificacionesEnviadas });
 });
 
 // ── PATCH /api/propiedades/:id/comision  (solo admin — configurar comisión)
@@ -578,11 +620,10 @@ router.patch('/:id/comision', authMiddleware, (req, res) => {
 router.patch('/:id/estado', authMiddleware, (req, res) => {
   const { id } = req.params;
   const { estado, precio } = req.body;
-  const estadosValidos = ['activo', 'inactivo', 'vendido', 'pendiente'];
-  if (estado !== undefined && !estadosValidos.includes(estado)) {
+  if (estado !== undefined && !ESTADOS_PROPIEDAD.includes(estado)) {
     return res.status(400).json({ error: 'Estado inválido' });
   }
-  const existe = db.prepare('SELECT id, usuario_id FROM propiedades WHERE id = ?').get(id);
+  const existe = db.prepare('SELECT id, usuario_id, estado, titulo FROM propiedades WHERE id = ?').get(id);
   if (!validarGestionPropiedad(req, res, existe)) return;
 
   if (estado !== undefined && precio !== undefined) {
@@ -592,7 +633,10 @@ router.patch('/:id/estado', authMiddleware, (req, res) => {
   } else if (precio !== undefined) {
     db.prepare('UPDATE propiedades SET precio=?, actualizado_en=CURRENT_TIMESTAMP WHERE id=?').run(Number(precio), id);
   }
-  res.json({ ok: true });
+  const notificacionesEnviadas = estado === 'alquilado' && existe.estado !== 'alquilado'
+    ? notificarPropiedadAlquilada(existe)
+    : 0;
+  res.json({ ok: true, notificaciones_enviadas: notificacionesEnviadas });
 });
 
 // ── PATCH /api/propiedades/:id/compartir-1d  (solo admin — compartir propiedad 1D con asesores)
