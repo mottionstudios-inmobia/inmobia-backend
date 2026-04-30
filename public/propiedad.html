@@ -126,6 +126,23 @@
     margin-bottom: 0.55rem;
     text-shadow: 0 2px 12px rgba(0,0,0,0.4);
   }
+  .galeria-meta {
+    display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin-top: 0.2rem;
+  }
+  .galeria-proyecto {
+    font-size: 0.85rem; font-weight: 400; color: #fff; letter-spacing: 0.02em;
+  }
+  .galeria-tipo-operacion {
+    display: none;
+    color: rgba(255,255,255,0.88);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .galeria-separador {
+    color: rgba(255,255,255,0.45); font-size: 0.8rem; line-height: 1;
+  }
   .galeria-ubicacion {
     display: flex; align-items: center; gap: 0.4rem;
     color: rgba(255,255,255,0.8); font-size: 0.84rem;
@@ -643,6 +660,23 @@
   }
   @media (max-width: 600px) {
     .galeria { grid-template-rows: 240px; }
+    .galeria-badge {
+      top: 0.75rem; left: 0.75rem;
+      max-width: calc(100% - 1.5rem);
+      padding: 0.28rem 0.62rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      gap: 0.3rem;
+      white-space: nowrap;
+    }
+    .galeria-badge .badge-dot { width: 5px; height: 5px; }
+    .galeria-overlay { padding: 3.2rem 1rem 1rem; }
+    .galeria-titulo { display: none; }
+    .galeria-meta { display: block; margin-top: 0; }
+    .galeria-proyecto { display: block; font-size: 1rem; font-weight: 500; line-height: 1.25; }
+    .galeria-tipo-operacion { display: block; margin-top: 0.2rem; }
+    .galeria-separador { display: none; }
+    .galeria-ubicacion { margin-top: 0.55rem !important; font-size: 0.8rem; line-height: 1.35; }
     .relacionadas-grid { grid-template-columns: 1fr; }
     .prop-caract { gap: 1.5rem; }
   }
@@ -1122,9 +1156,10 @@
         </div>
         <div class="galeria-overlay">
           <div class="galeria-titulo">${propData.titulo}</div>
-          <div style="display:flex;align-items:center;gap:0.55rem;flex-wrap:wrap;margin-top:0.2rem">
-            ${propData.nombre_proyecto ? `<span style="font-size:0.85rem;font-weight:400;color:#fff;letter-spacing:0.02em">${propData.nombre_proyecto}</span>` : ''}
-            ${propData.nombre_proyecto && ubicacion ? `<span style="color:rgba(255,255,255,0.45);font-size:0.8rem;line-height:1">|</span>` : ''}
+          <div class="galeria-meta">
+            ${propData.nombre_proyecto ? `<span class="galeria-proyecto">${propData.nombre_proyecto}</span>` : ''}
+            ${propData.nombre_proyecto ? `<span class="galeria-tipo-operacion">${tipoLabel} · ${opLabel}</span>` : ''}
+            ${propData.nombre_proyecto && ubicacion ? `<span class="galeria-separador">|</span>` : ''}
             ${ubicacion ? `<div class="galeria-ubicacion" style="margin:0">
               <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
               ${ubicacion}
