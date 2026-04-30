@@ -1810,7 +1810,7 @@
 
           <div class="form-group">
             <label>Operación *</label>
-            <select id="f-operacion" required>
+            <select id="f-operacion" onchange="toggleCamposVentaAdmin(this.value)" required>
               <option value="">Seleccionar</option>
               <option value="renta">Renta</option>
               <option value="venta">Venta</option>
@@ -1830,7 +1830,7 @@
             </select>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" id="f-mant-wrap">
             <label>Incluye Mantenimiento</label>
             <div style="display:flex;gap:1.5rem;padding:6px 0">
               <label class="checkbox-item">
@@ -1854,7 +1854,7 @@
             </div>
           </div>
 
-          <div class="form-group full">
+          <div class="form-group full" id="f-mant-incluye-wrap">
             <label>Mantenimiento incluye:</label>
             <div class="checkbox-row">
               <label class="checkbox-item"><input type="checkbox" id="f-mant-agua"> Agua</label>
@@ -2054,9 +2054,9 @@
           </div>
 
           <!-- Requisitos -->
-          <div class="section-divider">Requisitos</div>
+          <div class="section-divider" id="f-req-divider">Requisitos</div>
 
-          <div class="form-group full">
+          <div class="form-group full" id="f-req-wrap">
             <div class="checkbox-row">
               <label class="checkbox-item"><input type="checkbox" id="f-req-dpi"> DPI o pasaporte</label>
               <label class="checkbox-item"><input type="checkbox" id="f-req-constancia"> Constancia laboral</label>
@@ -2075,12 +2075,12 @@
             </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" id="f-req-valor-wrap">
             <label>Valor del contrato</label>
             <input type="text" id="f-req-valor-contrato" placeholder="Ej. Q500, 1 mes de renta...">
           </div>
 
-          <div class="form-group full">
+          <div class="form-group full" id="f-req-adicionales-wrap">
             <label>Requisitos adicionales</label>
             <textarea id="f-req-adicionales" placeholder="Otros requisitos no listados..." rows="2"></textarea>
           </div>
@@ -4529,6 +4529,7 @@ function filtrarPlan(v) { filtroAsesorPlan = v; renderAsesores(); }
 // ── MODAL NUEVA / EDITAR ──────────────────────────────────────
 function abrirModalNueva() {
   limpiarForm();
+  toggleCamposVentaAdmin('');
   document.getElementById('modal-titulo').textContent = 'Nueva Propiedad';
   document.getElementById('btn-guardar-text').textContent = 'Guardar propiedad';
   document.getElementById('prop-id').value = '';
@@ -4550,6 +4551,7 @@ async function editarProp(id) {
     document.getElementById('f-nombre-proyecto').value = p.nombre_proyecto || '';
     document.getElementById('f-tipo').value       = p.tipo || '';
     document.getElementById('f-operacion').value  = p.operacion || '';
+    toggleCamposVentaAdmin(p.operacion || '');
     document.getElementById('f-precio').value     = formatNumeroMiles(p.precio);
     document.getElementById('f-moneda').value        = p.moneda || 'GTQ';
     document.querySelector(`input[name="mantenimiento"][value="${p.mantenimiento ? '1' : '0'}"]`).checked = true;
@@ -4703,6 +4705,21 @@ function limpiarForm() {
   wrapP.removeAttribute('data-prop-id');
   document.getElementById('preview-principal-img').src = '';
   archivosSeleccionados = [];
+}
+
+function toggleCamposVentaAdmin(operacion) {
+  const ocultarCamposRenta = operacion === 'venta';
+  [
+    'f-mant-wrap',
+    'f-mant-incluye-wrap',
+    'f-req-divider',
+    'f-req-wrap',
+    'f-req-valor-wrap',
+    'f-req-adicionales-wrap'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = ocultarCamposRenta ? 'none' : '';
+  });
 }
 
 // ── IMAGEN PRINCIPAL ─────────────────────────────────────────
@@ -4894,6 +4911,7 @@ async function guardarPropiedad() {
   btnT.innerHTML = '<span class="spinner"></span>';
 
   const fd = new FormData();
+  const esVenta = operacion === 'venta';
   fd.append('titulo',          titulo);
   fd.append('nombre_proyecto', document.getElementById('f-nombre-proyecto').value.trim());
   fd.append('descripcion_persuasiva', document.getElementById('f-descripcion-persuasiva').value.trim());
@@ -4902,29 +4920,29 @@ async function guardarPropiedad() {
   fd.append('operacion',    operacion);
   fd.append('precio',       precio);
   fd.append('moneda',         document.getElementById('f-moneda').value);
-  fd.append('mantenimiento', document.querySelector('input[name="mantenimiento"]:checked')?.value ?? 0);
+  fd.append('mantenimiento', esVenta ? 0 : (document.querySelector('input[name="mantenimiento"]:checked')?.value ?? 0));
   fd.append('iva',           document.querySelector('input[name="iva"]:checked')?.value ?? 0);
   const chk = id => document.getElementById(id).checked ? 1 : 0;
   // Mantenimiento incluye
-  fd.append('mant_agua',          chk('f-mant-agua'));
-  fd.append('mant_basura',        chk('f-mant-basura'));
-  fd.append('mant_seguridad',     chk('f-mant-seguridad'));
-  fd.append('mant_areas_comunes', chk('f-mant-areas-comunes'));
-  fd.append('mant_areas_verdes',  chk('f-mant-areas-verdes'));
+  fd.append('mant_agua',          esVenta ? 0 : chk('f-mant-agua'));
+  fd.append('mant_basura',        esVenta ? 0 : chk('f-mant-basura'));
+  fd.append('mant_seguridad',     esVenta ? 0 : chk('f-mant-seguridad'));
+  fd.append('mant_areas_comunes', esVenta ? 0 : chk('f-mant-areas-comunes'));
+  fd.append('mant_areas_verdes',  esVenta ? 0 : chk('f-mant-areas-verdes'));
   // Requisitos
-  fd.append('req_dpi',            chk('f-req-dpi'));
-  fd.append('req_constancia',     chk('f-req-constancia'));
-  fd.append('req_estados_cuenta', chk('f-req-estados-cuenta'));
-  fd.append('req_formulario',     chk('f-req-formulario'));
-  fd.append('req_fiador',         chk('f-req-fiador'));
-  fd.append('req_antecedentes',   chk('f-req-antecedentes'));
-  fd.append('req_renas',          chk('f-req-renas'));
-  fd.append('req_infornet',       chk('f-req-infornet'));
-  fd.append('req_deposito',       chk('f-req-deposito'));
-  fd.append('req_contrato_1ano',  chk('f-req-contrato-1ano'));
-  fd.append('req_notario',        chk('f-req-notario'));
-  fd.append('req_valor_contrato', document.getElementById('f-req-valor-contrato').value.trim());
-  fd.append('req_adicionales',    document.getElementById('f-req-adicionales').value.trim());
+  fd.append('req_dpi',            esVenta ? 0 : chk('f-req-dpi'));
+  fd.append('req_constancia',     esVenta ? 0 : chk('f-req-constancia'));
+  fd.append('req_estados_cuenta', esVenta ? 0 : chk('f-req-estados-cuenta'));
+  fd.append('req_formulario',     esVenta ? 0 : chk('f-req-formulario'));
+  fd.append('req_fiador',         esVenta ? 0 : chk('f-req-fiador'));
+  fd.append('req_antecedentes',   esVenta ? 0 : chk('f-req-antecedentes'));
+  fd.append('req_renas',          esVenta ? 0 : chk('f-req-renas'));
+  fd.append('req_infornet',       esVenta ? 0 : chk('f-req-infornet'));
+  fd.append('req_deposito',       esVenta ? 0 : chk('f-req-deposito'));
+  fd.append('req_contrato_1ano',  esVenta ? 0 : chk('f-req-contrato-1ano'));
+  fd.append('req_notario',        esVenta ? 0 : chk('f-req-notario'));
+  fd.append('req_valor_contrato', esVenta ? '' : document.getElementById('f-req-valor-contrato').value.trim());
+  fd.append('req_adicionales',    esVenta ? '' : document.getElementById('f-req-adicionales').value.trim());
   fd.append('zona',         document.getElementById('f-zona').value);
   fd.append('municipio',    document.getElementById('f-municipio').value);
   fd.append('direccion',    document.getElementById('f-direccion').value);

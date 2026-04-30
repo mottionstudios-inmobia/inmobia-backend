@@ -4504,7 +4504,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
       </div>
 
       <!-- Requisitos -->
-      <div>
+      <div id="np-renta-requisitos-wrap">
         <div class="modal-section-title">Requisitos</div>
         <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem">
           <label class="check-inline"><input type="checkbox" id="np-req-dpi"> DPI o pasaporte</label>
@@ -13576,6 +13576,7 @@ function toggleCamposOperacion(operacion) {
   document.getElementById('np-mant-wrap').style.display         = esVenta ? 'none' : '';
   document.getElementById('np-iva-wrap').style.display          = esVenta ? 'none' : '';
   document.getElementById('np-mant-incluye-wrap').style.display = esVenta ? 'none' : '';
+  document.getElementById('np-renta-requisitos-wrap').style.display = esVenta ? 'none' : '';
   document.getElementById('np-impuestos-wrap').style.display    = esVenta ? '' : 'none';
 }
 
@@ -13944,6 +13945,7 @@ async function guardarPropiedad() {
 
   const form = new FormData();
   const chk = id => document.getElementById(id)?.checked ? 1 : 0;
+  const esVenta = operacion === 'venta';
   form.append('titulo',                titulo);
   form.append('nombre_proyecto',       document.getElementById('np-nombre-proyecto').value.trim());
   form.append('tipo',                  tipo);
@@ -13954,14 +13956,14 @@ async function guardarPropiedad() {
   form.append('zona',                  document.getElementById('np-zona').value);
   form.append('municipio',             document.getElementById('np-municipio').value);
   form.append('colonia',               document.getElementById('np-colonia').value.trim());
-  form.append('mantenimiento',         document.querySelector('input[name="np-mantenimiento"]:checked')?.value ?? 0);
+  form.append('mantenimiento',         esVenta ? 0 : (document.querySelector('input[name="np-mantenimiento"]:checked')?.value ?? 0));
   form.append('iva',                   document.querySelector('input[name="np-iva"]:checked')?.value ?? 0);
   form.append('impuestos',             document.querySelector('input[name="np-impuestos"]:checked')?.value ?? 0);
-  form.append('mant_agua',            chk('np-mant-agua'));
-  form.append('mant_basura',          chk('np-mant-basura'));
-  form.append('mant_seguridad',       chk('np-mant-seguridad'));
-  form.append('mant_areas_comunes',   chk('np-mant-areas-comunes'));
-  form.append('mant_areas_verdes',    chk('np-mant-areas-verdes'));
+  form.append('mant_agua',            esVenta ? 0 : chk('np-mant-agua'));
+  form.append('mant_basura',          esVenta ? 0 : chk('np-mant-basura'));
+  form.append('mant_seguridad',       esVenta ? 0 : chk('np-mant-seguridad'));
+  form.append('mant_areas_comunes',   esVenta ? 0 : chk('np-mant-areas-comunes'));
+  form.append('mant_areas_verdes',    esVenta ? 0 : chk('np-mant-areas-verdes'));
   form.append('mapa_url',             document.getElementById('np-mapa-url').value.trim());
   form.append('habitaciones',          document.getElementById('np-habitaciones').value || 0);
   form.append('banos',                 document.getElementById('np-banos').value || 0);
@@ -14026,19 +14028,19 @@ async function guardarPropiedad() {
   form.append('deck',                 chk('np-deck'));
   form.append('otra_amenidad',        document.getElementById('np-otra-amenidad').value.trim());
   // Requisitos
-  form.append('req_dpi',              chk('np-req-dpi'));
-  form.append('req_constancia',       chk('np-req-constancia'));
-  form.append('req_estados_cuenta',   chk('np-req-estados-cuenta'));
-  form.append('req_formulario',       chk('np-req-formulario'));
-  form.append('req_fiador',           chk('np-req-fiador'));
-  form.append('req_antecedentes',     chk('np-req-antecedentes'));
-  form.append('req_renas',            chk('np-req-renas'));
-  form.append('req_infornet',         chk('np-req-infornet'));
-  form.append('req_deposito',         chk('np-req-deposito'));
-  form.append('req_contrato_1ano',    chk('np-req-contrato-1ano'));
-  form.append('req_notario',          chk('np-req-notario'));
-  form.append('req_valor_contrato',   document.getElementById('np-req-valor-contrato').value.trim());
-  form.append('req_adicionales',      document.getElementById('np-req-adicionales').value.trim());
+  form.append('req_dpi',              esVenta ? 0 : chk('np-req-dpi'));
+  form.append('req_constancia',       esVenta ? 0 : chk('np-req-constancia'));
+  form.append('req_estados_cuenta',   esVenta ? 0 : chk('np-req-estados-cuenta'));
+  form.append('req_formulario',       esVenta ? 0 : chk('np-req-formulario'));
+  form.append('req_fiador',           esVenta ? 0 : chk('np-req-fiador'));
+  form.append('req_antecedentes',     esVenta ? 0 : chk('np-req-antecedentes'));
+  form.append('req_renas',            esVenta ? 0 : chk('np-req-renas'));
+  form.append('req_infornet',         esVenta ? 0 : chk('np-req-infornet'));
+  form.append('req_deposito',         esVenta ? 0 : chk('np-req-deposito'));
+  form.append('req_contrato_1ano',    esVenta ? 0 : chk('np-req-contrato-1ano'));
+  form.append('req_notario',          esVenta ? 0 : chk('np-req-notario'));
+  form.append('req_valor_contrato',   esVenta ? '' : document.getElementById('np-req-valor-contrato').value.trim());
+  form.append('req_adicionales',      esVenta ? '' : document.getElementById('np-req-adicionales').value.trim());
   form.append('descripcion_persuasiva',document.getElementById('np-desc-persuasiva').value.trim());
   form.append('descripcion',           document.getElementById('np-descripcion').value.trim());
   form.append('publicado_inmobia',     document.getElementById('np-publicado').checked ? 1 : 0);
