@@ -3390,7 +3390,8 @@ user-select: none;
     const precio     = formatearPrecio(p.precio, p.moneda, p.operacion);
     const ubicacion  = [p.colonia, p.zona, p.municipio].filter(Boolean).join(', ') || 'Guatemala';
     const tipoLabel  = p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1);
-    const shareUrl   = new URL(`/propiedad.html?id=${p.id}`, window.location.origin).href;
+    const shareVersion = encodeURIComponent(p.actualizado_en || p.creado_en || p.id);
+    const shareUrl   = new URL(`/propiedad.html?id=${p.id}&s=${shareVersion}`, window.location.origin).href;
     const shareText  = textoCompartirPropiedad(p.titulo, precio, ubicacion);
     const shareNative = typeof navigator !== 'undefined' && navigator.share
       ? `<button class="property-share-option" type="button" data-accion="native" onclick="compartirPropiedad(event,'native',this)"><span>↗</span> Compartir...</button>`

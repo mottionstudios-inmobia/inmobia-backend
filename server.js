@@ -73,6 +73,13 @@ function formatoPrecioPreview(precio, moneda = 'GTQ', operacion = 'venta') {
   return `${symbol}${numero}${operacion === 'renta' ? '/mes' : ''}`;
 }
 
+function imageMimeFromUrl(url = '') {
+  const clean = String(url).split('?')[0].toLowerCase();
+  if (clean.endsWith('.png')) return 'image/png';
+  if (clean.endsWith('.webp')) return 'image/webp';
+  return 'image/jpeg';
+}
+
 function descripcionPreviewPropiedad(p) {
   const specs = [
     p.nombre_proyecto,
@@ -103,6 +110,7 @@ app.get('/propiedad.html', (req, res, next) => {
     let html = readFileSync(htmlPath, 'utf8');
     const url = absoluteUrl(req, `/propiedad.html?id=${id}`);
     const image = absoluteUrl(req, propiedad.imagen_principal || '/recursos/1-exterior-1.jpg');
+    const imageType = imageMimeFromUrl(image);
     const title = `${propiedad.titulo || 'Propiedad en InmobIA'}${propiedad.nombre_proyecto ? ` | ${propiedad.nombre_proyecto}` : ''}`;
     const description = descripcionPreviewPropiedad(propiedad) || 'Conoce esta propiedad disponible en InmobIA.';
 
@@ -115,6 +123,9 @@ app.get('/propiedad.html', (req, res, next) => {
 <meta property="og:url" content="${escapeHtml(url)}">
 <meta property="og:image" content="${escapeHtml(image)}">
 <meta property="og:image:secure_url" content="${escapeHtml(image)}">
+<meta property="og:image:type" content="${escapeHtml(imageType)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="${escapeHtml(title)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${escapeHtml(title)}">
