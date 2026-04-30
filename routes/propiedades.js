@@ -575,15 +575,20 @@ router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
            req.body.notas_convenio || '', id);
   }
 
-  // Eliminar imágenes de galería que el usuario removió (no vienen en imagenes_conservar)
-  let conservar = req.body.imagenes_conservar;
-  if (conservar == null) conservar = [];
-  else if (!Array.isArray(conservar)) conservar = [conservar];
-  const galeriaActual = db.prepare('SELECT id, url FROM imagenes WHERE propiedad_id = ? AND principal = 0').all(id);
-  const borrarStmt = db.prepare('DELETE FROM imagenes WHERE id = ?');
-  galeriaActual.forEach(img => {
-    if (!conservar.includes(img.url)) borrarStmt.run(img.id);
-  });
+  // Eliminar imágenes de galería solo cuando el formulario confirma que está gestionando la galería.
+  // Algunos formularios editan solo datos de la propiedad y no envían imagenes_conservar.
+  const gestionaGaleria = req.body.imagenes_gestionadas === '1'
+    || Object.prototype.hasOwnProperty.call(req.body, 'imagenes_conservar');
+  if (gestionaGaleria) {
+    let conservar = req.body.imagenes_conservar;
+    if (conservar == null) conservar = [];
+    else if (!Array.isArray(conservar)) conservar = [conservar];
+    const galeriaActual = db.prepare('SELECT id, url FROM imagenes WHERE propiedad_id = ? AND principal = 0').all(id);
+    const borrarStmt = db.prepare('DELETE FROM imagenes WHERE id = ?');
+    galeriaActual.forEach(img => {
+      if (!conservar.includes(img.url)) borrarStmt.run(img.id);
+    });
+  }
 
   // Agregar nuevas imágenes si se subieron
   const insertImg2 = db.prepare('INSERT INTO imagenes (propiedad_id, url, principal, orden) VALUES (?,?,?,?)');

@@ -14054,6 +14054,7 @@ async function guardarPropiedad() {
 
   const principal = document.getElementById('np-img-principal').files[0];
   if (principal) form.append('imagen_principal', principal);
+  if (editingId) form.append('imagenes_gestionadas', '1');
   galeriaItems.forEach(item => {
     if (item.file) form.append('imagenes', item.file);
     else if (item.existingUrl) form.append('imagenes_conservar', item.existingUrl);
