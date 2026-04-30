@@ -1136,6 +1136,7 @@
 
       if (parsed.hostname.includes('google.') && parsed.pathname.includes('/maps/embed')) {
         embed = parsed.href;
+        link = parsed.href.replace('/maps/embed', '/maps');
       } else if (parsed.hostname.includes('google.') && parsed.pathname.includes('/maps')) {
         const coordMatch = parsed.href.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
         if (coordMatch) {
