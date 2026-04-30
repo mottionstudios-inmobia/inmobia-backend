@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), '.env') });
 import express from 'express';
 import cors from 'cors';
-import { readdirSync, mkdirSync, existsSync, statSync } from 'fs';
+import { readdirSync, mkdirSync, existsSync, statSync, readFileSync } from 'fs';
 import { db } from './database.js';
 import propiedadesRouter from './routes/propiedades.js';
 import authRouter from './routes/auth.js';
@@ -49,6 +49,89 @@ const fondosDirPublic = path.join(__dirname, './public/fondos');
 const fondosDirLegacy = path.join(__dirname, '../fondos');
 const fondosDir = existsSync(fondosDirPublic) ? fondosDirPublic : fondosDirLegacy;
 app.use('/fondos', express.static(fondosDir));
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function absoluteUrl(req, value = '') {
+  if (!value) return '';
+  if (/^https?:\/\//i.test(value)) return value;
+  const proto = req.get('x-forwarded-proto') || req.protocol || 'https';
+  const host = req.get('host');
+  return `${proto}://${host}${value.startsWith('/') ? value : `/${value}`}`;
+}
+
+function formatoPrecioPreview(precio, moneda = 'GTQ', operacion = 'venta') {
+  const symbol = moneda === 'USD' ? '$' : 'Q';
+  const numero = new Intl.NumberFormat('es-GT', { maximumFractionDigits: 0 }).format(Number(precio || 0));
+  return `${symbol}${numero}${operacion === 'renta' ? '/mes' : ''}`;
+}
+
+function descripcionPreviewPropiedad(p) {
+  const specs = [
+    p.nombre_proyecto,
+    p.habitaciones ? `${p.habitaciones} habitaciones` : '',
+    p.banos ? `${p.banos} baños` : '',
+    p.parqueos ? `${p.parqueos} parqueos` : '',
+    p.metros ? `${p.metros} m²` : '',
+    p.precio ? formatoPrecioPreview(p.precio, p.moneda, p.operacion) : '',
+  ].filter(Boolean);
+  return specs.join(' · ');
+}
+
+// HTML dinámico para que WhatsApp/Facebook lean vista previa de cada propiedad
+app.get('/propiedad.html', (req, res, next) => {
+  const id = Number(req.query.id);
+  if (!id) return next();
+
+  try {
+    const propiedad = db.prepare(`
+      SELECT p.*,
+        (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) AS imagen_principal
+      FROM propiedades p
+      WHERE p.id = ?
+    `).get(id);
+    if (!propiedad) return next();
+
+    const htmlPath = path.join(__dirname, './public/propiedad.html');
+    let html = readFileSync(htmlPath, 'utf8');
+    const url = absoluteUrl(req, `/propiedad.html?id=${id}`);
+    const image = absoluteUrl(req, propiedad.imagen_principal || '/recursos/1-exterior-1.jpg');
+    const title = `${propiedad.titulo || 'Propiedad en InmobIA'}${propiedad.nombre_proyecto ? ` | ${propiedad.nombre_proyecto}` : ''}`;
+    const description = descripcionPreviewPropiedad(propiedad) || 'Conoce esta propiedad disponible en InmobIA.';
+
+    const meta = `
+<meta name="description" content="${escapeHtml(description)}">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="InmobIA">
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(description)}">
+<meta property="og:url" content="${escapeHtml(url)}">
+<meta property="og:image" content="${escapeHtml(image)}">
+<meta property="og:image:secure_url" content="${escapeHtml(image)}">
+<meta property="og:image:alt" content="${escapeHtml(title)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${escapeHtml(title)}">
+<meta name="twitter:description" content="${escapeHtml(description)}">
+<meta name="twitter:image" content="${escapeHtml(image)}">`;
+
+    html = html
+      .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)} — InmobIA</title>`)
+      .replace('</head>', `${meta}\n</head>`);
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (err) {
+    console.error('Error generando preview de propiedad:', err.message);
+    next();
+  }
+});
 
 // Archivos HTML del frontend
 app.use(express.static(path.join(__dirname, './public')));
