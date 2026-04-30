@@ -161,6 +161,25 @@
     text-shadow: 0 1px 4px rgba(0,0,0,0.6);
     pointer-events: none;
   }
+  .prop-codigo-mobile {
+    display: none;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.65rem 2rem 0;
+    background: #fff;
+    color: #4b5563;
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    line-height: 1.35;
+    text-align: right;
+    text-transform: uppercase;
+  }
+  .prop-codigo-mobile strong {
+    color: #374151;
+    font-weight: 700;
+  }
   .galeria-secundarias {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -677,6 +696,12 @@
     .galeria-tipo-operacion { display: block; margin-top: 0.2rem; }
     .galeria-separador { display: none; }
     .galeria-ubicacion { margin-top: 0.55rem !important; font-size: 0.8rem; line-height: 1.35; }
+    .prop-codigo { display: none; }
+    .prop-codigo-mobile {
+      display: block;
+      padding: 0.6rem 1.5rem 0;
+      color: #4b5563;
+    }
     .relacionadas-grid { grid-template-columns: 1fr; }
     .prop-caract { gap: 1.5rem; }
   }
@@ -709,6 +734,7 @@
   <div class="galeria-wrap">
     <div class="galeria" id="galeria"></div>
   </div>
+  <div id="prop-codigo-mobile" class="prop-codigo-mobile"></div>
 
   <!-- LIGHTBOX -->
   <div class="lightbox" id="lightbox">
@@ -1246,9 +1272,11 @@
   // ── GALERÍA ─────────────────────────────────────────────────
   function renderGaleria() {
     const galeria = document.getElementById('galeria');
+    const codigoMobileEl = document.getElementById('prop-codigo-mobile');
     if (!imagenes.length) {
       galeria.style.background = '#f0ede8';
       galeria.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;color:#999;font-size:0.9rem;height:100%;grid-column:1/-1">Sin imágenes disponibles</div>';
+      if (codigoMobileEl) codigoMobileEl.innerHTML = '';
       return;
     }
 
@@ -1311,6 +1339,9 @@
     }
 
     galeria.innerHTML = html;
+    if (codigoMobileEl) {
+      codigoMobileEl.innerHTML = propCodigo ? `<strong>COD:</strong> <span>${propCodigo}</span>` : '';
+    }
   }
 
   // ── DETALLE ─────────────────────────────────────────────────
