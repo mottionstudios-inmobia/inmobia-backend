@@ -143,8 +143,8 @@ function datosPreviewPropiedad(req, propiedad, publicPath) {
 <meta property="og:image" content="${escapeHtml(image)}">
 <meta property="og:image:secure_url" content="${escapeHtml(image)}">
 <meta property="og:image:type" content="${escapeHtml(imageType)}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:width" content="300">
+<meta property="og:image:height" content="225">
 <meta property="og:image:alt" content="${escapeHtml(title)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${escapeHtml(title)}">
@@ -194,8 +194,8 @@ app.get('/og/propiedad/:id.jpg', async (req, res, next) => {
 
     const buffer = await sharp(imagePath)
       .rotate()
-      .resize(1200, 630, { fit: 'cover', position: 'center' })
-      .jpeg({ quality: 82, mozjpeg: true })
+      .resize(300, 225, { fit: 'cover', position: 'center' })
+      .jpeg({ quality: 86, mozjpeg: true })
       .toBuffer();
 
     res.setHeader('Content-Type', 'image/jpeg');
