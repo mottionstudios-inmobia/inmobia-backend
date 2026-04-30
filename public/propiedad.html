@@ -1238,10 +1238,10 @@
 
     // Características
     const defs = [
-      { cond: propData.habitaciones, img: '/public/Habitaciones.png', val: propData.habitaciones,    label: 'Habitaciones' },
-      { cond: propData.banos,        img: '/public/banos.png',        val: propData.banos,           label: 'Baños' },
-      { cond: propData.parqueos,     img: '/public/parqueos.png',     val: propData.parqueos,        label: 'Parqueos' },
-      { cond: propData.metros,       img: '/public/m2.png',           val: `${propData.metros}m²`,   label: 'Área' },
+      { cond: propData.habitaciones, img: '/iconos/Habitaciones.png', val: propData.habitaciones,    label: 'Habitaciones' },
+      { cond: propData.banos,        img: '/iconos/ba%C3%B1os.png',   val: propData.banos,           label: 'Baños' },
+      { cond: propData.parqueos,     img: '/iconos/parqueos.png',     val: propData.parqueos,        label: 'Parqueos' },
+      { cond: propData.metros,       img: '/iconos/m2.png',           val: `${propData.metros}m²`,   label: 'Área' },
     ];
     document.getElementById('prop-caract').innerHTML = defs.filter(d => d.cond).map(d => `
       <div class="caract-item">
@@ -1269,18 +1269,18 @@
     // Amenidades
     // ── Características Únicas (iconos)
     const unicasArr = [
-      { cond: propData.bodega,             img: '/public/bodega.png',             label: 'Bodega' },
-      { cond: propData.dormitorio_servicio,img: '/public/dormitorio-servicio.png',label: 'Dorm. de servicio' },
-      { cond: propData.sala_familiar,      img: '/public/sala-familiar.png',      label: 'Sala familiar' },
-      { cond: propData.amueblado,          img: '/public/amueblado.png',          label: 'Amueblado' },
-      { cond: propData.mascota,            img: '/public/mascotas.png',           label: 'Acepta mascotas' },
-      { cond: propData.no_mascota,         img: '/public/no-mascota.png',         label: 'No se acepta mascota' },
-      { cond: propData.linea_blanca,       img: '/public/linea-blanca.png',       label: 'Línea blanca' },
-      { cond: propData.no_linea_blanca,    img: '/public/no-linea-blanca.png',    label: 'No incluye línea blanca' },
-      { cond: propData.jardin,             img: '/public/jardin.png',             label: 'Jardín' },
-      { cond: propData.patio,              img: '/public/patio.png',              label: 'Patio' },
-      { cond: propData.garita,             img: '/public/garita.png',             label: 'Garita de seguridad' },
-      { cond: propData.estudio,            img: '/public/estudio.png',            label: 'Estudio' },
+      { cond: propData.bodega,             img: '/recursos/Iconos/bodega.png',                         label: 'Bodega' },
+      { cond: propData.dormitorio_servicio,img: '/recursos/Iconos/Dormitorio%20de%20servicio.png',     label: 'Dorm. de servicio' },
+      { cond: propData.sala_familiar,      img: '/recursos/Iconos/sala%20familiar.png',                label: 'Sala familiar' },
+      { cond: propData.amueblado,          img: '/recursos/Iconos/amueblado.png',                      label: 'Amueblado' },
+      { cond: propData.mascota,            img: '/recursos/Iconos/mascotas.png',                       label: 'Acepta mascotas' },
+      { cond: propData.no_mascota,         img: '/recursos/Iconos/no%20se%20acepta%20mascota.png',     label: 'No se acepta mascota' },
+      { cond: propData.linea_blanca,       img: '/recursos/Iconos/Linea%20blanca.png',                 label: 'Línea blanca' },
+      { cond: propData.no_linea_blanca,    img: '/recursos/Iconos/no%20incluye%20linea%20blanca.png',  label: 'No incluye línea blanca' },
+      { cond: propData.jardin,             img: '/recursos/Iconos/jardin.png',                         label: 'Jardín' },
+      { cond: propData.patio,              img: '/recursos/Iconos/patio.png',                          label: 'Patio' },
+      { cond: propData.garita,             img: '/recursos/Iconos/garita%20de%20seguridad.png',        label: 'Garita de seguridad' },
+      { cond: propData.estudio,            img: '/recursos/Iconos/Estudio.png',                        label: 'Estudio' },
     ].filter(u => u.cond);
 
     if (unicasArr.length) {
