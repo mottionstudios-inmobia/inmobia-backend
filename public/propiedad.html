@@ -1123,6 +1123,39 @@
     } catch { /* sin datos de asesor */ }
   }
 
+  function normalizarUrlMapa(url = '') {
+    const original = String(url || '').trim();
+    if (!original) return { embed: '', link: '' };
+
+    let link = original;
+    let embed = original;
+
+    try {
+      const parsed = new URL(original, window.location.origin);
+      link = parsed.href;
+
+      if (parsed.hostname.includes('google.') && parsed.pathname.includes('/maps/embed')) {
+        embed = parsed.href;
+      } else if (parsed.hostname.includes('google.') && parsed.pathname.includes('/maps')) {
+        const coordMatch = parsed.href.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+        if (coordMatch) {
+          embed = `https://www.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&z=16&output=embed`;
+        } else {
+          const placeMatch = parsed.pathname.match(/\/maps\/place\/([^/@]+)/);
+          const q = parsed.searchParams.get('q') || (placeMatch ? decodeURIComponent(placeMatch[1].replace(/\+/g, ' ')) : '');
+          embed = q
+            ? `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`
+            : `${parsed.origin}/maps?output=embed`;
+        }
+      }
+    } catch {
+      embed = `https://www.google.com/maps?q=${encodeURIComponent(original)}&output=embed`;
+      link = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(original)}`;
+    }
+
+    return { embed, link };
+  }
+
   // ── GALERÍA ─────────────────────────────────────────────────
   function renderGaleria() {
     const galeria = document.getElementById('galeria');
@@ -1240,10 +1273,10 @@
 
     // Mapa
     if (propData.mapa_url) {
+      const mapa = normalizarUrlMapa(propData.mapa_url);
       document.getElementById('mapa-wrap').style.display = 'block';
-      document.getElementById('mapa-iframe-sidebar').src = propData.mapa_url;
-      const mapaLink = propData.mapa_url.replace('https://www.google.com/maps/embed', 'https://www.google.com/maps');
-      document.getElementById('mapa-link').href = mapaLink;
+      document.getElementById('mapa-iframe-sidebar').src = mapa.embed;
+      document.getElementById('mapa-link').href = mapa.link;
     }
 
     document.getElementById('prop-precio').textContent = `${sym}${num}`;
@@ -1604,7 +1637,7 @@
 
   // ── CONSULTA SOBRE LA PROPIEDAD ──────────────────────────────
   function abrirModalMapa() {
-    document.getElementById('mapa-iframe').src = propData?.mapa_url || '';
+    document.getElementById('mapa-iframe').src = normalizarUrlMapa(propData?.mapa_url || '').embed;
     document.getElementById('modal-mapa').style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
