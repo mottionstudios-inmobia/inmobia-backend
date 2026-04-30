@@ -217,10 +217,10 @@ app.get('/compartir/propiedad/:id/:slug', (req, res, next) => {
     if (!propiedad) return next();
 
     const detailUrl = absoluteUrl(req, `/propiedad.html?id=${id}`);
-    const { title, description, meta } = datosPreviewPropiedad(req, propiedad, req.originalUrl);
+    const { title, description, image, meta } = datosPreviewPropiedad(req, propiedad, req.originalUrl);
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
     res.send(`<!doctype html>
 <html lang="es">
 <head>
@@ -231,14 +231,45 @@ app.get('/compartir/propiedad/:id/:slug', (req, res, next) => {
 <body>
 <h1>${escapeHtml(title)}</h1>
 <p>${escapeHtml(description)}</p>
+<p><img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" width="1200" height="630"></p>
 <p><a href="${escapeHtml(detailUrl)}">Ver propiedad en InmobIA</a></p>
-<script>setTimeout(function(){ window.location.replace(${JSON.stringify(detailUrl)}); }, 250);</script>
 </body>
 </html>`);
   } catch (err) {
     console.error('Error generando página de compartir propiedad:', err.message);
     next();
   }
+});
+
+app.get('/compartir-test', (req, res) => {
+  const url = absoluteUrl(req, req.originalUrl);
+  const image = absoluteUrl(req, '/recursos/1-exterior-1.jpg');
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+  res.send(`<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vista previa InmobIA</title>
+<meta name="description" content="Prueba de vista previa para compartir propiedades de InmobIA.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_GT">
+<meta property="og:site_name" content="InmobIA">
+<meta property="og:title" content="Vista previa InmobIA">
+<meta property="og:description" content="Prueba de vista previa para compartir propiedades de InmobIA.">
+<meta property="og:url" content="${escapeHtml(url)}">
+<meta property="og:image" content="${escapeHtml(image)}">
+<meta property="og:image:secure_url" content="${escapeHtml(image)}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+</head>
+<body>
+<h1>Vista previa InmobIA</h1>
+<p>Prueba de vista previa para compartir propiedades de InmobIA.</p>
+</body>
+</html>`);
 });
 
 app.get('/p/:id/:slug', (req, res, next) => {
