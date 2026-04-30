@@ -3330,7 +3330,10 @@ user-select: none;
     event.stopPropagation();
     const wrap = btn.closest('.property-share');
     const baseUrl = wrap.dataset.url;
-    const url = `${baseUrl.replace(/-\d+$/, '')}-${Date.now()}`;
+    const baseWhatsappUrl = wrap.dataset.whatsappUrl || baseUrl;
+    const url = accion === 'whatsapp'
+      ? baseWhatsappUrl.replace(/s=\d+$/, `s=${Date.now()}`)
+      : `${baseUrl.replace(/-\d+$/, '')}-${Date.now()}`;
     const titulo = wrap.dataset.title;
     const texto = wrap.dataset.text;
     const shareText = `${texto}\n${url}`;
@@ -3361,8 +3364,9 @@ user-select: none;
 
     const encodedUrl = encodeURIComponent(url);
     const encodedText = encodeURIComponent(shareText);
+    const esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
     const destinos = {
-      whatsapp: `https://wa.me/?text=${encodedUrl}`,
+      whatsapp: esMovil ? `whatsapp://send?text=${encodedText}` : `https://wa.me/?text=${encodedText}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent(texto)}`
     };
@@ -3406,6 +3410,7 @@ user-select: none;
     const tipoLabel  = p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1);
     const shareSlug = `${slugCompartirPropiedad(`${p.titulo || 'propiedad'} ${p.nombre_proyecto || ''}`)}-${Date.now()}`;
     const shareUrl   = new URL(`/propiedad/${shareSlug}/${p.id}?shared=whatsapp`, window.location.origin).href;
+    const whatsappUrl = new URL(`/propiedad.html?id=${p.id}&s=${Date.now()}`, window.location.origin).href;
     const shareText  = textoCompartirPropiedad(p.titulo, precio, ubicacion);
     const shareNative = typeof navigator !== 'undefined' && navigator.share
       ? `<button class="property-share-option" type="button" data-accion="native" onclick="compartirPropiedad(event,'native',this)"><span>↗</span> Compartir...</button>`
@@ -3461,7 +3466,7 @@ user-select: none;
         <p class="property-location">${p.nombre_proyecto ? `<span class="property-project-name">${p.nombre_proyecto}</span><span style="margin:0 0.35rem;opacity:0.35">|</span>` : ''}${ubicacion}</p>
         ${tagsHtml}
         <div class="property-specs">${specs.join('')}</div>
-        <div class="property-share" data-url="${escapeAttr(shareUrl)}" data-title="${escapeAttr(p.titulo)}" data-text="${escapeAttr(shareText)}" onclick="event.preventDefault();event.stopPropagation()">
+        <div class="property-share" data-url="${escapeAttr(shareUrl)}" data-whatsapp-url="${escapeAttr(whatsappUrl)}" data-title="${escapeAttr(p.titulo)}" data-text="${escapeAttr(shareText)}" onclick="event.preventDefault();event.stopPropagation()">
           <button class="property-share-btn" type="button" aria-label="Compartir propiedad" title="Compartir" onclick="toggleMenuCompartir(event,this)">
             <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.8l6.8-4.1M8.6 13.2l6.8 4.1"/></svg>
             <span>Compartir</span>

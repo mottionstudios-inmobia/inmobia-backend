@@ -291,7 +291,7 @@ app.get('/p/:id', (req, res, next) => {
 app.get('/propiedad.html', (req, res, next) => {
   const id = Number(req.query.id);
   const suffix = req.query.s ? `?s=${encodeURIComponent(req.query.s)}` : '';
-  enviarPropiedadConPreview(req, res, next, id, `/p/${id}${suffix}`);
+  enviarPropiedadConPreview(req, res, next, id, `/propiedad.html?id=${id}${suffix}`);
 });
 
 // Archivos HTML del frontend
