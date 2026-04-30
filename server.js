@@ -5,6 +5,7 @@ dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), '.
 import express from 'express';
 import cors from 'cors';
 import { readdirSync, mkdirSync, existsSync, statSync, readFileSync } from 'fs';
+import sharp from 'sharp';
 import { db } from './database.js';
 import propiedadesRouter from './routes/propiedades.js';
 import authRouter from './routes/auth.js';
@@ -80,6 +81,29 @@ function imageMimeFromUrl(url = '') {
   return 'image/jpeg';
 }
 
+function rutaLocalImagenPreview(value = '') {
+  let pathname = String(value || '').split('?')[0];
+  try {
+    if (/^https?:\/\//i.test(pathname)) pathname = new URL(pathname).pathname;
+  } catch (_) {}
+
+  pathname = decodeURIComponent(pathname);
+  const uploadsRoot = path.resolve(uploadsDir);
+  const publicRoot = path.resolve(__dirname, './public');
+
+  if (pathname.startsWith('/uploads/')) {
+    const candidate = path.resolve(uploadsDir, pathname.slice('/uploads/'.length));
+    if (candidate.startsWith(uploadsRoot)) return candidate;
+  }
+
+  if (pathname.startsWith('/recursos/')) {
+    const candidate = path.resolve(publicRoot, `.${pathname}`);
+    if (candidate.startsWith(publicRoot)) return candidate;
+  }
+
+  return path.join(__dirname, './public/recursos/1-exterior-1.jpg');
+}
+
 function descripcionPreviewPropiedad(p) {
   const specs = [
     p.nombre_proyecto,
@@ -103,7 +127,7 @@ function obtenerPropiedadPreview(id) {
 
 function datosPreviewPropiedad(req, propiedad, publicPath) {
   const url = absoluteUrl(req, publicPath || `/propiedad.html?id=${propiedad.id}`);
-  const image = absoluteUrl(req, propiedad.imagen_principal || '/recursos/1-exterior-1.jpg');
+  const image = absoluteUrl(req, `/og/propiedad/${propiedad.id}.jpg`);
   const imageType = imageMimeFromUrl(image);
   const title = `${propiedad.titulo || 'Propiedad en InmobIA'}${propiedad.nombre_proyecto ? ` | ${propiedad.nombre_proyecto}` : ''}`;
   const description = descripcionPreviewPropiedad(propiedad) || 'Conoce esta propiedad disponible en InmobIA.';
@@ -157,6 +181,33 @@ function enviarPropiedadConPreview(req, res, next, id, publicPath) {
 }
 
 // HTML dinámico para que WhatsApp/Facebook lean vista previa de cada propiedad
+app.get('/og/propiedad/:id.jpg', async (req, res, next) => {
+  const id = Number(req.params.id);
+  if (!id) return next();
+
+  try {
+    const propiedad = obtenerPropiedadPreview(id);
+    if (!propiedad) return next();
+
+    let imagePath = rutaLocalImagenPreview(propiedad.imagen_principal || '/recursos/1-exterior-1.jpg');
+    if (!existsSync(imagePath)) imagePath = path.join(__dirname, './public/recursos/1-exterior-1.jpg');
+
+    const buffer = await sharp(imagePath)
+      .rotate()
+      .resize(1200, 630, { fit: 'cover', position: 'center' })
+      .jpeg({ quality: 82, mozjpeg: true })
+      .toBuffer();
+
+    res.setHeader('Content-Type', 'image/jpeg');
+    res.setHeader('Content-Length', buffer.length);
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(buffer);
+  } catch (err) {
+    console.error('Error generando imagen OG de propiedad:', err.message);
+    next();
+  }
+});
+
 app.get('/compartir/propiedad/:id/:slug', (req, res, next) => {
   const id = Number(req.params.id);
   if (!id) return next();
@@ -176,7 +227,6 @@ app.get('/compartir/propiedad/:id/:slug', (req, res, next) => {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)} — InmobIA</title>${meta}
-<meta http-equiv="refresh" content="1;url=${escapeHtml(detailUrl)}">
 </head>
 <body>
 <h1>${escapeHtml(title)}</h1>
