@@ -92,29 +92,26 @@ function descripcionPreviewPropiedad(p) {
   return specs.join(' · ');
 }
 
-function enviarPropiedadConPreview(req, res, next, id, publicPath) {
-  if (!id) return next();
+function obtenerPropiedadPreview(id) {
+  return db.prepare(`
+    SELECT p.*,
+      (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) AS imagen_principal
+    FROM propiedades p
+    WHERE p.id = ?
+  `).get(id);
+}
 
-  try {
-    const propiedad = db.prepare(`
-      SELECT p.*,
-        (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) AS imagen_principal
-      FROM propiedades p
-      WHERE p.id = ?
-    `).get(id);
-    if (!propiedad) return next();
+function datosPreviewPropiedad(req, propiedad, publicPath) {
+  const url = absoluteUrl(req, publicPath || `/propiedad.html?id=${propiedad.id}`);
+  const image = absoluteUrl(req, propiedad.imagen_principal || '/recursos/1-exterior-1.jpg');
+  const imageType = imageMimeFromUrl(image);
+  const title = `${propiedad.titulo || 'Propiedad en InmobIA'}${propiedad.nombre_proyecto ? ` | ${propiedad.nombre_proyecto}` : ''}`;
+  const description = descripcionPreviewPropiedad(propiedad) || 'Conoce esta propiedad disponible en InmobIA.';
 
-    const htmlPath = path.join(__dirname, './public/propiedad.html');
-    let html = readFileSync(htmlPath, 'utf8');
-    const url = absoluteUrl(req, publicPath || `/propiedad.html?id=${id}`);
-    const image = absoluteUrl(req, propiedad.imagen_principal || '/recursos/1-exterior-1.jpg');
-    const imageType = imageMimeFromUrl(image);
-    const title = `${propiedad.titulo || 'Propiedad en InmobIA'}${propiedad.nombre_proyecto ? ` | ${propiedad.nombre_proyecto}` : ''}`;
-    const description = descripcionPreviewPropiedad(propiedad) || 'Conoce esta propiedad disponible en InmobIA.';
-
-    const meta = `
+  const meta = `
 <meta name="description" content="${escapeHtml(description)}">
-<meta property="og:type" content="article">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_GT">
 <meta property="og:site_name" content="InmobIA">
 <meta property="og:title" content="${escapeHtml(title)}">
 <meta property="og:description" content="${escapeHtml(description)}">
@@ -128,7 +125,22 @@ function enviarPropiedadConPreview(req, res, next, id, publicPath) {
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${escapeHtml(title)}">
 <meta name="twitter:description" content="${escapeHtml(description)}">
-<meta name="twitter:image" content="${escapeHtml(image)}">`;
+<meta name="twitter:image" content="${escapeHtml(image)}">
+<link rel="image_src" href="${escapeHtml(image)}">`;
+
+  return { url, image, imageType, title, description, meta };
+}
+
+function enviarPropiedadConPreview(req, res, next, id, publicPath) {
+  if (!id) return next();
+
+  try {
+    const propiedad = obtenerPropiedadPreview(id);
+    if (!propiedad) return next();
+
+    const htmlPath = path.join(__dirname, './public/propiedad.html');
+    let html = readFileSync(htmlPath, 'utf8');
+    const { title, meta } = datosPreviewPropiedad(req, propiedad, publicPath || `/propiedad.html?id=${id}`);
 
     html = html.replace(
       /<title>[\s\S]*?<\/title>/i,
@@ -145,6 +157,40 @@ function enviarPropiedadConPreview(req, res, next, id, publicPath) {
 }
 
 // HTML dinámico para que WhatsApp/Facebook lean vista previa de cada propiedad
+app.get('/compartir/propiedad/:id/:slug', (req, res, next) => {
+  const id = Number(req.params.id);
+  if (!id) return next();
+
+  try {
+    const propiedad = obtenerPropiedadPreview(id);
+    if (!propiedad) return next();
+
+    const detailUrl = absoluteUrl(req, `/propiedad.html?id=${id}`);
+    const { title, description, meta } = datosPreviewPropiedad(req, propiedad, req.originalUrl);
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.send(`<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(title)} — InmobIA</title>${meta}
+<meta http-equiv="refresh" content="1;url=${escapeHtml(detailUrl)}">
+</head>
+<body>
+<h1>${escapeHtml(title)}</h1>
+<p>${escapeHtml(description)}</p>
+<p><a href="${escapeHtml(detailUrl)}">Ver propiedad en InmobIA</a></p>
+<script>setTimeout(function(){ window.location.replace(${JSON.stringify(detailUrl)}); }, 250);</script>
+</body>
+</html>`);
+  } catch (err) {
+    console.error('Error generando página de compartir propiedad:', err.message);
+    next();
+  }
+});
+
 app.get('/p/:id/:slug', (req, res, next) => {
   const id = Number(req.params.id);
   enviarPropiedadConPreview(req, res, next, id, req.originalUrl);
