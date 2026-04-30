@@ -814,11 +814,15 @@
       <!-- COLUMNA SIDEBAR -->
       <aside class="sidebar">
         <div id="mapa-wrap" style="display:none;margin-bottom:0.75rem">
-          <iframe id="mapa-iframe-sidebar" src="" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="display:block;width:100%;height:180px;border:none;border-radius:8px 8px 0 0"></iframe>
-          <button onclick="abrirModalMapa()" style="width:100%;background:#e5a50d;color:#fff;border:none;border-radius:0 0 8px 8px;padding:0.7rem 1rem;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:background 0.2s" onmouseover="this.style.background='#1e2d4a'" onmouseout="this.style.background='#e5a50d'">
+          <iframe id="mapa-iframe-sidebar" src="" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="display:block;width:100%;height:118px;border:none;border-radius:8px 8px 0 0"></iframe>
+          <button onclick="abrirModalMapa()" style="width:100%;background:#e5a50d;color:#fff;border:none;border-radius:0;padding:0.52rem 1rem;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:background 0.2s" onmouseover="this.style.background='#1e2d4a'" onmouseout="this.style.background='#e5a50d'">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             Ver ubicación en Google Maps
           </button>
+          <a id="mapa-waze-link" href="" target="_blank" rel="noopener" style="width:100%;box-sizing:border-box;background:#2bbfdb;color:#fff;border:none;border-radius:0 0 8px 8px;padding:0.52rem 1rem;font-size:0.78rem;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:background 0.2s" onmouseover="this.style.background='#1e2d4a'" onmouseout="this.style.background='#2bbfdb'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"/><path d="M8.5 10.5h.01M15.5 10.5h.01"/><path d="M9 14c1.8 1.2 4.2 1.2 6 0"/></svg>
+            Ver ubicación en Waze
+          </a>
         </div>
         <div class="sidebar-card cta">
           <div class="cta-header" id="cta-header-bg">
@@ -1184,13 +1188,44 @@
     return { embed, link };
   }
 
+  function extraerCoordenadasMapa(mapa = {}) {
+    const raw = [mapa.embed, mapa.link, propData?.mapa_url].filter(Boolean).join(' ');
+    const patterns = [
+      /[?&]q=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/,
+      /[?&]ll=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/,
+      /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/,
+      /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/
+    ];
+    for (const pattern of patterns) {
+      const match = raw.match(pattern);
+      if (match) return { lat: match[1], lng: match[2] };
+    }
+    return null;
+  }
+
+  function crearUrlWaze(mapa = {}, data = {}) {
+    const coords = extraerCoordenadasMapa(mapa);
+    if (coords) return `https://waze.com/ul?ll=${coords.lat}%2C${coords.lng}&navigate=yes`;
+    const q = crearConsultaMapa(data) || mapa.link || data.titulo || 'Guatemala';
+    return `https://waze.com/ul?q=${encodeURIComponent(q)}&navigate=yes`;
+  }
+
+  function enriquecerMapa(mapa = {}, data = {}) {
+    return { ...mapa, waze: crearUrlWaze(mapa, data) };
+  }
+
+  function actualizarBloqueMapa(mapa = {}) {
+    document.getElementById('mapa-wrap').style.display = 'block';
+    document.getElementById('mapa-iframe-sidebar').src = mapa.embed;
+    document.getElementById('mapa-link').href = mapa.link;
+    document.getElementById('mapa-waze-link').href = mapa.waze || crearUrlWaze(mapa, propData || {});
+  }
+
   async function aplicarMapaPropiedad() {
     if (!propData?.mapa_url) return;
 
-    mapaActual = normalizarUrlMapa(propData.mapa_url, propData);
-    document.getElementById('mapa-wrap').style.display = 'block';
-    document.getElementById('mapa-iframe-sidebar').src = mapaActual.embed;
-    document.getElementById('mapa-link').href = mapaActual.link;
+    mapaActual = enriquecerMapa(normalizarUrlMapa(propData.mapa_url, propData), propData);
+    actualizarBloqueMapa(mapaActual);
 
     if (!esEnlaceCortoGoogleMaps(propData.mapa_url)) return;
 
@@ -1199,9 +1234,8 @@
       if (!res.ok) return;
       const data = await res.json();
       if (!data?.embed) return;
-      mapaActual = { embed: data.embed, link: data.link || propData.mapa_url };
-      document.getElementById('mapa-iframe-sidebar').src = mapaActual.embed;
-      document.getElementById('mapa-link').href = mapaActual.link;
+      mapaActual = enriquecerMapa({ embed: data.embed, link: data.link || propData.mapa_url }, propData);
+      actualizarBloqueMapa(mapaActual);
       const modalMapa = document.getElementById('mapa-iframe');
       if (modalMapa?.src) modalMapa.src = mapaActual.embed;
     } catch (err) {
