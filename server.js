@@ -136,6 +136,7 @@ function enviarPropiedadConPreview(req, res, next, id, publicPath) {
     );
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.send(html);
   } catch (err) {
     console.error('Error generando preview de propiedad:', err.message);
