@@ -35,6 +35,12 @@
     background: var(--white); border-bottom: 1px solid var(--gray-border);
   }
   .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo-home {
+    height: 62px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+  }
   .nav-logo-text { display: inline-flex; align-items: baseline; }
   .logo-inmob { font-family: 'Comfortaa', sans-serif; font-size: 1.7rem; font-weight: 300; color: var(--charcoal); }
   .logo-ia    { font-family: 'Century Gothic', 'Trebuchet MS', sans-serif; font-size: 2rem; font-weight: 400; color: var(--gold); }
@@ -678,6 +684,7 @@
     .relacionadas-grid { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 600px) {
+    .nav-logo-home { height: 52px; }
     .galeria { grid-template-rows: 240px; }
     .galeria-badge {
       top: 0.75rem; left: 0.75rem;
@@ -712,7 +719,7 @@
 <!-- NAV -->
 <nav>
   <a href="/" class="nav-logo" id="nav-logo">
-    <span class="nav-logo-text" id="nav-logo-inmobia"><span class="logo-inmob">Inmob</span><span class="logo-ia">IA</span></span>
+    <img id="nav-logo-inmobia" class="nav-logo-home" src="/logo-inmobia-home01.svg" alt="InmobIA">
     <img id="nav-logo-custom" src="" alt="Logo" style="display:none;max-height:40px;max-width:150px;object-fit:contain">
   </a>
   <a href="/index.html#propiedades" class="nav-back" id="nav-back">
