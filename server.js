@@ -105,7 +105,9 @@ function rutaLocalImagenPreview(value = '') {
 }
 
 function descripcionPreviewPropiedad(p) {
+  const operacion = p.operacion === 'renta' ? 'En renta' : 'En venta';
   const specs = [
+    operacion,
     p.nombre_proyecto,
     p.habitaciones ? `${p.habitaciones} habitaciones` : '',
     p.banos ? `${p.banos} baños` : '',
