@@ -6980,12 +6980,12 @@ function filtrarProps() {
     const estadoCls = estadoMap[p.estado] || 'activo';
     const fecha = p.creado_en ? new Date(p.creado_en).toLocaleDateString('es-GT', { day:'2-digit', month:'short', year:'numeric' }) : '—';
     const esPlusOne = p.origen_comision === 'plus_one';
-    const plusOneBadge = esPlusOne ? `<span style="display:inline-flex;align-items:center;gap:0.25rem;margin-left:0.4rem;background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;border-radius:999px;padding:1px 7px;font-size:0.65rem;font-weight:800;vertical-align:middle">+1</span>` : '';
+    const plusOneBadge = esPlusOne ? `<span style="display:inline-flex;align-items:center;gap:0.25rem;margin-right:0.35rem;background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;border-radius:999px;padding:1px 7px;font-size:0.65rem;font-weight:800;vertical-align:middle">+1</span>` : '';
     return `
       <div class="prop-list-item" id="prop-row-${p.id}">
         <img class="prop-thumb" src="${img}" onerror="this.style.background='#e2e6f0';this.src=''">
         <div class="prop-info">
-          <div class="prop-titulo">${p.titulo}${plusOneBadge}</div>
+          <div class="prop-titulo">${plusOneBadge}${p.titulo}</div>
           ${p.nombre_proyecto ? `<div style="font-size:0.75rem;font-weight:600;color:#7c3aed;margin-bottom:0.15rem">${p.nombre_proyecto}</div>` : ''}
           <div class="prop-meta">
             <span>${p.tipo}</span><span>·</span><span>${p.operacion}</span><span>·</span><span>${[p.colonia, p.zona || (p.municipio ? p.municipio.trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase() : 'Sin zona')].filter(Boolean).join(' · ')}</span>
