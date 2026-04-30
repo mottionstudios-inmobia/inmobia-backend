@@ -92,9 +92,7 @@ function descripcionPreviewPropiedad(p) {
   return specs.join(' · ');
 }
 
-// HTML dinámico para que WhatsApp/Facebook lean vista previa de cada propiedad
-app.get('/propiedad.html', (req, res, next) => {
-  const id = Number(req.query.id);
+function enviarPropiedadConPreview(req, res, next, id, publicPath) {
   if (!id) return next();
 
   try {
@@ -108,7 +106,7 @@ app.get('/propiedad.html', (req, res, next) => {
 
     const htmlPath = path.join(__dirname, './public/propiedad.html');
     let html = readFileSync(htmlPath, 'utf8');
-    const url = absoluteUrl(req, `/propiedad.html?id=${id}`);
+    const url = absoluteUrl(req, publicPath || `/propiedad.html?id=${id}`);
     const image = absoluteUrl(req, propiedad.imagen_principal || '/recursos/1-exterior-1.jpg');
     const imageType = imageMimeFromUrl(image);
     const title = `${propiedad.titulo || 'Propiedad en InmobIA'}${propiedad.nombre_proyecto ? ` | ${propiedad.nombre_proyecto}` : ''}`;
@@ -142,6 +140,19 @@ app.get('/propiedad.html', (req, res, next) => {
     console.error('Error generando preview de propiedad:', err.message);
     next();
   }
+}
+
+// HTML dinámico para que WhatsApp/Facebook lean vista previa de cada propiedad
+app.get('/p/:id', (req, res, next) => {
+  const id = Number(req.params.id);
+  const suffix = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+  enviarPropiedadConPreview(req, res, next, id, `/p/${id}${suffix}`);
+});
+
+app.get('/propiedad.html', (req, res, next) => {
+  const id = Number(req.query.id);
+  const suffix = req.query.s ? `?s=${encodeURIComponent(req.query.s)}` : '';
+  enviarPropiedadConPreview(req, res, next, id, `/p/${id}${suffix}`);
 });
 
 // Archivos HTML del frontend

@@ -970,7 +970,8 @@
   let WA_NUM = '50242683255'; // fallback — se reemplaza con el teléfono del asesor
 
   const params = new URLSearchParams(window.location.search);
-  const propId  = params.get('id');
+  const pathPropMatch = window.location.pathname.match(/^\/p\/(\d+)/);
+  const propId  = params.get('id') || pathPropMatch?.[1];
   // 'from=asesor' indica que el usuario llegó desde el portal del asesor
   const desdeAsesor = params.get('from') === 'asesor';
 
