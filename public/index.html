@@ -660,10 +660,9 @@ user-select: none;
   }
   .property-badge.venta { background: var(--gold-dark); }
   .property-status-tag {
-    position: absolute; bottom: 1rem; left: 1rem;
-    font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
-    font-weight: 700; padding: 0.28rem 0.7rem;
-    backdrop-filter: blur(4px);
+    display: inline-flex; align-items: center;
+    font-size: 0.58rem; letter-spacing: 0.11em; text-transform: uppercase;
+    font-weight: 700; padding: 0.18rem 0.5rem; border-radius: 3px;
   }
   .property-status-tag.disponible {
     background: rgba(30,60,20,0.82);
@@ -683,9 +682,11 @@ user-select: none;
   }
   .property-body { padding: 1.5rem; position: relative; }
   .property-type {
+    display: inline-flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
     font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--gold-dark); margin-bottom: 0.4rem;
   }
+  .property-type-sep { color: rgba(0,0,0,0.35); letter-spacing: 0; }
   .property-name {
     font-family: var(--font-display); font-size: 1.3rem; font-weight: 400;
     color: var(--charcoal); margin-bottom: 0.5rem; line-height: 1.3;
@@ -3419,6 +3420,7 @@ user-select: none;
     const statusTag = esPendiente
       ? `<span class="property-status-tag pendiente">Pendiente</span>`
       : `<span class="property-status-tag disponible">Disponible</span>`;
+    const tipoOperacionEstado = `<span>${tipoLabel}</span><span class="property-type-sep">·</span><span>${badgeText}</span>${statusTag}`;
 
     const specs = [];
     if (p.habitaciones) specs.push(`<div class="spec"><img src="/iconos/Habitaciones.png" style="width:26px;height:26px;object-fit:contain;margin-bottom:2px"><strong>${p.habitaciones}</strong><span>Habs</span></div>`);
@@ -3454,12 +3456,11 @@ user-select: none;
       <div class="property-img">
         <img src="${img}" alt="${p.titulo}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80'">
         <span class="${badgeClass}">${badgeText}</span>
-        ${statusTag}
         <span class="property-price-tag">${precio}</span>
       </div>
       <div class="property-body">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem">
-          <div class="property-type">${tipoLabel}</div>
+          <div class="property-type">${tipoOperacionEstado}</div>
           ${p.codigo ? `<span style="font-size:0.68rem;color:#888;letter-spacing:0.03em;white-space:nowrap;flex-shrink:0">${p.codigo}</span>` : ''}
         </div>
         <h3 class="property-name">${p.titulo}</h3>
