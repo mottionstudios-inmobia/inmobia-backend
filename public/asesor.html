@@ -273,6 +273,43 @@ nav {
 .prop-specs .spec { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
 .prop-specs .spec strong { font-size: 1.05rem; font-weight: 600; color: var(--charcoal); line-height: 1.2; }
 .prop-specs .spec span   { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray); }
+.prop-card-bottom {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 0.9rem;
+  border-top: 1px solid var(--gray-border); padding-top: 0.9rem; margin-top: 0.65rem;
+}
+.prop-card-bottom .prop-specs {
+  flex: 1; border-top: 0; padding-top: 0; margin-top: 0; justify-content: center;
+}
+.property-share {
+  position: relative; flex-shrink: 0; z-index: 4;
+}
+.property-share-btn {
+  width: 54px; min-height: 48px; border: 0; padding: 0;
+  background: transparent; color: var(--gold-dark, #b8963e);
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.14rem;
+  cursor: pointer; font-family: var(--font-body); font-size: 0.56rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; transition: transform var(--transition), color var(--transition);
+}
+.property-share-btn:hover { transform: translateY(-2px); color: var(--charcoal); }
+.property-share-btn svg {
+  width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.property-share-menu {
+  position: absolute; right: 0; bottom: calc(100% + 0.55rem);
+  min-width: 185px; padding: 0.45rem; border: 1px solid var(--gray-border);
+  border-radius: 10px; background: #fff; box-shadow: 0 18px 45px rgba(0,0,0,0.16);
+  display: none;
+}
+.property-share.open .property-share-menu { display: block; }
+.property-share-option {
+  width: 100%; border: 0; background: transparent; color: var(--charcoal);
+  display: flex; align-items: center; gap: 0.55rem; padding: 0.6rem 0.65rem;
+  border-radius: 8px; font-size: 0.82rem; font-weight: 600; text-align: left;
+  cursor: pointer; white-space: nowrap;
+}
+.property-share-option:hover { background: var(--gray-light); }
+.property-share-option span:first-child { width: 1.2rem; text-align: center; color: var(--gold-dark, #b8963e); }
 .prop-badge-new {
   display: inline-block; background: var(--gold); color: #fff;
   font-size: 0.65rem; font-weight: 400; padding: 0.15rem 0.5rem; border-radius: 3px;
@@ -1181,6 +1218,99 @@ function renderRedesSociales(a) {
   ).join('');
 }
 
+function escapeAttr(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function slugCompartirPropiedad(texto) {
+  return String(texto || 'propiedad')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 70) || 'propiedad';
+}
+
+function precioCompartirPropiedad(p) {
+  const sym = p.moneda === 'USD' ? '$' : 'Q';
+  const num = Number(p.precio || 0).toLocaleString('es-GT');
+  return `${sym}${num}${p.operacion === 'renta' ? '/mes' : ''}`;
+}
+
+function textoCompartirPropiedad(titulo, precio, ubicacion) {
+  return `Mira esta propiedad en InmobIA: ${titulo}${precio ? ` - ${precio}` : ''}${ubicacion ? ` - ${ubicacion}` : ''}`;
+}
+
+function cerrarMenusCompartir() {
+  document.querySelectorAll('.property-share.open').forEach(el => el.classList.remove('open'));
+}
+
+function toggleMenuCompartir(event, btn) {
+  event.preventDefault();
+  event.stopPropagation();
+  const wrap = btn.closest('.property-share');
+  const estabaAbierto = wrap.classList.contains('open');
+  cerrarMenusCompartir();
+  if (!estabaAbierto) wrap.classList.add('open');
+}
+
+async function compartirPropiedad(event, accion, btn) {
+  event.preventDefault();
+  event.stopPropagation();
+  const wrap = btn.closest('.property-share');
+  const baseUrl = wrap.dataset.url;
+  const baseWhatsappUrl = wrap.dataset.whatsappUrl || baseUrl;
+  const url = accion === 'whatsapp'
+    ? baseWhatsappUrl.replace(/s=\d+$/, `s=${Date.now()}`)
+    : `${baseUrl.replace(/-\d+$/, '')}-${Date.now()}`;
+  const titulo = wrap.dataset.title;
+  const texto = wrap.dataset.text;
+  const shareText = `${texto}\n${url}`;
+
+  if (accion === 'native' && navigator.share) {
+    try {
+      await navigator.share({ title: titulo, text: texto, url });
+    } catch (_) {}
+    cerrarMenusCompartir();
+    return;
+  }
+
+  if (accion === 'copy') {
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch (_) {
+      const tmp = document.createElement('input');
+      tmp.value = url;
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      tmp.remove();
+    }
+    alert('Enlace copiado');
+    cerrarMenusCompartir();
+    return;
+  }
+
+  const encodedUrl = encodeURIComponent(url);
+  const encodedText = encodeURIComponent(shareText);
+  const esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+  const destinos = {
+    whatsapp: esMovil ? `whatsapp://send?text=${encodedText}` : `https://wa.me/?text=${encodedText}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+    telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent(texto)}`
+  };
+
+  if (destinos[accion]) window.open(destinos[accion], '_blank', 'noopener,noreferrer');
+  cerrarMenusCompartir();
+}
+
+document.addEventListener('click', cerrarMenusCompartir);
+
 function renderPropiedades(propiedades) {
   todasLasProps = propiedades;
 
@@ -1228,6 +1358,15 @@ function pintarGrid(propiedades) {
     const esVenta   = p.operacion === 'venta';
     const opLabel   = esVenta ? 'Venta' : 'Renta';
     const esNueva   = daysDiff(p.creado_en) <= 7;
+    const ubicacionCompartir = [p.colonia, p.zona, p.municipio].filter(Boolean).join(', ') || 'Guatemala';
+    const precioCompartir = precioCompartirPropiedad(p);
+    const shareSlug = `${slugCompartirPropiedad(`${p.titulo || 'propiedad'} ${p.nombre_proyecto || ''}`)}-${Date.now()}`;
+    const shareUrl = new URL(`/propiedad/${shareSlug}/${p.id}?shared=whatsapp`, window.location.origin).href;
+    const whatsappUrl = new URL(`/propiedad.html?id=${p.id}&s=${Date.now()}`, window.location.origin).href;
+    const shareText = textoCompartirPropiedad(p.titulo, precioCompartir, ubicacionCompartir);
+    const shareNative = typeof navigator !== 'undefined' && navigator.share
+      ? `<button class="property-share-option" type="button" data-accion="native" onclick="compartirPropiedad(event,'native',this)"><span>↗</span> Compartir...</button>`
+      : '';
 
     const proyectoOverlay = p.nombre_proyecto
       ? `<div style="position:absolute;bottom:0;left:0;right:0;padding:0.6rem 0.85rem;background:linear-gradient(transparent,rgba(0,0,0,0.6));pointer-events:none">
@@ -1276,7 +1415,22 @@ function pintarGrid(propiedades) {
           ${p.codigo ? `<span style="font-size:0.68rem;color:#888;letter-spacing:0.03em;white-space:nowrap;flex-shrink:0">${p.codigo}</span>` : ''}
         </div>
         <div class="prop-titulo">${p.titulo}<span class="prop-badge-new" style="background:#3a7d2c;color:#fff;border:none">Disponible</span>${esNueva ? '<span class="prop-badge-new">Nuevo</span>' : ''}</div>
-        ${specs.length ? `<div class="prop-specs">${specs.join('')}</div>` : ''}
+        <div class="prop-card-bottom">
+          ${specs.length ? `<div class="prop-specs">${specs.join('')}</div>` : '<div></div>'}
+          <div class="property-share" data-url="${escapeAttr(shareUrl)}" data-whatsapp-url="${escapeAttr(whatsappUrl)}" data-title="${escapeAttr(p.titulo)}" data-text="${escapeAttr(shareText)}" onclick="event.preventDefault();event.stopPropagation()">
+            <button class="property-share-btn" type="button" aria-label="Compartir propiedad" title="Compartir" onclick="toggleMenuCompartir(event,this)">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.8l6.8-4.1M8.6 13.2l6.8 4.1"/></svg>
+              <span>Compartir</span>
+            </button>
+            <div class="property-share-menu">
+              ${shareNative}
+              <button class="property-share-option" type="button" data-accion="copy" onclick="compartirPropiedad(event,'copy',this)"><span>⧉</span> Copiar enlace</button>
+              <button class="property-share-option" type="button" data-accion="whatsapp" onclick="compartirPropiedad(event,'whatsapp',this)"><span>☏</span> WhatsApp</button>
+              <button class="property-share-option" type="button" data-accion="facebook" onclick="compartirPropiedad(event,'facebook',this)"><span>f</span> Facebook</button>
+              <button class="property-share-option" type="button" data-accion="telegram" onclick="compartirPropiedad(event,'telegram',this)"><span>✈</span> Telegram</button>
+            </div>
+          </div>
+        </div>
       </div>
     </a>`;
   }).join('');
