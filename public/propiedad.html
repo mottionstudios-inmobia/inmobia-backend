@@ -302,6 +302,14 @@
     color: #8a6d3b; background: #fff8e1; border: 1px solid #ffe082;
   }
   .prop-mantenimiento svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
+  .prop-impuestos-text {
+    display: inline-block;
+    color: #8a744f;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
 
   .prop-caract {
     display: flex; gap: 1.5rem; flex-wrap: wrap;
@@ -1423,8 +1431,8 @@
     const impEl = document.getElementById('prop-impuestos');
     if (esVenta) {
       impEl.innerHTML = propData.impuestos
-        ? `<span class="prop-mantenimiento si"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Incluye impuestos</span>`
-        : `<span class="prop-mantenimiento no"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>No incluye impuestos</span>`;
+        ? `<span class="prop-impuestos-text">Impuestos incluidos</span>`
+        : `<span class="prop-impuestos-text">+ Impuestos</span>`;
     }
 
     // Características
