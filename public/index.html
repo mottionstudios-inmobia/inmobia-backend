@@ -556,21 +556,19 @@ user-select: none;
   /* ── DROPDOWN CUSTOM ── */
   .pill-dropdown {
     display: none;
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 50%; transform: translateX(-50%);
+    position: fixed;
     background: #fff;
     border: 1px solid #e0dbd3;
     border-radius: 14px;
     box-shadow: 0 12px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.06);
     min-width: 200px;
-    z-index: 500;
+    z-index: 9999;
     overflow: hidden;
   }
   .pill-dropdown.open { display: block; animation: pillDrop 0.18s cubic-bezier(0.4,0,0.2,1); }
   @keyframes pillDrop {
-    from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   .pill-option {
     display: block; width: 100%;
@@ -2240,12 +2238,25 @@ user-select: none;
     document.querySelectorAll('.select-pill.pill-open').forEach(p => p.classList.remove('pill-open'));
   }
 
+  function positionDropdown(dropdown, pill) {
+    const r = pill.getBoundingClientRect();
+    const ddW = Math.max(pill.offsetWidth, 200);
+    let left = r.left + r.width / 2 - ddW / 2;
+    if (left < 8) left = 8;
+    if (left + ddW > window.innerWidth - 8) left = window.innerWidth - ddW - 8;
+    dropdown.style.top  = (r.bottom + 8) + 'px';
+    dropdown.style.left = left + 'px';
+    dropdown.style.minWidth = ddW + 'px';
+  }
+
   function buildPillDropdown(pill) {
     const sel = pill.querySelector('select');
-    if (!sel || pill.querySelector('.pill-dropdown')) return;
+    if (!sel || pill._dropdown) return;
 
     const dropdown = document.createElement('div');
     dropdown.className = 'pill-dropdown';
+    pill._dropdown = dropdown;
+    document.body.appendChild(dropdown);
 
     const renderOptions = () => {
       dropdown.innerHTML = '';
@@ -2265,38 +2276,31 @@ user-select: none;
       });
     };
     renderOptions();
-
-    // Actualizar opciones cuando el select cambia externamente (ej: limpiar)
     sel.addEventListener('change', renderOptions);
 
-    pill.appendChild(dropdown);
-
-    // Clic en la cápsula abre/cierra el dropdown
     pill.addEventListener('click', e => {
       e.stopPropagation();
       const isOpen = dropdown.classList.contains('open');
       closeAllDropdowns();
       if (!isOpen) {
-        // Asegurar que las opciones estén actualizadas antes de abrir
         renderOptions();
+        positionDropdown(dropdown, pill);
         dropdown.classList.add('open');
         pill.classList.add('pill-open');
       }
     });
 
-    // El select invisible ya no necesita abrir el nativo
     sel.addEventListener('mousedown', e => e.preventDefault());
     sel.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        pill.click();
-      }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pill.click(); }
     });
   }
 
   function initPillOverlays() {
     document.querySelectorAll('.select-pill').forEach(pill => buildPillDropdown(pill));
     document.addEventListener('click', closeAllDropdowns);
+    window.addEventListener('scroll', closeAllDropdowns, true);
+    window.addEventListener('resize', closeAllDropdowns);
   }
 
   document.addEventListener('DOMContentLoaded', initPillOverlays);
