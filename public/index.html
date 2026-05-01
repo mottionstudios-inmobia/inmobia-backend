@@ -1597,13 +1597,7 @@ user-select: none;
         <!-- opciones se regeneran dinámicamente por actualizarPresupuesto() -->
       </div>
     </div>
-    <div class="filtro-activo-actions">
-      <button class="filtro-activo-btn filtro-activo-btn-clear" onclick="limpiarFiltrosBarra()">Limpiar</button>
-    </div>
-  </div>
-
-  <div class="apt-filters visible" id="apt-filters">
-    <div class="apt-filter-group">
+    <div class="filtro-activo-field">
       <div class="select-pill">
         <label>Habitaciones</label>
         <select id="f-habitaciones" onchange="aplicarFiltrosApt()">
@@ -1615,7 +1609,7 @@ user-select: none;
         </select>
       </div>
     </div>
-    <div class="apt-filter-group">
+    <div class="filtro-activo-field">
       <div class="select-pill">
         <label>Parqueos</label>
         <select id="f-parqueos" onchange="aplicarFiltrosApt()">
@@ -1629,7 +1623,7 @@ user-select: none;
         </select>
       </div>
     </div>
-    <div class="apt-filter-group">
+    <div class="filtro-activo-field">
       <div class="select-pill">
         <label>Orden de precio</label>
         <select id="f-precio" onchange="aplicarFiltrosApt()">
@@ -1639,10 +1633,13 @@ user-select: none;
         </select>
       </div>
     </div>
-    <div style="display:flex;align-items:center;padding:0 1rem;flex-shrink:0">
-      <button class="apt-clear-btn" onclick="limpiarFiltrosApt()">Limpiar</button>
+    <div class="filtro-activo-actions">
+      <button class="filtro-activo-btn filtro-activo-btn-clear" onclick="limpiarTodosFiltros()">Limpiar</button>
     </div>
   </div>
+
+  <!-- apt-filters vacío — mantenido por compatibilidad con JS que lo referencia -->
+  <div id="apt-filters" style="display:none"></div>
  
   <div class="properties-grid" id="properties-grid">
 
@@ -2915,6 +2912,11 @@ user-select: none;
     document.getElementById('f-parqueos').selectedIndex = 0;
     document.getElementById('f-precio').selectedIndex = 0;
     aplicarFiltrosApt();
+  }
+
+  function limpiarTodosFiltros() {
+    limpiarFiltrosBarra();
+    limpiarFiltrosApt();
   }
 
   // ── CAMPOS OBLIGATORIOS SEGÚN OPERACIÓN + TIPO
