@@ -392,6 +392,15 @@
     display: block;
     margin-bottom: 1rem;
   }
+  .mapa-actions-title {
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--charcoal);
+    margin: 0 0 0.6rem;
+  }
   .mapa-action-btn {
     width: 100%;
     box-sizing: border-box;
@@ -932,6 +941,7 @@
       <!-- COLUMNA SIDEBAR -->
       <aside class="sidebar">
         <div id="mapa-wrap" class="mapa-actions" style="display:none">
+          <div class="mapa-actions-title">Ver ubicación:</div>
           <a id="mapa-google-link" href="" target="_blank" rel="noopener" class="mapa-action-btn mapa-action-google" aria-label="Ver ubicación en Google Maps">
             <img class="mapa-action-img" src="/recursos/google-maps.png" alt="Ver ubicación en Google Maps">
           </a>
