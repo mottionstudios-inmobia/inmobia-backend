@@ -2272,6 +2272,7 @@ user-select: none;
       label.textContent = isDefault ? originalText : sel.options[sel.selectedIndex].text;
       pill.classList.toggle('pill-active', !isDefault);
     };
+    pill._resetLabel = () => { sel.selectedIndex = 0; updatePillLabel(); };
     updatePillLabel();
 
     const renderOptions = () => {
@@ -3044,11 +3045,9 @@ user-select: none;
   function limpiarTodosFiltros() {
     limpiarFiltrosBarra();
     limpiarFiltrosApt();
-    // Notificar a los pills custom que los selects fueron reseteados
-    ['fr-operacion','fr-propiedad','fr-zona','fr-presupuesto',
-     'f-habitaciones','f-parqueos','f-precio'].forEach(id => {
-      const sel = document.getElementById(id);
-      if (sel) sel.dispatchEvent(new Event('change', { bubbles: true }));
+    // Forzar reset visual de todos los pills directamente
+    document.querySelectorAll('.select-pill').forEach(pill => {
+      if (pill._resetLabel) pill._resetLabel();
     });
   }
 
