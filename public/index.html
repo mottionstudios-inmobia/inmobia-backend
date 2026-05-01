@@ -484,7 +484,7 @@ user-select: none;
     background: transparent;
     padding: 0; width: auto;
     transition: all 0.2s; cursor: pointer;
-    overflow: hidden; position: relative;
+    overflow: visible; position: relative;
   }
   .filtro-activo-field .select-pill label {
     padding: 0.6rem 0.85rem; pointer-events: none; flex-shrink: 0;
@@ -553,6 +553,52 @@ user-select: none;
 
   #apt-filters { display: none !important; }
 
+  /* ── DROPDOWN CUSTOM ── */
+  .pill-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%; transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #e0dbd3;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.06);
+    min-width: 200px;
+    z-index: 500;
+    overflow: hidden;
+  }
+  .pill-dropdown.open { display: block; animation: pillDrop 0.18s cubic-bezier(0.4,0,0.2,1); }
+  @keyframes pillDrop {
+    from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  .pill-option {
+    display: block; width: 100%;
+    padding: 0.65rem 1.1rem;
+    text-align: left; background: none; border: none;
+    border-bottom: 1px solid #f0ede8;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    color: #2c2420; letter-spacing: 0.01em;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .pill-option:last-child { border-bottom: none; }
+  .pill-option:hover { background: #1e2d4a; color: #fff; }
+  .pill-option.selected {
+    color: #c9a84c; font-weight: 600;
+    background: rgba(201,168,76,0.06);
+  }
+  .pill-option.selected::before {
+    content: '✓ '; font-size: 0.72rem;
+  }
+  .pill-option.selected:hover { background: #1e2d4a; color: #fff; }
+  /* Cápsula activa (dropdown abierto) */
+  .select-pill.pill-open {
+    border-color: #1e2d4a; background: #1e2d4a;
+  }
+  .select-pill.pill-open label { color: #fff; }
+
   /* ── SUB-FILTROS — cápsulas flotantes sin barra ── */
   .apt-filters {
     display: none;
@@ -574,7 +620,7 @@ user-select: none;
     background: transparent;
     padding: 0; width: auto;
     transition: all 0.2s; cursor: pointer;
-    overflow: hidden; position: relative;
+    overflow: visible; position: relative;
   }
   .apt-filter-group .select-pill label {
     padding: 0.6rem 0.85rem; pointer-events: none; flex-shrink: 0;
@@ -2182,20 +2228,71 @@ user-select: none;
 </div>
  
 <script>
-  // ── CÁPSULAS — overlay select, toda la cápsula abre el dropdown ──
-  function initPillOverlays() {
-    document.querySelectorAll('.select-pill').forEach(pill => {
-      const sel = pill.querySelector('select');
-      if (!sel || pill.querySelector('.pill-val')) return;
-      const val = document.createElement('span');
-      val.className = 'pill-val';
-      val.textContent = sel.options[sel.selectedIndex]?.text || '';
-      pill.insertBefore(val, sel);
-      sel.addEventListener('change', () => {
-        val.textContent = sel.options[sel.selectedIndex]?.text || '';
+  // ── DROPDOWNS CUSTOM — reemplazan el select nativo ──
+  function closeAllDropdowns() {
+    document.querySelectorAll('.pill-dropdown.open').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.select-pill.pill-open').forEach(p => p.classList.remove('pill-open'));
+  }
+
+  function buildPillDropdown(pill) {
+    const sel = pill.querySelector('select');
+    if (!sel || pill.querySelector('.pill-dropdown')) return;
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'pill-dropdown';
+
+    const renderOptions = () => {
+      dropdown.innerHTML = '';
+      Array.from(sel.options).forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pill-option' + (i === sel.selectedIndex ? ' selected' : '');
+        btn.textContent = opt.text;
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          sel.selectedIndex = i;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+          renderOptions();
+          closeAllDropdowns();
+        });
+        dropdown.appendChild(btn);
       });
+    };
+    renderOptions();
+
+    // Actualizar opciones cuando el select cambia externamente (ej: limpiar)
+    sel.addEventListener('change', renderOptions);
+
+    pill.appendChild(dropdown);
+
+    // Clic en la cápsula abre/cierra el dropdown
+    pill.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.contains('open');
+      closeAllDropdowns();
+      if (!isOpen) {
+        // Asegurar que las opciones estén actualizadas antes de abrir
+        renderOptions();
+        dropdown.classList.add('open');
+        pill.classList.add('pill-open');
+      }
+    });
+
+    // El select invisible ya no necesita abrir el nativo
+    sel.addEventListener('mousedown', e => e.preventDefault());
+    sel.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        pill.click();
+      }
     });
   }
+
+  function initPillOverlays() {
+    document.querySelectorAll('.select-pill').forEach(pill => buildPillDropdown(pill));
+    document.addEventListener('click', closeAllDropdowns);
+  }
+
   document.addEventListener('DOMContentLoaded', initPillOverlays);
 
   // ── PRESUPUESTO DINÁMICO
