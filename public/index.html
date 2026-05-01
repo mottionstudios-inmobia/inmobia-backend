@@ -3044,6 +3044,12 @@ user-select: none;
   function limpiarTodosFiltros() {
     limpiarFiltrosBarra();
     limpiarFiltrosApt();
+    // Notificar a los pills custom que los selects fueron reseteados
+    ['fr-operacion','fr-propiedad','fr-zona','fr-presupuesto',
+     'f-habitaciones','f-parqueos','f-precio'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (sel) sel.dispatchEvent(new Event('change', { bubbles: true }));
+    });
   }
 
   // ── CAMPOS OBLIGATORIOS SEGÚN OPERACIÓN + TIPO
