@@ -591,7 +591,12 @@ user-select: none;
     content: '✓ '; font-size: 0.72rem;
   }
   .pill-option.selected:hover { background: #1e2d4a; color: #fff; }
-  /* Cápsula activa (dropdown abierto) */
+  /* Cápsula con filtro activo (valor seleccionado ≠ default) */
+  .select-pill.pill-active {
+    border-color: #1e2d4a; background: #1e2d4a;
+  }
+  .select-pill.pill-active label { color: #fff; }
+  /* Cápsula con dropdown abierto */
   .select-pill.pill-open {
     border-color: #1e2d4a; background: #1e2d4a;
   }
@@ -2258,6 +2263,17 @@ user-select: none;
     pill._dropdown = dropdown;
     document.body.appendChild(dropdown);
 
+    const label = pill.querySelector('label');
+    const originalText = label ? label.textContent : '';
+
+    const updatePillLabel = () => {
+      if (!label) return;
+      const isDefault = sel.selectedIndex === 0;
+      label.textContent = isDefault ? originalText : sel.options[sel.selectedIndex].text;
+      pill.classList.toggle('pill-active', !isDefault);
+    };
+    updatePillLabel();
+
     const renderOptions = () => {
       dropdown.innerHTML = '';
       Array.from(sel.options).forEach((opt, i) => {
@@ -2269,6 +2285,7 @@ user-select: none;
           e.stopPropagation();
           sel.selectedIndex = i;
           sel.dispatchEvent(new Event('change', { bubbles: true }));
+          updatePillLabel();
           renderOptions();
           closeAllDropdowns();
         });
@@ -2276,7 +2293,7 @@ user-select: none;
       });
     };
     renderOptions();
-    sel.addEventListener('change', renderOptions);
+    sel.addEventListener('change', () => { updatePillLabel(); renderOptions(); });
 
     pill.addEventListener('click', e => {
       e.stopPropagation();
