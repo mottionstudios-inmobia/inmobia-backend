@@ -374,6 +374,50 @@
 
   /* ── SIDEBAR ── */
   .sidebar { position: sticky; top: 88px; height: fit-content; }
+  .mapa-actions {
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+  .mapa-action-btn {
+    width: 100%;
+    min-height: 58px;
+    box-sizing: border-box;
+    border: none;
+    color: #fff;
+    padding: 0.8rem 1rem;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .mapa-action-btn:hover {
+    transform: translateY(-1px);
+  }
+  .mapa-action-google {
+    background: #f5a800;
+    border-radius: 0 0 28px 28px;
+  }
+  .mapa-action-google:hover { background: #d99600; }
+  .mapa-action-waze {
+    background: #12bfd4;
+    border-radius: 32px;
+    margin-top: 1rem;
+  }
+  .mapa-action-waze:hover { background: #0aa6bb; }
+  .mapa-action-icon {
+    width: 31px;
+    height: 31px;
+    object-fit: contain;
+    display: block;
+    filter: brightness(0) invert(1);
+  }
 
   .sidebar-card {
     background: var(--gray-light);
@@ -887,15 +931,17 @@
 
       <!-- COLUMNA SIDEBAR -->
       <aside class="sidebar">
-        <div id="mapa-wrap" style="display:none;margin-bottom:0.75rem">
+        <div id="mapa-wrap" class="mapa-actions" style="display:none">
           <iframe id="mapa-iframe-sidebar" src="" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="display:block;width:100%;height:118px;border:none;border-radius:8px 8px 0 0"></iframe>
-          <button onclick="abrirModalMapa()" style="width:100%;background:#e5a50d;color:#fff;border:none;border-radius:0;padding:0.52rem 1rem;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:background 0.2s" onmouseover="this.style.background='#1e2d4a'" onmouseout="this.style.background='#e5a50d'">
-            <img src="/recursos/google-maps.png" alt="" style="width:16px;height:16px;object-fit:contain;display:block">
-            Ver ubicación en Google Maps
+          <button onclick="abrirModalMapa()" class="mapa-action-btn mapa-action-google">
+            <span>Ver ubicacion en</span>
+            <img class="mapa-action-icon" src="/recursos/google-maps.png" alt="">
+            <span>Google Maps</span>
           </button>
-          <a id="mapa-waze-link" href="" target="_blank" rel="noopener" style="width:100%;box-sizing:border-box;background:#2bbfdb;color:#fff;border:none;border-radius:0 0 8px 8px;padding:0.52rem 1rem;font-size:0.78rem;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:background 0.2s" onmouseover="this.style.background='#1e2d4a'" onmouseout="this.style.background='#2bbfdb'">
-            <img src="/recursos/waze.png" alt="" style="width:16px;height:16px;object-fit:contain;display:block">
-            Ver ubicación en Waze
+          <a id="mapa-waze-link" href="" target="_blank" rel="noopener" class="mapa-action-btn mapa-action-waze">
+            <span>Ver ubicacion en</span>
+            <img class="mapa-action-icon" src="/recursos/waze.png" alt="">
+            <span>Waze</span>
           </a>
         </div>
         <div class="sidebar-card cta">
