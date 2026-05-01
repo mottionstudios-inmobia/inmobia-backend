@@ -464,10 +464,11 @@ user-select: none;
   /* ── FILTROS — cápsulas flotantes sin barra ── */
   .filtro-activo {
     display: none;
-    align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;
+    align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: nowrap;
     background: transparent;
-    padding: 1rem 0 0.25rem;
-    margin-bottom: 0;
+    padding: 1rem 0 1.5rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
   }
   .filtro-activo.visible { display: flex; }
   .filtro-activo-field {
@@ -549,6 +550,8 @@ user-select: none;
     border-color: #1e2d4a;
     box-shadow: 0 2px 8px rgba(30,45,74,0.2);
   }
+
+  #apt-filters { display: none !important; }
 
   /* ── SUB-FILTROS — cápsulas flotantes sin barra ── */
   .apt-filters {
@@ -1638,8 +1641,8 @@ user-select: none;
     </div>
   </div>
 
-  <!-- apt-filters vacío — mantenido por compatibilidad con JS que lo referencia -->
-  <div id="apt-filters" style="display:none"></div>
+  <!-- apt-filters oculto — pills movidas a filtro-resumen -->
+  <div id="apt-filters"></div>
  
   <div class="properties-grid" id="properties-grid">
 
