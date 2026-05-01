@@ -480,11 +480,11 @@ user-select: none;
     padding: 0;
     min-width: 0; position: relative;
   }
-  /* Fila 1 — cápsulas negras */
+  /* Fila 1 — cápsulas outline */
   .filtro-activo-field .select-pill {
     display: flex; align-items: center; gap: 0.45rem;
-    border: 1px solid #1a1a1a; border-radius: 20px;
-    background: #1a1a1a;
+    border: 1.5px solid #b8b3a8; border-radius: 20px;
+    background: transparent;
     padding: 0; width: auto;
     transition: all 0.2s; cursor: pointer;
     overflow: hidden;
@@ -495,20 +495,20 @@ user-select: none;
   .filtro-activo-field .select-pill label::after {
     content: ''; display: inline-block;
     width: 1px; height: 1rem;
-    background: rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.2);
     margin-left: 0.6rem; vertical-align: middle;
   }
   .filtro-activo-field .select-pill select {
     flex: 1; width: auto; min-width: 90px; height: 100%; min-height: 36px;
     cursor: pointer; background: transparent; border: none;
-    color: rgba(255,255,255,0.9); font-family: var(--font-body);
+    color: var(--charcoal); font-family: var(--font-body);
     font-size: 0.75rem; outline: none; padding: 0 0.85rem 0 0;
     -webkit-appearance: auto; appearance: auto;
   }
-  .filtro-activo-field .select-pill:hover { background: #2c2c2c; border-color: #2c2c2c; }
+  .filtro-activo-field .select-pill:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
   .filtro-activo-field .select-pill:focus-within {
-    background: #2c2c2c; border-color: var(--gold);
-    box-shadow: 0 2px 8px rgba(201,168,76,0.2);
+    border-color: var(--gold);
+    box-shadow: 0 2px 8px rgba(201,168,76,0.15);
   }
   .filtro-activo-field label {
     font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
@@ -516,11 +516,11 @@ user-select: none;
   }
   .filtro-activo-field select {
     background: transparent; border: none;
-    color: rgba(255,255,255,0.9); font-family: var(--font-body);
+    color: var(--charcoal); font-family: var(--font-body);
     font-size: 0.75rem; cursor: pointer; outline: none;
     flex: 1; min-width: 0; padding: 0; width: 100%;
   }
-  .filtro-activo-field select option { background: #1a1a1a; color: #fff; }
+  .filtro-activo-field select option { background: #fff; color: var(--charcoal); }
   .filtro-activo-actions {
     display: flex; align-items: center; gap: 0.5rem;
     padding: 0; flex-shrink: 0;
@@ -563,11 +563,11 @@ user-select: none;
     flex: 0 0 auto; padding: 0;
   }
   .apt-filter-group:last-child { border-right: none; }
-  /* Fila 2 — cápsulas doradas (color Área de Asesores) */
+  /* Fila 2 — cápsulas outline */
   .apt-filter-group .select-pill {
     display: flex; align-items: center; gap: 0.45rem;
-    border: 1px solid var(--gold); border-radius: 20px;
-    background: var(--gold);
+    border: 1.5px solid #b8b3a8; border-radius: 20px;
+    background: transparent;
     padding: 0; width: auto;
     transition: all 0.2s; cursor: pointer;
     overflow: hidden;
@@ -578,35 +578,32 @@ user-select: none;
   .apt-filter-group .select-pill label::after {
     content: ''; display: inline-block;
     width: 1px; height: 1rem;
-    background: rgba(255,255,255,0.35);
+    background: rgba(0,0,0,0.2);
     margin-left: 0.6rem; vertical-align: middle;
   }
   .apt-filter-group .select-pill select {
     flex: 1; min-width: 90px; height: 100%; min-height: 36px;
     cursor: pointer; background: transparent; border: none;
-    color: rgba(255,255,255,0.95); font-family: var(--font-body);
+    color: var(--charcoal); font-family: var(--font-body);
     font-size: 0.75rem; outline: none; padding: 0 0.85rem 0 0;
     -webkit-appearance: auto; appearance: auto;
   }
-  .apt-filter-group .select-pill:hover {
-    background: var(--gold-dark); border-color: var(--gold-dark);
-    box-shadow: 0 2px 8px rgba(201,168,76,0.3);
-  }
+  .apt-filter-group .select-pill:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
   .apt-filter-group .select-pill:focus-within {
-    background: var(--gold-dark); border-color: var(--gold-dark);
-    box-shadow: 0 2px 8px rgba(201,168,76,0.3);
+    border-color: var(--gold);
+    box-shadow: 0 2px 8px rgba(201,168,76,0.15);
   }
   .apt-filter-group label {
     font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
-    color: #fff; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+    color: var(--gold); font-weight: 600; white-space: nowrap; flex-shrink: 0;
   }
   .apt-filter-group select {
     border: none; background: transparent; font-family: var(--font-body);
-    font-size: 0.75rem; color: rgba(255,255,255,0.95);
+    font-size: 0.75rem; color: var(--charcoal);
     cursor: pointer; outline: none; flex: 1; min-width: 0; padding: 0;
   }
-  .apt-filter-group select option { background: #7a6a35; color: #fff; }
-  .apt-filter-group select:focus { color: #fff; }
+  .apt-filter-group select option { background: #fff; color: var(--charcoal); }
+  .apt-filter-group select:focus { color: var(--charcoal); }
 
   .properties-grid {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
