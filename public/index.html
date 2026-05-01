@@ -486,14 +486,10 @@ user-select: none;
     overflow: hidden; position: relative;
   }
   .filtro-activo-field .select-pill label {
-    padding-left: 0.85rem; pointer-events: none; flex-shrink: 0;
+    padding: 0 0.85rem; pointer-events: none; flex-shrink: 0;
   }
-  .filtro-activo-field .select-pill label::after {
-    content: ''; display: inline-block;
-    width: 1px; height: 1rem;
-    background: rgba(0,0,0,0.2);
-    margin-left: 0.6rem; vertical-align: middle;
-  }
+  .filtro-activo-field .select-pill label::after { display: none; }
+  .filtro-activo-field .select-pill .pill-val { display: none; }
   .filtro-activo-field .select-pill select {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
@@ -578,14 +574,10 @@ user-select: none;
     overflow: hidden; position: relative;
   }
   .apt-filter-group .select-pill label {
-    padding-left: 0.85rem; pointer-events: none; flex-shrink: 0;
+    padding: 0 0.85rem; pointer-events: none; flex-shrink: 0;
   }
-  .apt-filter-group .select-pill label::after {
-    content: ''; display: inline-block;
-    width: 1px; height: 1rem;
-    background: rgba(0,0,0,0.2);
-    margin-left: 0.6rem; vertical-align: middle;
-  }
+  .apt-filter-group .select-pill label::after { display: none; }
+  .apt-filter-group .select-pill .pill-val { display: none; }
   .apt-filter-group .select-pill select {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
