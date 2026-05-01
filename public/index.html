@@ -504,18 +504,17 @@ user-select: none;
     font-size: 0.75rem; color: var(--charcoal);
     padding: 0 0.85rem 0 0; white-space: nowrap; flex-shrink: 0;
   }
-  .filtro-activo-field .select-pill:hover {
-    border-color: var(--gold); background: var(--gold);
+  .filtro-activo-field .select-pill:hover,
+  .filtro-activo-field .select-pill:focus-within {
+    border-color: #1e2d4a; background: #1e2d4a;
+    box-shadow: 0 2px 8px rgba(30,45,74,0.25);
   }
   .filtro-activo-field .select-pill:hover label,
-  .filtro-activo-field .select-pill:hover .pill-val { color: #fff; }
-  .filtro-activo-field .select-pill:hover label::after { background: rgba(255,255,255,0.35); }
-  .filtro-activo-field .select-pill:focus-within {
-    border-color: var(--gold); background: var(--gold);
-    box-shadow: 0 2px 8px rgba(201,168,76,0.3);
-  }
+  .filtro-activo-field .select-pill:hover .pill-val,
   .filtro-activo-field .select-pill:focus-within label,
   .filtro-activo-field .select-pill:focus-within .pill-val { color: #fff; }
+  .filtro-activo-field .select-pill:hover label::after,
+  .filtro-activo-field .select-pill:focus-within label::after { background: rgba(255,255,255,0.35); }
   .filtro-activo-field label {
     font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
     color: var(--gold); font-weight: 600; white-space: nowrap; flex-shrink: 0;
@@ -541,7 +540,7 @@ user-select: none;
     background: transparent; color: #9a9080;
     border: 1px solid #d4cfc8;
   }
-  .filtro-activo-btn-clear:hover { color: #2c2420; border-color: #9a9080; }
+  .filtro-activo-btn-clear:hover { background: #1e2d4a; color: #fff; border-color: #1e2d4a; }
   .apt-clear-btn {
     background: transparent; color: #7a7060;
     border: 1px solid #b8b3a8; border-radius: 20px;
@@ -550,7 +549,7 @@ user-select: none;
     transition: all 0.2s; white-space: nowrap;
   }
   .apt-clear-btn:hover {
-    background: #1e2d4a; color: var(--white);
+    background: #1e2d4a; color: #fff;
     border-color: #1e2d4a;
     box-shadow: 0 2px 8px rgba(30,45,74,0.2);
   }
@@ -597,18 +596,17 @@ user-select: none;
     font-size: 0.75rem; color: var(--charcoal);
     padding: 0 0.85rem 0 0; white-space: nowrap; flex-shrink: 0;
   }
-  .apt-filter-group .select-pill:hover {
-    border-color: var(--gold); background: var(--gold);
+  .apt-filter-group .select-pill:hover,
+  .apt-filter-group .select-pill:focus-within {
+    border-color: #1e2d4a; background: #1e2d4a;
+    box-shadow: 0 2px 8px rgba(30,45,74,0.25);
   }
   .apt-filter-group .select-pill:hover label,
-  .apt-filter-group .select-pill:hover .pill-val { color: #fff; }
-  .apt-filter-group .select-pill:hover label::after { background: rgba(255,255,255,0.35); }
-  .apt-filter-group .select-pill:focus-within {
-    border-color: var(--gold); background: var(--gold);
-    box-shadow: 0 2px 8px rgba(201,168,76,0.3);
-  }
+  .apt-filter-group .select-pill:hover .pill-val,
   .apt-filter-group .select-pill:focus-within label,
   .apt-filter-group .select-pill:focus-within .pill-val { color: #fff; }
+  .apt-filter-group .select-pill:hover label::after,
+  .apt-filter-group .select-pill:focus-within label::after { background: rgba(255,255,255,0.35); }
   .apt-filter-group label {
     font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
     color: var(--gold); font-weight: 600; white-space: nowrap; flex-shrink: 0;
