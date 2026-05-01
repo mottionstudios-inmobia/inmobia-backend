@@ -277,7 +277,7 @@
   }
   .prop-precio-left { display: flex; flex-direction: column; gap: 0; }
   .prop-precio-row {
-    display: flex; align-items: baseline; gap: 0.7rem;
+    display: flex; align-items: center; gap: 0.85rem;
   }
   .prop-precio {
     font-family: var(--font-display);
@@ -288,6 +288,20 @@
   .prop-precio-periodo {
     font-size: 0.82rem; color: var(--gray);
     letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .prop-precio-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.12rem;
+    padding-top: 0.15rem;
+  }
+  .prop-precio-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
   }
   .prop-mantenimiento {
     display: inline-flex; align-items: center; gap: 0.4rem;
@@ -775,16 +789,12 @@
     .prop-precio-left { position: relative; width: 100%; min-height: 3.75rem; }
     .prop-precio-row {
       gap: 0.58rem;
-      align-items: baseline;
+      align-items: center;
       flex-wrap: nowrap;
     }
     .prop-precio { font-size: 2rem; line-height: 1; }
-    .prop-precio-periodo { font-size: 0.72rem; line-height: 1; letter-spacing: 0.055em; }
-    #prop-impuestos {
-      position: absolute;
-      left: 9.25rem;
-      top: 1.05rem;
-    }
+    .prop-precio-meta { gap: 0.08rem; padding-top: 0.2rem; }
+    .prop-precio-periodo { font-size: 0.72rem; line-height: 1.05; letter-spacing: 0.055em; }
     .prop-impuestos-text { font-size: 0.76rem; line-height: 1.1; }
     .prop-caract {
       justify-content: space-between;
@@ -851,12 +861,14 @@
             <div class="prop-precio-left">
               <div class="prop-precio-row">
                 <div class="prop-precio" id="prop-precio"></div>
-                <span class="prop-precio-periodo" id="prop-precio-periodo"></span>
+                <div class="prop-precio-meta">
+                  <span class="prop-precio-periodo" id="prop-precio-periodo"></span>
+                  <div id="prop-impuestos"></div>
+                </div>
               </div>
-              <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem">
+              <div class="prop-precio-flags">
                 <div id="prop-mantenimiento"></div>
                 <div id="prop-iva"></div>
-                <div id="prop-impuestos"></div>
               </div>
             </div>
             <div class="prop-caract" id="prop-caract"></div>
