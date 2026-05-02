@@ -1687,14 +1687,14 @@ user-select: none;
         <label for="fr-presupuesto" data-short="Precio">Presupuesto</label>
         <select id="fr-presupuesto" onchange="aplicarFiltroActivo()">
           <option>Sin límite</option>
-          <option data-short="≤Q3,000">Hasta Q3,000/mes</option>
-          <option data-short="≤Q5,000">Hasta Q5,000/mes</option>
-          <option data-short="≤Q8,000">Hasta Q8,000/mes</option>
-          <option data-short="≤Q15,000">Hasta Q15,000/mes</option>
-          <option data-short="≤Q30,000">Hasta Q30,000/mes</option>
-          <option data-short="≤Q50,000">Hasta Q50,000/mes</option>
-          <option data-short="≤Q100,000">Hasta Q100,000/mes</option>
-          <option data-short="Q100k+">Q100,000+/mes</option>
+          <option data-short="Hasta Q3,000">Hasta Q3,000/mes</option>
+          <option data-short="Hasta Q5,000">Hasta Q5,000/mes</option>
+          <option data-short="Hasta Q8,000">Hasta Q8,000/mes</option>
+          <option data-short="Hasta Q15,000">Hasta Q15,000/mes</option>
+          <option data-short="Hasta Q30,000">Hasta Q30,000/mes</option>
+          <option data-short="Hasta Q50,000">Hasta Q50,000/mes</option>
+          <option data-short="Hasta Q100,000">Hasta Q100,000/mes</option>
+          <option data-short="Q100,000+">Q100,000+/mes</option>
         </select>
         <!-- opciones se regeneran dinámicamente por actualizarPresupuesto() -->
       </div>
@@ -2330,7 +2330,7 @@ user-select: none;
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'pill-option' + (i === sel.selectedIndex ? ' selected' : '');
-        btn.textContent = opt.text;
+        btn.textContent = (window.innerWidth <= 600 && opt.dataset.short) ? opt.dataset.short : opt.text;
         btn.addEventListener('click', e => {
           e.stopPropagation();
           sel.selectedIndex = i;
