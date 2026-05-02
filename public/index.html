@@ -1307,7 +1307,8 @@ user-select: none;
       overflow-x: visible;
     }
     .filtro-activo-field { flex: 1 1 calc(33.33% - 0.4rem); max-width: calc(33.33% - 0.4rem); padding: 0; height: auto; border-right: none; }
-    .filtro-activo-actions { display: none; }
+    .filtro-activo-actions { display: flex; flex: 1 1 calc(33.33% - 0.4rem); max-width: calc(33.33% - 0.4rem); align-items: center; justify-content: center; padding: 0; height: auto; }
+    .filtro-activo-btn-clear { font-size: 0.6rem; padding: 0.38rem 0.65rem; border-radius: 20px; letter-spacing: 0.06em; white-space: nowrap; }
     .filtro-activo-field .select-pill {
       width: 100%; justify-content: center;
       border: 1.5px solid #b8b3a8 !important; border-radius: 20px !important;
@@ -1329,7 +1330,6 @@ user-select: none;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .filtro-activo-field .select-pill label::after { display: none; }
-    .filtro-activo-actions { width: auto; height: auto; padding: 0; justify-content: center; }
     .pill-dropdown { min-width: 160px; font-size: 0.8rem; }
     .filter-tabs { padding-left: 0 !important; padding-right: 0 !important; }
     .properties-grid, .testimonios-grid, .servicios-grid { grid-template-columns: 1fr; }
@@ -1367,7 +1367,6 @@ user-select: none;
     .hero-slide-meta span { font-size: 0.65rem; letter-spacing: 0.06em; }
     .hero-stat-num { font-size: 1.8rem; }
     .hero-stat-label { font-size: 0.7rem; }
-    .filtro-activo-actions { display: none; }
     .visita-row { padding: 2rem 1rem 3rem; }
     .visita-content { padding: 0 1rem; }
     .cita-form { padding: 0 1rem; }
@@ -1630,8 +1629,8 @@ user-select: none;
         <label for="fr-operacion" data-short="Oper.">Operación</label>
         <select id="fr-operacion" onchange="aplicarFiltroActivo()">
           <option value="">Todas</option>
-          <option>Renta / Alquiler</option>
-          <option>Compra / Venta</option>
+          <option data-short="Renta">Renta / Alquiler</option>
+          <option data-short="Venta">Compra / Venta</option>
         </select>
       </div>
     </div>
@@ -1644,7 +1643,7 @@ user-select: none;
           <option>Casas</option>
           <option>Terrenos</option>
           <option>Oficinas</option>
-          <option>Locales Comerciales</option>
+          <option data-short="Locales">Locales Comerciales</option>
         </select>
       </div>
     </div>
@@ -1688,14 +1687,14 @@ user-select: none;
         <label for="fr-presupuesto" data-short="Precio">Presupuesto</label>
         <select id="fr-presupuesto" onchange="aplicarFiltroActivo()">
           <option>Sin límite</option>
-          <option>Hasta Q3,000/mes</option>
-          <option>Hasta Q5,000/mes</option>
-          <option>Hasta Q8,000/mes</option>
-          <option>Hasta Q15,000/mes</option>
-          <option>Hasta Q30,000/mes</option>
-          <option>Hasta Q50,000/mes</option>
-          <option>Hasta Q100,000/mes</option>
-          <option>Q100,000+/mes</option>
+          <option data-short="≤Q3,000">Hasta Q3,000/mes</option>
+          <option data-short="≤Q5,000">Hasta Q5,000/mes</option>
+          <option data-short="≤Q8,000">Hasta Q8,000/mes</option>
+          <option data-short="≤Q15,000">Hasta Q15,000/mes</option>
+          <option data-short="≤Q30,000">Hasta Q30,000/mes</option>
+          <option data-short="≤Q50,000">Hasta Q50,000/mes</option>
+          <option data-short="≤Q100,000">Hasta Q100,000/mes</option>
+          <option data-short="Q100k+">Q100,000+/mes</option>
         </select>
         <!-- opciones se regeneran dinámicamente por actualizarPresupuesto() -->
       </div>
@@ -1731,8 +1730,8 @@ user-select: none;
         <label data-short="Orden">Orden de precio</label>
         <select id="f-precio" onchange="aplicarFiltrosApt()">
           <option value="">Sin ordenar</option>
-          <option value="asc">Menor precio primero</option>
-          <option value="desc">Mayor precio primero</option>
+          <option value="asc" data-short="Menor a mayor">Menor precio primero</option>
+          <option value="desc" data-short="Mayor a menor">Mayor precio primero</option>
         </select>
       </div>
     </div>
@@ -2316,7 +2315,9 @@ user-select: none;
     const updatePillLabel = () => {
       if (!label) return;
       const isDefault = sel.selectedIndex === 0;
-      label.textContent = isDefault ? getDisplayLabel() : sel.options[sel.selectedIndex].text;
+      const opt = sel.options[sel.selectedIndex];
+      const optShort = window.innerWidth <= 600 && opt?.dataset.short ? opt.dataset.short : opt?.text || '';
+      label.textContent = isDefault ? getDisplayLabel() : optShort;
       pill.classList.toggle('pill-active', !isDefault);
     };
     pill._resetLabel = () => { sel.selectedIndex = 0; updatePillLabel(); };
