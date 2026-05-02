@@ -2808,7 +2808,24 @@ user-select: none;
     document.querySelector('#propiedades').scrollIntoView({ behavior: 'smooth' });
   }
 
+  function toggleZonaSegunDepartamento() {
+    const dep = document.getElementById('fr-departamento')?.value || '';
+    const esGuatemala = !dep || dep === 'Guatemala';
+    const zonaField = document.getElementById('fr-zona')?.closest('.filtro-activo-field');
+    if (!zonaField) return;
+    if (!esGuatemala) {
+      zonaField.style.display = 'none';
+      document.getElementById('fr-zona').selectedIndex = 0;
+      if (document.getElementById('fr-zona')._resetLabel) document.getElementById('fr-zona')._resetLabel?.();
+      const pill = document.getElementById('fr-zona').closest('.select-pill');
+      if (pill?._resetLabel) pill._resetLabel();
+    } else {
+      zonaField.style.display = '';
+    }
+  }
+
   function aplicarFiltroActivo() {
+    toggleZonaSegunDepartamento();
     const selOperacion  = document.getElementById('fr-operacion').value;
     const prevPresupuesto = document.getElementById('fr-presupuesto').value;
     actualizarPresupuesto(selOperacion || null);
@@ -3027,6 +3044,7 @@ user-select: none;
       if (sel) sel.addEventListener('change', actualizarPills);
     });
     actualizarPills();
+    toggleZonaSegunDepartamento();
     actualizarPresupuesto(); // inicializar con opciones de Renta por defecto
   });
 
