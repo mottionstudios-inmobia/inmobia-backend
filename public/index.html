@@ -1296,8 +1296,6 @@ user-select: none;
       overflow-x: visible;
     }
     .filtro-activo-field { flex: 0 0 auto; padding: 0; height: auto; border-right: none; }
-    .filtro-activo-field:nth-child(1),
-    .filtro-activo-field:nth-child(2) { display: flex; }
     .filtro-activo-field .select-pill {
       border: 1.5px solid #b8b3a8; border-radius: 20px;
       background: transparent; overflow: visible;
@@ -2290,6 +2288,7 @@ user-select: none;
       pill.classList.toggle('pill-active', !isDefault);
     };
     pill._resetLabel = () => { sel.selectedIndex = 0; updatePillLabel(); };
+    pill._syncLabel  = () => updatePillLabel();
     updatePillLabel();
 
     const renderOptions = () => {
@@ -2670,19 +2669,26 @@ user-select: none;
 
     // Aplicar filtros
     aplicarFiltrosMultiples();
+
+    // Sincronizar labels de todos los pills con el estado actual
+    document.querySelectorAll('.select-pill').forEach(pill => {
+      if (pill._syncLabel) pill._syncLabel();
+    });
   }
 
   function actualizarBarraFiltros() {
     const frOperacionField = document.getElementById('fr-operacion')?.closest('.filtro-activo-field');
     const frPropiedadField = document.getElementById('fr-propiedad')?.closest('.filtro-activo-field');
 
-    // Ocultar campo operación si un tab ya la define
     const tieneOperacion = Array.from(tabsActivos).some(t => tabAOperacion[t] !== null);
-    if (frOperacionField) frOperacionField.style.display = tieneOperacion ? 'none' : '';
+    if (frOperacionField) {
+      frOperacionField.style.display = tieneOperacion ? 'none' : '';
+    }
 
-    // Ocultar campo propiedad si un tab ya la define
     const tienePropiedad = Array.from(tabsActivos).some(t => tabAPropiedad[t] !== '' && tabAPropiedad[t] !== null);
-    if (frPropiedadField) frPropiedadField.style.display = tienePropiedad ? 'none' : '';
+    if (frPropiedadField) {
+      frPropiedadField.style.display = tienePropiedad ? 'none' : '';
+    }
   }
 
   function aplicarFiltrosMultiples() {
