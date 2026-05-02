@@ -591,16 +591,16 @@ user-select: none;
     content: '✓ '; font-size: 0.72rem;
   }
   .pill-option.selected:hover { background: #1e2d4a; color: #fff; }
-  /* Cápsula con filtro activo (valor seleccionado ≠ default) */
+  /* Cápsula con filtro activo — !important para ganar sobre background:transparent */
   .select-pill.pill-active {
-    border-color: #1e2d4a; background: #1e2d4a;
+    border-color: #1e2d4a !important; background: #1e2d4a !important;
   }
-  .select-pill.pill-active label { color: #fff; }
+  .select-pill.pill-active label { color: #fff !important; }
   /* Cápsula con dropdown abierto */
   .select-pill.pill-open {
-    border-color: #1e2d4a; background: #1e2d4a;
+    border-color: #1e2d4a !important; background: #1e2d4a !important;
   }
-  .select-pill.pill-open label { color: #fff; }
+  .select-pill.pill-open label { color: #fff !important; }
 
   /* ── SUB-FILTROS — cápsulas flotantes sin barra ── */
   .apt-filters {
