@@ -1306,11 +1306,11 @@ user-select: none;
       margin-left: 0; margin-right: 0;
       overflow-x: visible;
     }
-    .filtro-activo-field { flex: 1 1 calc(33.33% - 0.4rem); max-width: calc(33.33% - 0.4rem); padding: 0; height: auto; border-right: none; }
-    .filtro-activo-actions { display: flex; flex: 1 1 calc(33.33% - 0.4rem); max-width: calc(33.33% - 0.4rem); align-items: center; justify-content: center; padding: 0; height: auto; }
+    .filtro-activo-field { flex: 0 0 auto; padding: 0; height: auto; border-right: none; }
+    .filtro-activo-actions { display: flex; flex: 0 0 auto; align-items: center; justify-content: center; padding: 0; height: auto; }
     .filtro-activo-btn-clear { font-size: 0.6rem; padding: 0.38rem 0.65rem; border-radius: 20px; letter-spacing: 0.06em; white-space: nowrap; }
     .filtro-activo-field .select-pill {
-      width: 100%; justify-content: center;
+      width: auto; justify-content: center;
       border: 1.5px solid #b8b3a8 !important; border-radius: 20px !important;
       background: transparent !important;
     }
@@ -1327,7 +1327,7 @@ user-select: none;
     .filtro-activo-field .select-pill label {
       font-size: 0.65rem; padding: 0.45rem 0.6rem;
       letter-spacing: 0.05em; text-align: center;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .filtro-activo-field .select-pill label::after { display: none; }
     .pill-dropdown { min-width: 160px; font-size: 0.8rem; }
@@ -2310,13 +2310,13 @@ user-select: none;
     const label = pill.querySelector('label');
     const originalText = label ? label.textContent : '';
     const getDisplayLabel = () =>
-      (window.innerWidth <= 600 && label?.dataset.short) ? label.dataset.short : originalText;
+      (window.innerWidth <= 900 && label?.dataset.short) ? label.dataset.short : originalText;
 
     const updatePillLabel = () => {
       if (!label) return;
       const isDefault = sel.selectedIndex === 0;
       const opt = sel.options[sel.selectedIndex];
-      const optShort = window.innerWidth <= 600 && opt?.dataset.short ? opt.dataset.short : opt?.text || '';
+      const optShort = window.innerWidth <= 900 && opt?.dataset.short ? opt.dataset.short : opt?.text || '';
       label.textContent = isDefault ? getDisplayLabel() : optShort;
       pill.classList.toggle('pill-active', !isDefault);
     };
