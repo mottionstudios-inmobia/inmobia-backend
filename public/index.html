@@ -1581,7 +1581,7 @@ user-select: none;
   <div class="section-header animate">
     <div class="section-badge">Portafolio</div>
     <h2 class="section-title">Propiedades <em>disponibles</em></h2>
-    <p class="section-sub" style="text-align: center; max-width: 600px;">Contamos con la red más amplia de socios lo cual garantiza encontrar la más amplia galería de propiedades de Guatemala</p>
+    <p class="section-sub" style="text-align: center; max-width: 600px;">Te conectamos con la más amplia selección de propiedades en toda Guatemala.</p>
   </div>
  
   <div class="filter-tabs">
@@ -1616,6 +1616,22 @@ user-select: none;
           <option>Terrenos</option>
           <option>Oficinas</option>
           <option>Locales Comerciales</option>
+        </select>
+      </div>
+    </div>
+    <div class="filtro-activo-field">
+      <div class="select-pill">
+        <label for="fr-departamento">Departamento</label>
+        <select id="fr-departamento" onchange="aplicarFiltroActivo()">
+          <option value="">Todos</option>
+          <option>Guatemala</option><option>Sacatepéquez</option><option>Chimaltenango</option>
+          <option>Escuintla</option><option>Santa Rosa</option><option>Sololá</option>
+          <option>Totonicapán</option><option>Quetzaltenango</option><option>Suchitepéquez</option>
+          <option>Retalhuleu</option><option>San Marcos</option><option>Huehuetenango</option>
+          <option>Quiché</option><option>Baja Verapaz</option><option>Alta Verapaz</option>
+          <option>Petén</option><option>Izabal</option><option>Zacapa</option>
+          <option>Chiquimula</option><option>Jalapa</option><option>Jutiapa</option>
+          <option>El Progreso</option>
         </select>
       </div>
     </div>
@@ -2802,8 +2818,9 @@ user-select: none;
       frPres.value = prevPresupuesto;
     }
     const selPropiedad  = document.getElementById('fr-propiedad').value;
-    const selZona       = document.getElementById('fr-zona').value;
-    const selPresupuesto= frPres.value;
+    const selDepartamento= document.getElementById('fr-departamento')?.value || '';
+    const selZona        = document.getElementById('fr-zona').value;
+    const selPresupuesto = frPres.value;
 
     const opKeywordBarra  = selOperacion === 'Compra / Venta' ? 'venta' : selOperacion === 'Renta / Alquiler' ? 'renta' : null;
     const propInfoBarra   = mapaPropiedad[selPropiedad] || null;
@@ -2859,6 +2876,7 @@ user-select: none;
       opKeyword: operaciones.size > 0 ? Array.from(operaciones) : null,
       propKeyword: propiedades.size > 0 ? Array.from(propiedades) : null,
       zonaFiltro,
+      departamentoFiltro: selDepartamento || null,
       maxPrecio,
       minPrecio
     };
@@ -2910,6 +2928,7 @@ user-select: none;
 
       // Filtros adicionales
       if (zonaFiltro) visible = visible && zona === zonaFiltro;
+      if (filtrosBarra.departamentoFiltro) visible = visible && (card.dataset.departamento === filtrosBarra.departamentoFiltro);
       if (maxPrecio !== Infinity) visible = visible && precio <= maxPrecio;
       if (minPrecio) visible = visible && precio >= minPrecio;
 
@@ -2982,7 +3001,7 @@ user-select: none;
 
   function actualizarPills() {
     // Barra oscura: activo si no es el índice 0 (default)
-    ['fr-operacion','fr-propiedad','fr-zona','fr-presupuesto'].forEach(id => {
+    ['fr-operacion','fr-propiedad','fr-departamento','fr-zona','fr-presupuesto'].forEach(id => {
       const sel = document.getElementById(id);
       if (!sel) return;
       const pill = sel.closest('.select-pill');
@@ -3002,7 +3021,7 @@ user-select: none;
 
   // Escuchar cambios en todos los selects de filtro
   document.addEventListener('DOMContentLoaded', () => {
-    ['fr-operacion','fr-propiedad','fr-zona','fr-presupuesto',
+    ['fr-operacion','fr-propiedad','fr-departamento','fr-zona','fr-presupuesto',
      'f-habitaciones','f-parqueos','f-precio'].forEach(id => {
       const sel = document.getElementById(id);
       if (sel) sel.addEventListener('change', actualizarPills);
@@ -3020,10 +3039,11 @@ user-select: none;
     selectsBar[2].selectedIndex = 0;
     selectsBar[3].selectedIndex = 0;
     // Resetear barra de filtro activo
-    document.getElementById('fr-operacion').selectedIndex  = 0;
-    document.getElementById('fr-propiedad').selectedIndex  = 0;
-    document.getElementById('fr-zona').selectedIndex       = 0;
-    document.getElementById('fr-presupuesto').selectedIndex= 0;
+    document.getElementById('fr-operacion').selectedIndex    = 0;
+    document.getElementById('fr-propiedad').selectedIndex    = 0;
+    document.getElementById('fr-departamento').selectedIndex = 0;
+    document.getElementById('fr-zona').selectedIndex         = 0;
+    document.getElementById('fr-presupuesto').selectedIndex  = 0;
     // Mostrar todas las cards (barra siempre visible)
     document.getElementById('filtro-resumen').classList.add('visible');
     document.querySelectorAll('.property-card').forEach(card => card.style.display = '');
@@ -3582,6 +3602,7 @@ user-select: none;
     card.dataset.operacion    = p.operacion || '';
     card.dataset.tipo         = tipoData;
     card.dataset.zona         = zonaData;
+    card.dataset.departamento = p.departamento || 'Guatemala';
     card.dataset.precio       = String(Math.round(p.precio));
     card.dataset.moneda       = p.moneda || 'GTQ';
     card.dataset.habitaciones = String(p.habitaciones || 0);

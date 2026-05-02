@@ -1888,6 +1888,20 @@
           <div class="section-divider">Ubicación</div>
 
           <div class="form-group">
+            <label>Departamento</label>
+            <select id="f-departamento">
+              <option value="Guatemala" selected>Guatemala</option>
+              <option>Sacatepéquez</option><option>Chimaltenango</option><option>Escuintla</option>
+              <option>Santa Rosa</option><option>Sololá</option><option>Totonicapán</option>
+              <option>Quetzaltenango</option><option>Suchitepéquez</option><option>Retalhuleu</option>
+              <option>San Marcos</option><option>Huehuetenango</option><option>Quiché</option>
+              <option>Baja Verapaz</option><option>Alta Verapaz</option><option>Petén</option>
+              <option>Izabal</option><option>Zacapa</option><option>Chiquimula</option>
+              <option>Jalapa</option><option>Jutiapa</option><option>El Progreso</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label>Municipio</label>
             <select id="f-municipio">
               <option value="">Sin especificar</option>
@@ -4556,8 +4570,9 @@ async function editarProp(id) {
     document.getElementById('f-moneda').value        = p.moneda || 'GTQ';
     document.querySelector(`input[name="mantenimiento"][value="${p.mantenimiento ? '1' : '0'}"]`).checked = true;
     document.querySelector(`input[name="iva"][value="${p.iva ? '1' : '0'}"]`).checked = true;
-    document.getElementById('f-zona').value       = p.zona || '';
-    document.getElementById('f-municipio').value  = p.municipio || '';
+    document.getElementById('f-zona').value          = p.zona || '';
+    document.getElementById('f-municipio').value     = p.municipio || '';
+    document.getElementById('f-departamento').value  = p.departamento || 'Guatemala';
     document.getElementById('f-direccion').value  = p.direccion || '';
     document.getElementById('f-mapa-url').value   = p.mapa_url || '';
     document.getElementById('f-habitaciones').value = p.habitaciones || 0;
@@ -4945,6 +4960,7 @@ async function guardarPropiedad() {
   fd.append('req_adicionales',    esVenta ? '' : document.getElementById('f-req-adicionales').value.trim());
   fd.append('zona',         document.getElementById('f-zona').value);
   fd.append('municipio',    document.getElementById('f-municipio').value);
+  fd.append('departamento', document.getElementById('f-departamento').value);
   fd.append('direccion',    document.getElementById('f-direccion').value);
   fd.append('mapa_url',     document.getElementById('f-mapa-url').value.trim());
   fd.append('habitaciones', document.getElementById('f-habitaciones').value);

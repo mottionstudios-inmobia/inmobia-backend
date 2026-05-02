@@ -215,7 +215,7 @@ router.patch('/:id/toggle-publicacion', authMiddleware, (req, res) => {
 
 // ── GET /api/propiedades  (pública, con filtros)
 router.get('/', (req, res) => {
-  const { tipo, operacion, zona, busqueda, minPrecio, maxPrecio, habitaciones, parqueos, estado, limit = 50, offset = 0 } = req.query;
+  const { tipo, operacion, zona, departamento, busqueda, minPrecio, maxPrecio, habitaciones, parqueos, estado, limit = 50, offset = 0 } = req.query;
 
   // estado=todos solo omite filtros internos cuando lo solicita un admin autenticado.
   const usuarioToken = leerUsuarioToken(req);
@@ -241,6 +241,7 @@ router.get('/', (req, res) => {
   if (tipo)         { sql += ' AND p.tipo = ?';            params.push(tipo); }
   if (operacion)    { sql += ' AND p.operacion = ?';       params.push(operacion); }
   if (zona)         { sql += ' AND p.zona LIKE ?';         params.push(`%${zona}%`); }
+  if (departamento) { sql += ' AND p.departamento = ?';   params.push(departamento); }
   if (busqueda)     { sql += ' AND (p.titulo LIKE ? OR p.zona LIKE ?)'; params.push(`%${busqueda}%`, `%${busqueda}%`); }
   if (minPrecio)    { sql += ' AND p.precio >= ?';         params.push(Number(minPrecio)); }
   if (maxPrecio)    { sql += ' AND p.precio <= ?';         params.push(Number(maxPrecio)); }
@@ -263,7 +264,8 @@ router.get('/', (req, res) => {
   }
   if (tipo)         { countSql += ' AND p.tipo = ?';          countParams.push(tipo); }
   if (operacion)    { countSql += ' AND p.operacion = ?';     countParams.push(operacion); }
-  if (zona)         { countSql += ' AND p.zona LIKE ?';       countParams.push(`%${zona}%`); }
+  if (zona)         { countSql += ' AND p.zona LIKE ?';         countParams.push(`%${zona}%`); }
+  if (departamento) { countSql += ' AND p.departamento = ?';   countParams.push(departamento); }
   if (busqueda)     { countSql += ' AND (p.titulo LIKE ? OR p.zona LIKE ?)'; countParams.push(`%${busqueda}%`, `%${busqueda}%`); }
   if (minPrecio)    { countSql += ' AND p.precio >= ?';       countParams.push(Number(minPrecio)); }
   if (maxPrecio)    { countSql += ' AND p.precio <= ?';       countParams.push(Number(maxPrecio)); }
@@ -422,7 +424,7 @@ function uploadFieldsSafe(req, res, next) {
 router.post('/', authMiddleware, uploadFieldsSafe, (req, res) => {
   const {
     titulo, nombre_proyecto = '', descripcion_persuasiva = '', descripcion = '', tipo, operacion, precio, moneda = 'GTQ',
-    zona = '', municipio = '', colonia = '', direccion = '', mapa_url = '', habitaciones = 0, banos = 0,
+    zona = '', municipio = '', colonia = '', departamento = 'Guatemala', direccion = '', mapa_url = '', habitaciones = 0, banos = 0,
     parqueos = 0, metros = 0, amueblado = 0, mascota = 0,
     piscina = 0, gimnasio = 0, seguridad = 0, destacado = 0, mantenimiento = 0, iva = 0, impuestos = 0,
     bodega = 0, dormitorio_servicio = 0, sala_familiar = 0,
@@ -469,7 +471,7 @@ router.post('/', authMiddleware, uploadFieldsSafe, (req, res) => {
   try {
   result = db.prepare(`
     INSERT INTO propiedades
-      (titulo, nombre_proyecto, descripcion_persuasiva, descripcion, tipo, operacion, precio, moneda, zona, municipio, colonia, direccion, mapa_url,
+      (titulo, nombre_proyecto, descripcion_persuasiva, descripcion, tipo, operacion, precio, moneda, zona, municipio, colonia, departamento, direccion, mapa_url,
        habitaciones, banos, parqueos, metros, amueblado, mascota, piscina, gimnasio, seguridad,
        destacado, mantenimiento, iva, impuestos, bodega, dormitorio_servicio, sala_familiar,
        no_mascota, no_linea_blanca, linea_blanca, jardin, patio, garita,
@@ -485,8 +487,8 @@ router.post('/', authMiddleware, uploadFieldsSafe, (req, res) => {
        req_dpi, req_constancia, req_estados_cuenta, req_formulario, req_fiador,
        req_antecedentes, req_renas, req_infornet, req_deposito, req_contrato_1ano, req_notario,
        req_valor_contrato, req_adicionales, usuario_id, publicado_inmobia, codigo)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-  `).run(titulo, nombre_proyecto, descripcion_persuasiva, descripcion, tipo, operacion, n(precio), moneda, zona, municipio, colonia, direccion, mapa_url,
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  `).run(titulo, nombre_proyecto, descripcion_persuasiva, descripcion, tipo, operacion, n(precio), moneda, zona, municipio, colonia, departamento, direccion, mapa_url,
          n(habitaciones), n(banos), n(parqueos), n(metros), n(amueblado), n(mascota), n(piscina),
          n(gimnasio), n(seguridad), n(destacado), n(mantenimiento), n(iva), n(impuestos),
          n(bodega), n(dormitorio_servicio), n(sala_familiar),
@@ -556,7 +558,7 @@ router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
 
   const {
     titulo, nombre_proyecto = '', descripcion_persuasiva = '', descripcion = '', tipo, operacion, precio, moneda = 'GTQ',
-    zona = '', municipio = '', colonia = '', direccion = '', mapa_url = '', habitaciones = 0, banos = 0, parqueos = 0,
+    zona = '', municipio = '', colonia = '', departamento = 'Guatemala', direccion = '', mapa_url = '', habitaciones = 0, banos = 0, parqueos = 0,
     metros = 0, amueblado = 0, mascota = 0, piscina = 0, gimnasio = 0, seguridad = 0, estado = 'activo', destacado = 0, mantenimiento = 0, iva = 0, impuestos = 0,
     bodega = 0, dormitorio_servicio = 0, sala_familiar = 0,
     no_mascota = 0, no_linea_blanca = 0,
@@ -604,7 +606,7 @@ router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
   db.prepare(`
     UPDATE propiedades SET
       titulo=?, nombre_proyecto=?, descripcion_persuasiva=?, descripcion=?, tipo=?, operacion=?, precio=?, moneda=?,
-      zona=?, municipio=?, colonia=?, direccion=?, mapa_url=?, habitaciones=?, banos=?, parqueos=?,
+      zona=?, municipio=?, colonia=?, departamento=?, direccion=?, mapa_url=?, habitaciones=?, banos=?, parqueos=?,
       metros=?, amueblado=?, mascota=?, piscina=?, gimnasio=?, seguridad=?,
       estado=?, destacado=?, mantenimiento=?, iva=?, impuestos=?,
       bodega=?, dormitorio_servicio=?, sala_familiar=?,
@@ -624,7 +626,7 @@ router.put('/:id', authMiddleware, uploadFieldsSafe, (req, res) => {
       actualizado_en=CURRENT_TIMESTAMP
     WHERE id=?
   `).run(titulo, nombre_proyecto, descripcion_persuasiva, descripcion, tipo, operacion, n(precio), moneda,
-         zona, municipio, colonia, direccion, mapa_url, n(habitaciones), n(banos), n(parqueos),
+         zona, municipio, colonia, departamento, direccion, mapa_url, n(habitaciones), n(banos), n(parqueos),
          n(metros), n(amueblado), n(mascota), n(piscina), n(gimnasio), n(seguridad),
          estado, n(destacado), n(mantenimiento), n(iva), n(impuestos),
          n(bodega), n(dormitorio_servicio), n(sala_familiar),

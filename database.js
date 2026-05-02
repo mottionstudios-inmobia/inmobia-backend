@@ -117,6 +117,7 @@ try { db.exec(`ALTER TABLE propiedades ADD COLUMN no_linea_blanca INTEGER DEFAUL
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN nombre_proyecto TEXT DEFAULT ''`); } catch {}
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN mapa_url TEXT DEFAULT ''`); } catch {}
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN colonia TEXT DEFAULT ''`); } catch {}
+try { db.exec(`ALTER TABLE propiedades ADD COLUMN departamento TEXT DEFAULT 'Guatemala'`); } catch {}
 // ¿Qué incluye?
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN inc_estufa INTEGER DEFAULT 0`); } catch {}
 try { db.exec(`ALTER TABLE propiedades ADD COLUMN inc_refrigeradora INTEGER DEFAULT 0`); } catch {}

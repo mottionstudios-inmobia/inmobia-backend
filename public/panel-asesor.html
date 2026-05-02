@@ -13955,6 +13955,7 @@ async function guardarPropiedad() {
   form.append('moneda',                document.getElementById('np-moneda').value);
   form.append('zona',                  document.getElementById('np-zona').value);
   form.append('municipio',             document.getElementById('np-municipio').value);
+  form.append('departamento',          document.getElementById('np-departamento')?.value || 'Guatemala');
   form.append('colonia',               document.getElementById('np-colonia').value.trim());
   form.append('mantenimiento',         esVenta ? 0 : (document.querySelector('input[name="np-mantenimiento"]:checked')?.value ?? 0));
   form.append('iva',                   document.querySelector('input[name="np-iva"]:checked')?.value ?? 0);
@@ -14209,6 +14210,7 @@ async function editarPropiedad(id) {
     actualizarSimboloSinLB();
     document.getElementById('np-zona').value             = p.zona || '';
     document.getElementById('np-municipio').value        = p.municipio || '';
+    document.getElementById('np-departamento').value     = p.departamento || 'Guatemala';
     document.getElementById('np-colonia').value          = p.colonia || '';
     // Radios
     document.querySelector(`input[name="np-mantenimiento"][value="${p.mantenimiento ? '1' : '0'}"]`).checked = true;
