@@ -1335,6 +1335,12 @@ user-select: none;
     .pill-dropdown { min-width: 160px; font-size: 0.8rem; }
     .filter-tabs { padding-left: 0 !important; padding-right: 0 !important; }
     .properties-grid, .testimonios-grid, .servicios-grid { grid-template-columns: 1fr; }
+    .property-body { padding: 0.75rem 1rem; }
+    .property-name { font-size: 0.9rem; margin-bottom: 0.25rem; }
+    .property-location { font-size: 0.72rem; margin-bottom: 0.5rem; }
+    .card-tags-row { margin-bottom: 0.35rem; }
+    .card-tags { font-size: 0.65rem; gap: 0.3rem; }
+    .property-specs { gap: 0.6rem; font-size: 0.72rem; }
     .steps-grid { grid-template-columns: 1fr; gap: 0; }
     .steps-grid::before { display: none; }
     .step { padding: 2.5rem 2rem; border-right: none; border-bottom: none; }
@@ -1623,7 +1629,7 @@ user-select: none;
   <div class="filtro-activo visible" id="filtro-resumen">
     <div class="filtro-activo-field">
       <div class="select-pill">
-        <label for="fr-operacion">Operación</label>
+        <label for="fr-operacion" data-short="Oper.">Operación</label>
         <select id="fr-operacion" onchange="aplicarFiltroActivo()">
           <option value="">Todas</option>
           <option>Renta / Alquiler</option>
@@ -1633,7 +1639,7 @@ user-select: none;
     </div>
     <div class="filtro-activo-field">
       <div class="select-pill">
-        <label for="fr-propiedad">Propiedad</label>
+        <label for="fr-propiedad" data-short="Tipo">Propiedad</label>
         <select id="fr-propiedad" onchange="aplicarFiltroActivo()">
           <option value="">Todos</option>
           <option>Apartamentos</option>
@@ -1646,7 +1652,7 @@ user-select: none;
     </div>
     <div class="filtro-activo-field">
       <div class="select-pill">
-        <label for="fr-departamento">Departamento</label>
+        <label for="fr-departamento" data-short="Depto.">Departamento</label>
         <select id="fr-departamento" onchange="aplicarFiltroActivo()">
           <option value="">Todos</option>
           <option>Guatemala</option><option>Sacatepéquez</option><option>Chimaltenango</option>
@@ -1662,7 +1668,7 @@ user-select: none;
     </div>
     <div class="filtro-activo-field">
       <div class="select-pill">
-        <label for="fr-zona">Zona / Sector</label>
+        <label for="fr-zona" data-short="Zona">Zona / Sector</label>
         <select id="fr-zona" onchange="aplicarFiltroActivo()">
           <option>Todas las zonas</option>
           <option>Zona 1</option><option>Zona 2</option><option>Zona 3</option><option>Zona 4</option>
@@ -1681,7 +1687,7 @@ user-select: none;
     </div>
     <div class="filtro-activo-field">
       <div class="select-pill">
-        <label for="fr-presupuesto">Presupuesto</label>
+        <label for="fr-presupuesto" data-short="Precio">Presupuesto</label>
         <select id="fr-presupuesto" onchange="aplicarFiltroActivo()">
           <option>Sin límite</option>
           <option>Hasta Q3,000/mes</option>
@@ -1698,7 +1704,7 @@ user-select: none;
     </div>
     <div class="filtro-activo-field">
       <div class="select-pill">
-        <label>Habitaciones</label>
+        <label data-short="Dorm.">Habitaciones</label>
         <select id="f-habitaciones" onchange="aplicarFiltrosApt()">
           <option value="">Todas</option>
           <option value="1">1 Hab.</option>
@@ -1710,7 +1716,7 @@ user-select: none;
     </div>
     <div class="filtro-activo-field">
       <div class="select-pill">
-        <label>Parqueos</label>
+        <label data-short="Parqueos">Parqueos</label>
         <select id="f-parqueos" onchange="aplicarFiltrosApt()">
           <option value="">Todos</option>
           <option value="1">1 parqueo</option>
@@ -1724,7 +1730,7 @@ user-select: none;
     </div>
     <div class="filtro-activo-field">
       <div class="select-pill">
-        <label>Orden de precio</label>
+        <label data-short="Orden">Orden de precio</label>
         <select id="f-precio" onchange="aplicarFiltrosApt()">
           <option value="">Sin ordenar</option>
           <option value="asc">Menor precio primero</option>
@@ -2306,11 +2312,13 @@ user-select: none;
 
     const label = pill.querySelector('label');
     const originalText = label ? label.textContent : '';
+    const getDisplayLabel = () =>
+      (window.innerWidth <= 600 && label?.dataset.short) ? label.dataset.short : originalText;
 
     const updatePillLabel = () => {
       if (!label) return;
       const isDefault = sel.selectedIndex === 0;
-      label.textContent = isDefault ? originalText : sel.options[sel.selectedIndex].text;
+      label.textContent = isDefault ? getDisplayLabel() : sel.options[sel.selectedIndex].text;
       pill.classList.toggle('pill-active', !isDefault);
     };
     pill._resetLabel = () => { sel.selectedIndex = 0; updatePillLabel(); };
