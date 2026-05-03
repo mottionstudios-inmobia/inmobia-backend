@@ -1017,7 +1017,7 @@ user-select: none;
   .zona-caps-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.35); margin-bottom: 0.4rem; }
   .zona-caps { display: flex !important; flex-wrap: wrap !important; gap: 0.35rem; align-items: flex-start; }
   .zona-cap { position: relative; flex: 0 0 auto !important; width: auto !important; }
-  .zona-cap input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .zona-cap input[type="checkbox"], .zona-cap input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
   .zona-cap label {
     display: inline-block !important; width: auto !important;
     padding: 0.28rem 0.75rem; margin: 0 !important;
@@ -1887,17 +1887,39 @@ user-select: none;
         </div>
         <div class="form-group">
           <label>Departamento <span class="req-mark">*</span></label>
-          <select id="b-departamento" required onchange="actualizarZonaBusqueda()">
-            <option value="">Seleccionar...</option>
-            <option>Guatemala</option><option>Alta Verapaz</option><option>Baja Verapaz</option>
-            <option>Chimaltenango</option><option>Chiquimula</option><option>El Progreso</option>
-            <option>Escuintla</option><option>Huehuetenango</option><option>Izabal</option>
-            <option>Jalapa</option><option>Jutiapa</option><option>Petén</option>
-            <option>Quetzaltenango</option><option>Quiché</option><option>Retalhuleu</option>
-            <option>Sacatepéquez</option><option>San Marcos</option><option>Santa Rosa</option>
-            <option>Sololá</option><option>Suchitepéquez</option><option>Totonicapán</option>
-            <option>Zacapa</option>
-          </select>
+          <button type="button" id="btn-depto-toggle" onclick="toggleDeptoPanel()" style="
+            width:100%;display:flex;justify-content:space-between;align-items:center;
+            background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);
+            color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;
+            font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
+            <span id="depto-toggle-label">Seleccionar departamento ▾</span>
+          </button>
+          <div id="depto-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+            <div class="zona-caps">
+              <div class="zona-cap"><input type="radio" id="dep-gt"   name="b-departamento" value="Guatemala"       onchange="selDeptoCapsula(this)"><label for="dep-gt">Guatemala</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-av"   name="b-departamento" value="Alta Verapaz"    onchange="selDeptoCapsula(this)"><label for="dep-av">Alta Verapaz</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-bv"   name="b-departamento" value="Baja Verapaz"    onchange="selDeptoCapsula(this)"><label for="dep-bv">Baja Verapaz</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-chim" name="b-departamento" value="Chimaltenango"   onchange="selDeptoCapsula(this)"><label for="dep-chim">Chimaltenango</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-chiq" name="b-departamento" value="Chiquimula"      onchange="selDeptoCapsula(this)"><label for="dep-chiq">Chiquimula</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-ep"   name="b-departamento" value="El Progreso"     onchange="selDeptoCapsula(this)"><label for="dep-ep">El Progreso</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-esc"  name="b-departamento" value="Escuintla"       onchange="selDeptoCapsula(this)"><label for="dep-esc">Escuintla</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-hue"  name="b-departamento" value="Huehuetenango"   onchange="selDeptoCapsula(this)"><label for="dep-hue">Huehuetenango</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-iza"  name="b-departamento" value="Izabal"          onchange="selDeptoCapsula(this)"><label for="dep-iza">Izabal</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-jal"  name="b-departamento" value="Jalapa"          onchange="selDeptoCapsula(this)"><label for="dep-jal">Jalapa</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-jut"  name="b-departamento" value="Jutiapa"         onchange="selDeptoCapsula(this)"><label for="dep-jut">Jutiapa</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-pet"  name="b-departamento" value="Petén"           onchange="selDeptoCapsula(this)"><label for="dep-pet">Petén</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-que"  name="b-departamento" value="Quetzaltenango"  onchange="selDeptoCapsula(this)"><label for="dep-que">Quetzaltenango</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-qui"  name="b-departamento" value="Quiché"          onchange="selDeptoCapsula(this)"><label for="dep-qui">Quiché</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-ret"  name="b-departamento" value="Retalhuleu"      onchange="selDeptoCapsula(this)"><label for="dep-ret">Retalhuleu</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-sac"  name="b-departamento" value="Sacatepéquez"    onchange="selDeptoCapsula(this)"><label for="dep-sac">Sacatepéquez</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-sm"   name="b-departamento" value="San Marcos"      onchange="selDeptoCapsula(this)"><label for="dep-sm">San Marcos</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-sr"   name="b-departamento" value="Santa Rosa"      onchange="selDeptoCapsula(this)"><label for="dep-sr">Santa Rosa</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-sol"  name="b-departamento" value="Sololá"          onchange="selDeptoCapsula(this)"><label for="dep-sol">Sololá</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-suc"  name="b-departamento" value="Suchitepéquez"   onchange="selDeptoCapsula(this)"><label for="dep-suc">Suchitepéquez</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-tot"  name="b-departamento" value="Totonicapán"     onchange="selDeptoCapsula(this)"><label for="dep-tot">Totonicapán</label></div>
+              <div class="zona-cap"><input type="radio" id="dep-zac"  name="b-departamento" value="Zacapa"          onchange="selDeptoCapsula(this)"><label for="dep-zac">Zacapa</label></div>
+            </div>
+          </div>
         </div>
       </div>
       <!-- Zona Guatemala — desplegable con municipios y zonas -->
@@ -3334,9 +3356,27 @@ user-select: none;
   }
   actualizarPresupuestoBusqueda();
 
+  // ── DEPARTAMENTO: toggle y selección por cápsula
+  function toggleDeptoPanel() {
+    const panel = document.getElementById('depto-panel');
+    const abierto = panel.style.display !== 'none';
+    panel.style.display = abierto ? 'none' : 'block';
+    const btn = document.getElementById('btn-depto-toggle');
+    if (btn) btn.style.borderRadius = abierto ? '4px' : '4px 4px 0 0';
+  }
+  function selDeptoCapsula(radio) {
+    const lbl = document.getElementById('depto-toggle-label');
+    if (lbl) lbl.textContent = radio.value + ' ▾';
+    // Cerrar panel tras selección
+    document.getElementById('depto-panel').style.display = 'none';
+    const btn = document.getElementById('btn-depto-toggle');
+    if (btn) { btn.style.borderRadius = '4px'; btn.style.borderColor = 'rgba(201,168,76,0.7)'; btn.style.color = 'rgba(255,255,255,0.9)'; }
+    actualizarZonaBusqueda();
+  }
+
   // ── ZONA SEGÚN DEPARTAMENTO (búsqueda personalizada)
   function actualizarZonaBusqueda() {
-    const dep = document.getElementById('b-departamento')?.value;
+    const dep = document.querySelector('input[name="b-departamento"]:checked')?.value || '';
     const esGt = dep === 'Guatemala';
     document.getElementById('grp-b-zona-gt').style.display   = esGt ? '' : 'none';
     document.getElementById('grp-b-zona-otro').style.display = esGt ? 'none' : (dep ? '' : 'none');
@@ -3394,7 +3434,7 @@ user-select: none;
 
     const presupSel = document.getElementById('b-presupuesto');
     const presupMax = presupSel?.value || '';
-    const dep = val('b-departamento');
+    const dep = form.querySelector('input[name="b-departamento"]:checked')?.value || '';
     const municipios = [...form.querySelectorAll('input[name="b-municipio"]:checked')].map(i => i.value);
     const zonasGt    = [...form.querySelectorAll('input[name="b-zona-gt"]:checked')].map(i => i.value);
     const zonaGt     = dep === 'Guatemala' ? [...municipios, ...zonasGt].join(', ') : '';
