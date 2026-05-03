@@ -1012,6 +1012,22 @@ user-select: none;
   .dia-option input:checked + label {
     background: var(--gold); color: #1B2A3A; border-color: var(--gold); font-weight: 600;
   }
+  /* Cápsulas de zona (búsqueda personalizada) */
+  .zona-caps-wrap { margin-bottom: 0.5rem; }
+  .zona-caps-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.35); margin-bottom: 0.4rem; }
+  .zona-caps { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .zona-cap { position: relative; }
+  .zona-cap input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .zona-cap label {
+    display: block; padding: 0.28rem 0.75rem;
+    border: 1px solid rgba(255,255,255,0.18); border-radius: 20px;
+    font-size: 0.72rem; cursor: pointer; color: rgba(255,255,255,0.55);
+    transition: all 0.15s; white-space: nowrap; user-select: none;
+  }
+  .zona-cap label:hover { border-color: var(--gold); color: rgba(255,255,255,0.9); background: rgba(201,168,76,0.1); }
+  .zona-cap input:checked + label { background: var(--gold); color: #1B2A3A; border-color: var(--gold); font-weight: 600; }
+  .zona-caps-hint { font-size: 0.68rem; color: rgba(255,255,255,0.3); margin-top: 0.4rem; }
+
   .nota-cita {
     font-size: 0.72rem; color: rgba(255,255,255,0.4);
     padding: 0.75rem 1rem; background: rgba(255,255,255,0.05);
@@ -1882,29 +1898,52 @@ user-select: none;
           </select>
         </div>
       </div>
-      <!-- Zona Guatemala -->
-      <div class="form-row" id="grp-b-zona-gt">
-        <div class="form-group">
-          <label>Zona / Municipio preferido</label>
-          <select id="b-ubicacion">
-            <option value="">Cualquiera</option>
-            <optgroup label="Zonas Ciudad de Guatemala">
-              <option>Zona 1</option><option>Zona 2</option><option>Zona 3</option>
-              <option>Zona 4</option><option>Zona 5</option><option>Zona 6</option>
-              <option>Zona 7</option><option>Zona 8</option><option>Zona 9</option>
-              <option>Zona 10</option><option>Zona 11</option><option>Zona 12</option>
-              <option>Zona 13</option><option>Zona 14</option><option>Zona 15</option>
-              <option>Zona 16</option><option>Zona 17</option><option>Zona 18</option>
-              <option>Zona 19</option><option>Zona 21</option>
-            </optgroup>
-            <optgroup label="Municipios">
-              <option>Mixco</option><option>Villa Nueva</option><option>San Miguel Petapa</option>
-              <option>Villa Canales</option><option>Amatitlán</option><option>Santa Catarina Pinula</option>
-              <option>San José Pinula</option><option>Fraijanes</option><option>Chinautla</option>
-            </optgroup>
-          </select>
+      <!-- Zona Guatemala — cápsulas multi-seleccionables -->
+      <div id="grp-b-zona-gt">
+        <div class="form-group" style="margin-bottom:0.5rem">
+          <label>Zona / Municipio preferido <span style="font-size:0.65rem;color:rgba(255,255,255,0.3);font-weight:400;text-transform:none;letter-spacing:0">— puede seleccionar varias</span></label>
+          <div class="zona-caps-wrap">
+            <div class="zona-caps-label">Zonas ciudad de Guatemala</div>
+            <div class="zona-caps">
+              <div class="zona-cap"><input type="checkbox" id="z1"  name="b-zona-gt" value="Zona 1"><label  for="z1">Z. 1</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z2"  name="b-zona-gt" value="Zona 2"><label  for="z2">Z. 2</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z3"  name="b-zona-gt" value="Zona 3"><label  for="z3">Z. 3</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z4"  name="b-zona-gt" value="Zona 4"><label  for="z4">Z. 4</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z5"  name="b-zona-gt" value="Zona 5"><label  for="z5">Z. 5</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z6"  name="b-zona-gt" value="Zona 6"><label  for="z6">Z. 6</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z7"  name="b-zona-gt" value="Zona 7"><label  for="z7">Z. 7</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z8"  name="b-zona-gt" value="Zona 8"><label  for="z8">Z. 8</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z9"  name="b-zona-gt" value="Zona 9"><label  for="z9">Z. 9</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z10" name="b-zona-gt" value="Zona 10"><label for="z10">Z. 10</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z11" name="b-zona-gt" value="Zona 11"><label for="z11">Z. 11</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z12" name="b-zona-gt" value="Zona 12"><label for="z12">Z. 12</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z13" name="b-zona-gt" value="Zona 13"><label for="z13">Z. 13</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z14" name="b-zona-gt" value="Zona 14"><label for="z14">Z. 14</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z15" name="b-zona-gt" value="Zona 15"><label for="z15">Z. 15</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z16" name="b-zona-gt" value="Zona 16"><label for="z16">Z. 16</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z17" name="b-zona-gt" value="Zona 17"><label for="z17">Z. 17</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z18" name="b-zona-gt" value="Zona 18"><label for="z18">Z. 18</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z19" name="b-zona-gt" value="Zona 19"><label for="z19">Z. 19</label></div>
+              <div class="zona-cap"><input type="checkbox" id="z21" name="b-zona-gt" value="Zona 21"><label for="z21">Z. 21</label></div>
+            </div>
+          </div>
+          <div class="zona-caps-wrap" style="margin-top:0.75rem">
+            <div class="zona-caps-label">Municipios</div>
+            <div class="zona-caps">
+              <div class="zona-cap"><input type="checkbox" id="zm-mixco"   name="b-zona-gt" value="Mixco"><label       for="zm-mixco">Mixco</label></div>
+              <div class="zona-cap"><input type="checkbox" id="zm-vnueva"  name="b-zona-gt" value="Villa Nueva"><label  for="zm-vnueva">Villa Nueva</label></div>
+              <div class="zona-cap"><input type="checkbox" id="zm-petapa"  name="b-zona-gt" value="San Miguel Petapa"><label for="zm-petapa">San Miguel Petapa</label></div>
+              <div class="zona-cap"><input type="checkbox" id="zm-vcanal"  name="b-zona-gt" value="Villa Canales"><label for="zm-vcanal">Villa Canales</label></div>
+              <div class="zona-cap"><input type="checkbox" id="zm-amatit"  name="b-zona-gt" value="Amatitlán"><label   for="zm-amatit">Amatitlán</label></div>
+              <div class="zona-cap"><input type="checkbox" id="zm-scpinul" name="b-zona-gt" value="Santa Catarina Pinula"><label for="zm-scpinul">Sta. Catarina Pinula</label></div>
+              <div class="zona-cap"><input type="checkbox" id="zm-sjpinul" name="b-zona-gt" value="San José Pinula"><label  for="zm-sjpinul">San José Pinula</label></div>
+              <div class="zona-cap"><input type="checkbox" id="zm-fraij"   name="b-zona-gt" value="Fraijanes"><label    for="zm-fraij">Fraijanes</label></div>
+              <div class="zona-cap"><input type="checkbox" id="zm-china"   name="b-zona-gt" value="Chinautla"><label    for="zm-china">Chinautla</label></div>
+            </div>
+          </div>
+          <div class="zona-caps-hint">Si no selecciona ninguna se considera "cualquier zona"</div>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-top:0.75rem">
           <label>Colonia o sector específico</label>
           <input id="b-ubicacion-detalle" type="text" placeholder="Ej: Cayalá, Vista Hermosa...">
         </div>
@@ -3304,7 +3343,9 @@ user-select: none;
     const presupSel = document.getElementById('b-presupuesto');
     const presupMax = presupSel?.value || '';
     const dep = val('b-departamento');
-    const zonaGt = dep === 'Guatemala' ? val('b-ubicacion') : '';
+    const zonaGt = dep === 'Guatemala'
+      ? [...form.querySelectorAll('input[name="b-zona-gt"]:checked')].map(i => i.value).join(', ')
+      : '';
     const zonaOtro = dep !== 'Guatemala' ? val('b-zona-otro') : '';
     const zonaFinal = zonaGt || zonaOtro || '';
 
