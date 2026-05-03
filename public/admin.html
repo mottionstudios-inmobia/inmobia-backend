@@ -1385,6 +1385,13 @@
             <option value="cerrado">Cerrado</option>
             <option value="inactivo">No interesado</option>
           </select>
+          <select class="search-input" style="width:auto" onchange="filtrarLeadOrigen(this.value)" id="lead-filtro-origen">
+            <option value="">Todos los orígenes</option>
+            <option value="busqueda_personalizada">Búsqueda personalizada</option>
+            <option value="inmobia">Lead InmobIA (agendamiento)</option>
+            <option value="portal">Cliente directo</option>
+            <option value="red-5ra">Red colaborativa 5RA</option>
+          </select>
         </div>
       </div>
 
@@ -4054,7 +4061,8 @@ function renderLeads() {
       if (mFiltro === '2A' && !l.modelo) { /* incluir */ }
       else if (mLead !== mFiltro) return false;
     }
-    if (leadFiltroEtapa && l.etapa !== leadFiltroEtapa) return false;
+    if (leadFiltroEtapa  && l.etapa  !== leadFiltroEtapa)  return false;
+    if (leadFiltroOrigen && l.origen !== leadFiltroOrigen) return false;
     if (busq && ![l.nombre, l.email, l.telefono, l.asesor_nombre, l.propiedad_titulo, l.prop_titulo]
                    .some(v => (v||'').toLowerCase().includes(busq))) return false;
     return true;
@@ -4230,8 +4238,9 @@ async function marcarTransferidoPago1D() {
   } catch { alert('Error de conexión'); }
 }
 
-function buscarLead(v)        { leadBusqueda = v;       renderLeads(); }
-function filtrarLeadEtapa(v)  { leadFiltroEtapa = v;    renderLeads(); }
+function buscarLead(v)        { leadBusqueda = v;        renderLeads(); }
+function filtrarLeadEtapa(v)  { leadFiltroEtapa = v;     renderLeads(); }
+function filtrarLeadOrigen(v) { leadFiltroOrigen = v;    renderLeads(); }
 function filtrarLeadModelo(m) {
   leadFiltroModelo = m;
   // Actualizar estado visual de cards

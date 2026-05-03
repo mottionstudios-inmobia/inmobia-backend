@@ -8106,20 +8106,21 @@ function getModeloLead(l) {
 
 function getLeadColor(l) {
   if (l.modelo === '1D') return '#0891b2';
+  if (l.origen === 'busqueda_personalizada') return '#e07b39';
   const m = { portal:'#27ae60', manual:'#27ae60', inmobia:'#8b5cf6', colaboracion:'#f59e0b', tripartito:'#ec4899', 'red-5ra':'#f59e0b' };
   return m[l.origen] || '#8b5cf6';
 }
 
 function getLeadPostItColors(l) {
-  // Retorna { bg: color de fondo pastel, border: color del borde, text: color del texto }
   const colors = {
-    '1D': { bg: '#cffafe', border: '#06b6d4', text: '#164e63' },
-    'portal': { bg: '#dcfce7', border: '#22c55e', text: '#166534' },
-    'manual': { bg: '#dcfce7', border: '#22c55e', text: '#166534' },
-    'inmobia': { bg: '#ede9fe', border: '#a78bfa', text: '#5b21b6' },
-    'colaboracion': { bg: '#fef3c7', border: '#fbbf24', text: '#92400e' },
-    'tripartito': { bg: '#fce7f3', border: '#ec4899', text: '#831843' },
-    'red-5ra': { bg: '#fef3c7', border: '#fbbf24', text: '#92400e' }
+    '1D':                   { bg: '#cffafe', border: '#06b6d4', text: '#164e63' },
+    'portal':               { bg: '#dcfce7', border: '#22c55e', text: '#166534' },
+    'manual':               { bg: '#dcfce7', border: '#22c55e', text: '#166534' },
+    'inmobia':              { bg: '#ede9fe', border: '#a78bfa', text: '#5b21b6' },
+    'busqueda_personalizada':{ bg: '#fff1eb', border: '#e07b39', text: '#7c2d12' },
+    'colaboracion':         { bg: '#fef3c7', border: '#fbbf24', text: '#92400e' },
+    'tripartito':           { bg: '#fce7f3', border: '#ec4899', text: '#831843' },
+    'red-5ra':              { bg: '#fef3c7', border: '#fbbf24', text: '#92400e' }
   };
 
   if (l.modelo === '1D') return colors['1D'];
@@ -8128,6 +8129,7 @@ function getLeadPostItColors(l) {
 
 function getLeadTitulo(l) {
   if (l.modelo === '1D') return 'Propiedades InmobIA';
+  if (l.origen === 'busqueda_personalizada') return 'Búsqueda personalizada';
   const m = { portal:'Cliente directo', manual:'Cliente directo', inmobia:'Lead InmobIA', colaboracion:'Colaboración', tripartito:'Propiedades compartidas', 'red-5ra':'Requerimientos de Asesores' };
   return m[l.origen] || 'Lead';
 }

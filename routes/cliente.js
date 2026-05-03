@@ -595,7 +595,7 @@ router.post('/busqueda-publica', async (req, res) => {
   if (!nombre || !telefono || !email || !operacion || !tipo)
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
 
-  const primerNombre = nombre.trim().split(' ')[0];
+  const primerNombre = nombre.trim();
   const lugarStr = zona || departamento || 'Guatemala';
   const presupMax = presupuesto_max ? Number(presupuesto_max) : null;
   const monedaUso = moneda || 'GTQ';
