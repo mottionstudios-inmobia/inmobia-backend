@@ -1887,14 +1887,17 @@ user-select: none;
           </button>
           <div id="tipo-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
             <div class="zona-caps">
-              <div class="zona-cap"><input type="radio" id="tp-apto"  name="b-tipo" value="Apartamento"    onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-apto">Apartamento</label></div>
-              <div class="zona-cap"><input type="radio" id="tp-casa"  name="b-tipo" value="Casa"           onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-casa">Casa</label></div>
-              <div class="zona-cap"><input type="radio" id="tp-town"  name="b-tipo" value="Townhouse"      onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-town">Townhouse</label></div>
-              <div class="zona-cap"><input type="radio" id="tp-terr"  name="b-tipo" value="Terreno"        onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-terr">Terreno</label></div>
-              <div class="zona-cap"><input type="radio" id="tp-ofic"  name="b-tipo" value="Oficina"        onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-ofic">Oficina</label></div>
-              <div class="zona-cap"><input type="radio" id="tp-local" name="b-tipo" value="Local comercial" onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-local">Local comercial</label></div>
-              <div class="zona-cap"><input type="radio" id="tp-otro"  name="b-tipo" value="Otro"           onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-otro">Otro</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-apto"  name="b-tipo" value="Apartamento"    onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta();document.getElementById('grp-tipo-otro').style.display='none'"><label for="tp-apto">Apartamento</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-casa"  name="b-tipo" value="Casa"           onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta();document.getElementById('grp-tipo-otro').style.display='none'"><label for="tp-casa">Casa</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-town"  name="b-tipo" value="Townhouse"      onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta();document.getElementById('grp-tipo-otro').style.display='none'"><label for="tp-town">Townhouse</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-terr"  name="b-tipo" value="Terreno"        onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta();document.getElementById('grp-tipo-otro').style.display='none'"><label for="tp-terr">Terreno</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-ofic"  name="b-tipo" value="Oficina"        onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta();document.getElementById('grp-tipo-otro').style.display='none'"><label for="tp-ofic">Oficina</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-local" name="b-tipo" value="Local comercial" onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta();document.getElementById('grp-tipo-otro').style.display='none'"><label for="tp-local">Local comercial</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-otro"  name="b-tipo" value="Otro"           onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta();document.getElementById('grp-tipo-otro').style.display=''"><label for="tp-otro">Otro</label></div>
             </div>
+          </div>
+          <div id="grp-tipo-otro" style="display:none;margin-top:0.6rem">
+            <input id="b-tipo-otro" type="text" placeholder="Describa el tipo de propiedad que busca..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);border-radius:4px;padding:0.6rem 1rem;color:#fff;font-family:var(--font-body);font-size:0.85rem;outline:none">
           </div>
         </div>
         <div class="form-group">
@@ -3519,7 +3522,7 @@ user-select: none;
       telefono:      tel,
       email:         val('b-email'),
       operacion:     form.querySelector('input[name="b-operacion"]:checked')?.value || '',
-      tipo:          form.querySelector('input[name="b-tipo"]:checked')?.value || '',
+      tipo:          (() => { const t = form.querySelector('input[name="b-tipo"]:checked')?.value || ''; return t === 'Otro' ? ('Otro: ' + (val('b-tipo-otro') || '')) : t; })(),
       departamento:  dep,
       zona:          zonaFinal,
       presupuesto_max: presupMax,
