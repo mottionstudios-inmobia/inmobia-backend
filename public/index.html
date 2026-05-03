@@ -553,7 +553,7 @@ user-select: none;
 
   #apt-filters { display: none !important; }
 
-  /* ── DROPDOWN CUSTOM ── */
+  /* ── DROPDOWN CUSTOM — cápsulas ── */
   .pill-dropdown {
     display: none;
     position: fixed;
@@ -561,36 +561,31 @@ user-select: none;
     border: 1px solid #e0dbd3;
     border-radius: 14px;
     box-shadow: 0 12px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.06);
-    min-width: 200px;
+    min-width: 180px; max-width: 340px;
     z-index: 9999;
-    overflow: hidden;
+    padding: 0.75rem;
   }
   .pill-dropdown.open { display: block; animation: pillDrop 0.18s cubic-bezier(0.4,0,0.2,1); }
+  .pill-dropdown-caps { display: flex; flex-wrap: wrap; gap: 0.35rem; }
   @keyframes pillDrop {
     from { opacity: 0; transform: translateY(-4px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   .pill-option {
-    display: block; width: 100%;
-    padding: 0.65rem 1.1rem;
-    text-align: left; background: none; border: none;
-    border-bottom: 1px solid #f0ede8;
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.32rem 0.8rem;
+    background: none;
+    border: 1.5px solid #d4cfc8; border-radius: 20px;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
-    color: #2c2420; letter-spacing: 0.01em;
-    transition: background 0.15s, color 0.15s;
-    white-space: nowrap;
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+    color: #4a4540; letter-spacing: 0.02em;
+    transition: all 0.15s; white-space: nowrap;
   }
-  .pill-option:last-child { border-bottom: none; }
-  .pill-option:hover { background: #1e2d4a; color: #fff; }
+  .pill-option:hover { border-color: #1e2d4a; background: #1e2d4a; color: #fff; }
   .pill-option.selected {
-    color: #c9a84c; font-weight: 600;
-    background: rgba(201,168,76,0.06);
+    border-color: #1e2d4a; background: #1e2d4a; color: #fff; font-weight: 600;
   }
-  .pill-option.selected::before {
-    content: '✓ '; font-size: 0.72rem;
-  }
-  .pill-option.selected:hover { background: #1e2d4a; color: #fff; }
+  .pill-option.selected::before { content: '✓ '; font-size: 0.7rem; }
   /* Cápsula con filtro activo — !important para ganar sobre background:transparent */
   .select-pill.pill-active {
     border-color: #1e2d4a !important; background: #1e2d4a !important;
@@ -2357,11 +2352,14 @@ user-select: none;
 
     const renderOptions = () => {
       dropdown.innerHTML = '';
+      const wrap = document.createElement('div');
+      wrap.className = 'pill-dropdown-caps';
       Array.from(sel.options).forEach((opt, i) => {
+        if (i === 0) return; // omitir opción default ("Todas", "Sin ordenar"…)
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'pill-option' + (i === sel.selectedIndex ? ' selected' : '');
-        btn.textContent = (window.innerWidth <= 600 && opt.dataset.short) ? opt.dataset.short : opt.text;
+        btn.textContent = (window.innerWidth <= 900 && opt.dataset.short) ? opt.dataset.short : opt.text;
         btn.addEventListener('click', e => {
           e.stopPropagation();
           sel.selectedIndex = i;
@@ -2370,8 +2368,9 @@ user-select: none;
           renderOptions();
           closeAllDropdowns();
         });
-        dropdown.appendChild(btn);
+        wrap.appendChild(btn);
       });
+      dropdown.appendChild(wrap);
     };
     renderOptions();
     sel.addEventListener('change', () => { updatePillLabel(); renderOptions(); });
