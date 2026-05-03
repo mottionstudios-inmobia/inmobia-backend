@@ -1864,11 +1864,19 @@ user-select: none;
         </div>
         <div class="form-group">
           <label>Operación <span class="req-mark">*</span></label>
-          <select id="b-operacion" required onchange="actualizarObligatoriosRenta();actualizarPresupuestoBusqueda()">
-            <option value="">Seleccionar...</option>
-            <option value="Renta">Renta / Alquiler</option>
-            <option value="Compra">Compra / Venta</option>
-          </select>
+          <button type="button" id="btn-oper-toggle" onclick="toggleOperPanel()" style="
+            width:100%;display:flex;justify-content:space-between;align-items:center;
+            background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);
+            color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;
+            font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
+            <span id="oper-toggle-label">Seleccionar operación ▾</span>
+          </button>
+          <div id="oper-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+            <div class="zona-caps">
+              <div class="zona-cap"><input type="radio" id="op-renta"  name="b-operacion" value="Renta"  onchange="selOperCapsula(this)"><label for="op-renta">Renta / Alquiler</label></div>
+              <div class="zona-cap"><input type="radio" id="op-compra" name="b-operacion" value="Compra" onchange="selOperCapsula(this)"><label for="op-compra">Compra / Venta</label></div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="form-row">
@@ -3134,7 +3142,7 @@ user-select: none;
 
   // ── CAMPOS OBLIGATORIOS SEGÚN OPERACIÓN + TIPO
   function actualizarObligatoriosRenta() {
-    const operacion = document.getElementById('b-operacion').value;
+    const operacion = document.querySelector('input[name="b-operacion"]:checked')?.value || '';
     const tipo = document.getElementById('b-tipo').value;
     const esRenta = operacion === 'Renta';
     const esCompraApto = operacion === 'Compra' && tipo === 'Apartamento';
@@ -3349,13 +3357,31 @@ user-select: none;
     { v: '5000000', t: 'Q2,500,000+' },
   ];
   function actualizarPresupuestoBusqueda() {
-    const op = document.getElementById('b-operacion')?.value;
+    const op = document.querySelector('input[name="b-operacion"]:checked')?.value || '';
     const sel = document.getElementById('b-presupuesto');
     if (!sel) return;
     const lista = op === 'Compra' ? presupuestosCompra : presupuestosRenta;
     sel.innerHTML = lista.map(o => `<option value="${o.v}">${o.t}</option>`).join('');
   }
   actualizarPresupuestoBusqueda();
+
+  // ── OPERACIÓN: toggle y selección por cápsula
+  function toggleOperPanel() {
+    const panel = document.getElementById('oper-panel');
+    const abierto = panel.style.display !== 'none';
+    panel.style.display = abierto ? 'none' : 'block';
+    const btn = document.getElementById('btn-oper-toggle');
+    if (btn) btn.style.borderRadius = abierto ? '4px' : '4px 4px 0 0';
+  }
+  function selOperCapsula(radio) {
+    const lbl = document.getElementById('oper-toggle-label');
+    if (lbl) lbl.textContent = (radio.value === 'Renta' ? 'Renta / Alquiler' : 'Compra / Venta') + ' ▾';
+    document.getElementById('oper-panel').style.display = 'none';
+    const btn = document.getElementById('btn-oper-toggle');
+    if (btn) { btn.style.borderRadius = '4px'; btn.style.borderColor = 'rgba(201,168,76,0.7)'; btn.style.color = 'rgba(255,255,255,0.9)'; }
+    actualizarObligatoriosRenta();
+    actualizarPresupuestoBusqueda();
+  }
 
   // ── DEPARTAMENTO: toggle y selección por cápsula
   function toggleDeptoPanel() {
@@ -3449,7 +3475,7 @@ user-select: none;
       nombre:        val('b-nombre'),
       telefono:      tel,
       email:         val('b-email'),
-      operacion:     val('b-operacion'),
+      operacion:     form.querySelector('input[name="b-operacion"]:checked')?.value || '',
       tipo:          val('b-tipo'),
       departamento:  dep,
       zona:          zonaFinal,
