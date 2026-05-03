@@ -3476,11 +3476,12 @@ user-select: none;
     const zonas     = [...document.querySelectorAll('input[name="b-zona-gt"]:checked')].map(i => i.value);
     const total = municipios.length + zonas.length;
 
-    // Ocultar zonas cuando hay municipio seleccionado
+    // Zonas visibles solo si no hay municipio, o si el único seleccionado es Ciudad de Guatemala
+    const municipiosSinCdGt = municipios.filter(m => m !== 'Ciudad de Guatemala');
     const grpZonas = document.getElementById('grp-zonas-ciudad');
-    if (grpZonas) grpZonas.style.display = municipios.length > 0 ? 'none' : '';
-    // Si hay municipio activo, desmarcar zonas
-    if (municipios.length > 0) {
+    if (grpZonas) grpZonas.style.display = municipiosSinCdGt.length > 0 ? 'none' : '';
+    // Desmarcar zonas solo si hay municipio que no sea Ciudad de Guatemala
+    if (municipiosSinCdGt.length > 0) {
       document.querySelectorAll('input[name="b-zona-gt"]').forEach(c => c.checked = false);
     }
 
