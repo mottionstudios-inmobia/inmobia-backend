@@ -1950,16 +1950,16 @@ user-select: none;
           <div class="zona-caps-wrap">
             <div class="zona-caps-label">Municipios del departamento de Guatemala</div>
             <div class="zona-caps">
-              <div class="zona-cap"><input type="checkbox" id="zm-cdgt"    name="b-municipio" value="Ciudad de Guatemala" onchange="actualizarZonaToggle()"><label for="zm-cdgt">Ciudad de Guatemala</label></div>
-              <div class="zona-cap"><input type="checkbox" id="zm-mixco"   name="b-municipio" value="Mixco"                onchange="actualizarZonaToggle()"><label for="zm-mixco">Mixco</label></div>
-              <div class="zona-cap"><input type="checkbox" id="zm-vnueva"  name="b-municipio" value="Villa Nueva"          onchange="actualizarZonaToggle()"><label for="zm-vnueva">Villa Nueva</label></div>
-              <div class="zona-cap"><input type="checkbox" id="zm-petapa"  name="b-municipio" value="San Miguel Petapa"    onchange="actualizarZonaToggle()"><label for="zm-petapa">San Miguel Petapa</label></div>
-              <div class="zona-cap"><input type="checkbox" id="zm-vcanal"  name="b-municipio" value="Villa Canales"        onchange="actualizarZonaToggle()"><label for="zm-vcanal">Villa Canales</label></div>
-              <div class="zona-cap"><input type="checkbox" id="zm-amatit"  name="b-municipio" value="Amatitlán"            onchange="actualizarZonaToggle()"><label for="zm-amatit">Amatitlán</label></div>
-              <div class="zona-cap"><input type="checkbox" id="zm-scpinul" name="b-municipio" value="Santa Catarina Pinula" onchange="actualizarZonaToggle()"><label for="zm-scpinul">Sta. Catarina Pinula</label></div>
-              <div class="zona-cap"><input type="checkbox" id="zm-sjpinul" name="b-municipio" value="San José Pinula"      onchange="actualizarZonaToggle()"><label for="zm-sjpinul">San José Pinula</label></div>
-              <div class="zona-cap"><input type="checkbox" id="zm-fraij"   name="b-municipio" value="Fraijanes"            onchange="actualizarZonaToggle()"><label for="zm-fraij">Fraijanes</label></div>
-              <div class="zona-cap"><input type="checkbox" id="zm-china"   name="b-municipio" value="Chinautla"            onchange="actualizarZonaToggle()"><label for="zm-china">Chinautla</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-cdgt"    name="b-municipio" value="Ciudad de Guatemala" onchange="actualizarZonaToggle()"><label for="zm-cdgt">Ciudad de Guatemala</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-mixco"   name="b-municipio" value="Mixco"                onchange="actualizarZonaToggle()"><label for="zm-mixco">Mixco</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-vnueva"  name="b-municipio" value="Villa Nueva"          onchange="actualizarZonaToggle()"><label for="zm-vnueva">Villa Nueva</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-petapa"  name="b-municipio" value="San Miguel Petapa"    onchange="actualizarZonaToggle()"><label for="zm-petapa">San Miguel Petapa</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-vcanal"  name="b-municipio" value="Villa Canales"        onchange="actualizarZonaToggle()"><label for="zm-vcanal">Villa Canales</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-amatit"  name="b-municipio" value="Amatitlán"            onchange="actualizarZonaToggle()"><label for="zm-amatit">Amatitlán</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-scpinul" name="b-municipio" value="Santa Catarina Pinula" onchange="actualizarZonaToggle()"><label for="zm-scpinul">Sta. Catarina Pinula</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-sjpinul" name="b-municipio" value="San José Pinula"      onchange="actualizarZonaToggle()"><label for="zm-sjpinul">San José Pinula</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-fraij"   name="b-municipio" value="Fraijanes"            onchange="actualizarZonaToggle()"><label for="zm-fraij">Fraijanes</label></div>
+              <div class="zona-cap"><input type="radio" id="zm-china"   name="b-municipio" value="Chinautla"            onchange="actualizarZonaToggle()"><label for="zm-china">Chinautla</label></div>
             </div>
           </div>
           <!-- 2. ZONAS — se ocultan si hay municipio seleccionado -->
@@ -3471,24 +3471,24 @@ user-select: none;
 
   // ── ACTUALIZA LABEL DEL BOTÓN Y OCULTA ZONAS SI HAY MUNICIPIO SELECCIONADO
   function actualizarZonaToggle() {
-    const municipios = [...document.querySelectorAll('input[name="b-municipio"]:checked')].map(i => i.value);
-    const zonas     = [...document.querySelectorAll('input[name="b-zona-gt"]:checked')].map(i => i.value);
-    const total = municipios.length + zonas.length;
+    // Municipio: radio — solo uno posible
+    const municipio = document.querySelector('input[name="b-municipio"]:checked')?.value || '';
+    // Zonas: checkbox — múltiples posibles
+    const zonas = [...document.querySelectorAll('input[name="b-zona-gt"]:checked')].map(i => i.value);
 
-    // Zonas visibles solo si no hay municipio, o si el único seleccionado es Ciudad de Guatemala
-    const municipiosSinCdGt = municipios.filter(m => m !== 'Ciudad de Guatemala');
+    // Zonas visibles solo si no hay municipio, o si el municipio es Ciudad de Guatemala
+    const ocultarZonas = municipio && municipio !== 'Ciudad de Guatemala';
     const grpZonas = document.getElementById('grp-zonas-ciudad');
-    if (grpZonas) grpZonas.style.display = municipiosSinCdGt.length > 0 ? 'none' : '';
-    // Desmarcar zonas solo si hay municipio que no sea Ciudad de Guatemala
-    if (municipiosSinCdGt.length > 0) {
+    if (grpZonas) grpZonas.style.display = ocultarZonas ? 'none' : '';
+    if (ocultarZonas) {
       document.querySelectorAll('input[name="b-zona-gt"]').forEach(c => c.checked = false);
     }
 
     // Actualizar texto del botón
     const lbl = document.getElementById('zona-toggle-label');
     if (!lbl) return;
-    if (total === 0) { lbl.textContent = 'Seleccionar municipio o zona ▾'; return; }
-    const seleccionados = [...municipios, ...zonas];
+    const seleccionados = municipio ? [municipio, ...zonas] : zonas;
+    if (seleccionados.length === 0) { lbl.textContent = 'Seleccionar municipio o zona ▾'; return; }
     lbl.textContent = seleccionados.length <= 3
       ? seleccionados.join(', ') + ' ▾'
       : `${seleccionados.slice(0,3).join(', ')} +${seleccionados.length - 3} más ▾`;
@@ -3508,9 +3508,9 @@ user-select: none;
 
     const presupMax = form.querySelector('input[name="b-presupuesto"]:checked')?.value || '';
     const dep = form.querySelector('input[name="b-departamento"]:checked')?.value || '';
-    const municipios = [...form.querySelectorAll('input[name="b-municipio"]:checked')].map(i => i.value);
+    const municipio  = form.querySelector('input[name="b-municipio"]:checked')?.value || '';
     const zonasGt    = [...form.querySelectorAll('input[name="b-zona-gt"]:checked')].map(i => i.value);
-    const zonaGt     = dep === 'Guatemala' ? [...municipios, ...zonasGt].join(', ') : '';
+    const zonaGt     = dep === 'Guatemala' ? [municipio, ...zonasGt].filter(Boolean).join(', ') : '';
     const zonaOtro   = dep !== 'Guatemala' ? val('b-zona-otro') : '';
     const zonaFinal = zonaGt || zonaOtro || '';
 
