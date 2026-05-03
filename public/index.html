@@ -1882,16 +1882,20 @@ user-select: none;
       <div class="form-row">
         <div class="form-group">
           <label>Tipo de propiedad <span class="req-mark">*</span></label>
-          <select id="b-tipo" required onchange="actualizarObligatoriosRenta()">
-            <option value="">Seleccionar...</option>
-            <option>Apartamento</option>
-            <option>Casa</option>
-            <option>Townhouse</option>
-            <option>Terreno</option>
-            <option>Oficina</option>
-            <option>Local comercial</option>
-            <option>Otro</option>
-          </select>
+          <button type="button" id="btn-tipo-toggle" onclick="toggleCapsPanel('tipo-panel','btn-tipo-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
+            <span id="tipo-toggle-label">Seleccionar tipo ▾</span>
+          </button>
+          <div id="tipo-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+            <div class="zona-caps">
+              <div class="zona-cap"><input type="radio" id="tp-apto"  name="b-tipo" value="Apartamento"    onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-apto">Apartamento</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-casa"  name="b-tipo" value="Casa"           onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-casa">Casa</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-town"  name="b-tipo" value="Townhouse"      onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-town">Townhouse</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-terr"  name="b-tipo" value="Terreno"        onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-terr">Terreno</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-ofic"  name="b-tipo" value="Oficina"        onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-ofic">Oficina</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-local" name="b-tipo" value="Local comercial" onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-local">Local comercial</label></div>
+              <div class="zona-cap"><input type="radio" id="tp-otro"  name="b-tipo" value="Otro"           onchange="selCapsRadio(this,'tipo-panel','btn-tipo-toggle','tipo-toggle-label');actualizarObligatoriosRenta()"><label for="tp-otro">Otro</label></div>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label>Departamento <span class="req-mark">*</span></label>
@@ -2003,9 +2007,12 @@ user-select: none;
       <div class="form-row">
         <div class="form-group">
           <label>Presupuesto máximo <span class="req-mark">*</span></label>
-          <select id="b-presupuesto" required>
-            <option value="">Seleccionar...</option>
-          </select>
+          <button type="button" id="btn-presup-toggle" onclick="toggleCapsPanel('presup-panel','btn-presup-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
+            <span id="presup-toggle-label">Seleccionar presupuesto ▾</span>
+          </button>
+          <div id="presup-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+            <div class="zona-caps" id="presup-caps"></div>
+          </div>
         </div>
         <div class="form-group" id="grp-fecha">
           <label>Fecha prevista de mudanza</label>
@@ -2035,43 +2042,53 @@ user-select: none;
           <input id="b-integrantes" type="number" min="1" placeholder="Ej: 4">
         </div>
       </div>
-      <div class="form-row" id="grp-habitaciones-parqueos">
-        <div class="form-group">
-          <label id="lbl-habitaciones">Habitaciones <span class="req-mark">*</span></label>
-          <select id="b-habitaciones">
-            <option value="">Seleccionar...</option>
-            <option>1 habitación</option>
-            <option>2 habitaciones</option>
-            <option>3 habitaciones</option>
-            <option>4 habitaciones</option>
-            <option>5 o más habitaciones</option>
-          </select>
+      <div id="grp-habitaciones-parqueos">
+        <div class="form-group" style="margin-bottom:1rem">
+          <label id="lbl-habitaciones">Habitaciones</label>
+          <button type="button" id="btn-hab-toggle" onclick="toggleCapsPanel('hab-panel','btn-hab-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
+            <span id="hab-toggle-label">Cualquier cantidad ▾</span>
+          </button>
+          <div id="hab-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+            <div class="zona-caps">
+              <div class="zona-cap"><input type="radio" id="h1" name="b-habitaciones" value="1 habitación"       onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h1">1</label></div>
+              <div class="zona-cap"><input type="radio" id="h2" name="b-habitaciones" value="2 habitaciones"     onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h2">2</label></div>
+              <div class="zona-cap"><input type="radio" id="h3" name="b-habitaciones" value="3 habitaciones"     onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h3">3</label></div>
+              <div class="zona-cap"><input type="radio" id="h4" name="b-habitaciones" value="4 habitaciones"     onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h4">4</label></div>
+              <div class="zona-cap"><input type="radio" id="h5" name="b-habitaciones" value="5 o más habitaciones" onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h5">5+</label></div>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Parqueos <span class="req-mark">*</span></label>
-          <select id="b-parqueos">
-            <option value="">Seleccionar...</option>
-            <option>Sin parqueo</option>
-            <option>1 parqueo</option>
-            <option>2 parqueos</option>
-            <option>3 parqueos</option>
-            <option>4 parqueos</option>
-            <option>5 parqueos</option>
-            <option>6 o más parqueos</option>
-            <option>Parqueo para moto</option>
-          </select>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label>Parqueos</label>
+          <button type="button" id="btn-parq-toggle" onclick="toggleCapsPanel('parq-panel','btn-parq-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
+            <span id="parq-toggle-label">Cualquier cantidad ▾</span>
+          </button>
+          <div id="parq-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+            <div class="zona-caps">
+              <div class="zona-cap"><input type="radio" id="p0"    name="b-parqueos" value="Sin parqueo"      onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p0">Sin parqueo</label></div>
+              <div class="zona-cap"><input type="radio" id="p1"    name="b-parqueos" value="1 parqueo"        onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p1">1</label></div>
+              <div class="zona-cap"><input type="radio" id="p2"    name="b-parqueos" value="2 parqueos"       onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p2">2</label></div>
+              <div class="zona-cap"><input type="radio" id="p3"    name="b-parqueos" value="3 parqueos"       onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p3">3</label></div>
+              <div class="zona-cap"><input type="radio" id="p4"    name="b-parqueos" value="4 parqueos"       onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p4">4</label></div>
+              <div class="zona-cap"><input type="radio" id="p5"    name="b-parqueos" value="5 parqueos"       onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p5">5</label></div>
+              <div class="zona-cap"><input type="radio" id="p6"    name="b-parqueos" value="6 o más parqueos" onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p6">6+</label></div>
+              <div class="zona-cap"><input type="radio" id="pmoto" name="b-parqueos" value="Parqueo para moto" onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="pmoto">Moto</label></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Baños</label>
-          <select id="b-banos">
-            <option value="">Seleccionar...</option>
-            <option>1 baño</option>
-            <option>2 baños</option>
-            <option>3 baños</option>
-            <option>4 o más baños</option>
-          </select>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label>Baños</label>
+        <button type="button" id="btn-banos-toggle" onclick="toggleCapsPanel('banos-panel','btn-banos-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
+          <span id="banos-toggle-label">Cualquier cantidad ▾</span>
+        </button>
+        <div id="banos-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+          <div class="zona-caps">
+            <div class="zona-cap"><input type="radio" id="ba1" name="b-banos" value="1 baño"       onchange="selCapsRadio(this,'banos-panel','btn-banos-toggle','banos-toggle-label')"><label for="ba1">1</label></div>
+            <div class="zona-cap"><input type="radio" id="ba2" name="b-banos" value="2 baños"      onchange="selCapsRadio(this,'banos-panel','btn-banos-toggle','banos-toggle-label')"><label for="ba2">2</label></div>
+            <div class="zona-cap"><input type="radio" id="ba3" name="b-banos" value="3 baños"      onchange="selCapsRadio(this,'banos-panel','btn-banos-toggle','banos-toggle-label')"><label for="ba3">3</label></div>
+            <div class="zona-cap"><input type="radio" id="ba4" name="b-banos" value="4 o más baños" onchange="selCapsRadio(this,'banos-panel','btn-banos-toggle','banos-toggle-label')"><label for="ba4">4+</label></div>
+          </div>
         </div>
       </div>
 
@@ -3143,7 +3160,7 @@ user-select: none;
   // ── CAMPOS OBLIGATORIOS SEGÚN OPERACIÓN + TIPO
   function actualizarObligatoriosRenta() {
     const operacion = document.querySelector('input[name="b-operacion"]:checked')?.value || '';
-    const tipo = document.getElementById('b-tipo').value;
+    const tipo = document.querySelector('input[name="b-tipo"]:checked')?.value || '';
     const esRenta = operacion === 'Renta';
     const esCompraApto = operacion === 'Compra' && tipo === 'Apartamento';
     const form = document.getElementById('busqueda-form');
@@ -3358,12 +3375,39 @@ user-select: none;
   ];
   function actualizarPresupuestoBusqueda() {
     const op = document.querySelector('input[name="b-operacion"]:checked')?.value || '';
-    const sel = document.getElementById('b-presupuesto');
-    if (!sel) return;
+    const caps = document.getElementById('presup-caps');
+    if (!caps) return;
     const lista = op === 'Compra' ? presupuestosCompra : presupuestosRenta;
-    sel.innerHTML = lista.map(o => `<option value="${o.v}">${o.t}</option>`).join('');
+    caps.innerHTML = lista.filter(o => o.v !== '').map((o, i) => `
+      <div class="zona-cap">
+        <input type="radio" id="ps${i}" name="b-presupuesto" value="${o.v}"
+          onchange="selCapsRadio(this,'presup-panel','btn-presup-toggle','presup-toggle-label')">
+        <label for="ps${i}">${o.t}</label>
+      </div>`).join('');
+    // Resetear label si cambia operación
+    const lbl = document.getElementById('presup-toggle-label');
+    if (lbl) lbl.textContent = 'Seleccionar presupuesto ▾';
+    const btn = document.getElementById('btn-presup-toggle');
+    if (btn) { btn.style.borderColor = 'rgba(255,255,255,0.18)'; btn.style.color = 'rgba(255,255,255,0.55)'; }
   }
   actualizarPresupuestoBusqueda();
+
+  // ── HELPERS GENÉRICOS PARA PANELES DE CÁPSULAS
+  function toggleCapsPanel(panelId, btnId) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    const abierto = panel.style.display !== 'none';
+    panel.style.display = abierto ? 'none' : 'block';
+    const btn = document.getElementById(btnId);
+    if (btn) btn.style.borderRadius = abierto ? '4px' : '4px 4px 0 0';
+  }
+  function selCapsRadio(radio, panelId, btnId, labelId) {
+    document.getElementById(panelId).style.display = 'none';
+    const btn = document.getElementById(btnId);
+    if (btn) { btn.style.borderRadius = '4px'; btn.style.borderColor = 'rgba(201,168,76,0.7)'; btn.style.color = 'rgba(255,255,255,0.9)'; }
+    const lbl = document.getElementById(labelId);
+    if (lbl) lbl.textContent = radio.value + ' ▾';
+  }
 
   // ── OPERACIÓN: toggle y selección por cápsula
   function toggleOperPanel() {
@@ -3459,8 +3503,7 @@ user-select: none;
     const pais = val('b-codigo-pais');
     const tel  = pais + ' ' + val('b-whatsapp');
 
-    const presupSel = document.getElementById('b-presupuesto');
-    const presupMax = presupSel?.value || '';
+    const presupMax = form.querySelector('input[name="b-presupuesto"]:checked')?.value || '';
     const dep = form.querySelector('input[name="b-departamento"]:checked')?.value || '';
     const municipios = [...form.querySelectorAll('input[name="b-municipio"]:checked')].map(i => i.value);
     const zonasGt    = [...form.querySelectorAll('input[name="b-zona-gt"]:checked')].map(i => i.value);
@@ -3476,14 +3519,14 @@ user-select: none;
       telefono:      tel,
       email:         val('b-email'),
       operacion:     form.querySelector('input[name="b-operacion"]:checked')?.value || '',
-      tipo:          val('b-tipo'),
+      tipo:          form.querySelector('input[name="b-tipo"]:checked')?.value || '',
       departamento:  dep,
       zona:          zonaFinal,
       presupuesto_max: presupMax,
       moneda:        'GTQ',
-      habitaciones:  val('b-habitaciones'),
-      banos:         val('b-banos'),
-      parqueos:      val('b-parqueos'),
+      habitaciones:  form.querySelector('input[name="b-habitaciones"]:checked')?.value || '',
+      banos:         form.querySelector('input[name="b-banos"]:checked')?.value || '',
+      parqueos:      form.querySelector('input[name="b-parqueos"]:checked')?.value || '',
       metros:        val('b-metros'),
       caracteristicas: caract,
       fecha_mudanza: val('b-fecha'),
