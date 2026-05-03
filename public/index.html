@@ -2923,19 +2923,14 @@ user-select: none;
     const opTab = opTabMap[selOperacion] || null;
     const propTab = propTabMap[selPropiedad] || null;
 
-    tabsActivos.delete('todos');
-    tabsActivos.delete('renta');
-    tabsActivos.delete('venta');
-    if (opTab) tabsActivos.add(opTab);
-
-    tabsActivos.delete('apartamento');
-    tabsActivos.delete('casa');
-    tabsActivos.delete('terreno');
-    tabsActivos.delete('oficina');
-    tabsActivos.delete('local');
-    if (propTab) tabsActivos.add(propTab);
-
-    if (!selOperacion && !selPropiedad) tabsActivos.add('todos');
+    // Preservar tabsActivos — los tabs ya actualizaron su propio estado.
+    // Solo sincronizamos si los pills tienen un valor explícito que los tabs no cubren.
+    if (opTab && !tabsActivos.has('renta') && !tabsActivos.has('venta')) {
+      tabsActivos.delete('todos'); tabsActivos.add(opTab);
+    }
+    if (propTab && !['apartamento','casa','terreno','oficina','local'].some(t => tabsActivos.has(t))) {
+      tabsActivos.delete('todos'); tabsActivos.add(propTab);
+    }
     if (tabsActivos.size === 0) tabsActivos.add('todos');
 
     // Construir filtros desde tabs (usar la lógica de aplicarFiltrosMultiples)
