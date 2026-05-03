@@ -1015,14 +1015,16 @@ user-select: none;
   /* Cápsulas de zona (búsqueda personalizada) */
   .zona-caps-wrap { margin-bottom: 0.5rem; }
   .zona-caps-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.35); margin-bottom: 0.4rem; }
-  .zona-caps { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-  .zona-cap { position: relative; }
+  .zona-caps { display: flex !important; flex-wrap: wrap !important; gap: 0.35rem; align-items: flex-start; }
+  .zona-cap { position: relative; flex: 0 0 auto !important; width: auto !important; }
   .zona-cap input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
   .zona-cap label {
-    display: block; padding: 0.28rem 0.75rem;
+    display: inline-block !important; width: auto !important;
+    padding: 0.28rem 0.75rem; margin: 0 !important;
     border: 1px solid rgba(255,255,255,0.18); border-radius: 20px;
     font-size: 0.72rem; cursor: pointer; color: rgba(255,255,255,0.55);
     transition: all 0.15s; white-space: nowrap; user-select: none;
+    text-transform: none !important; letter-spacing: 0 !important;
   }
   .zona-cap label:hover { border-color: var(--gold); color: rgba(255,255,255,0.9); background: rgba(201,168,76,0.1); }
   .zona-cap input:checked + label { background: var(--gold); color: #1B2A3A; border-color: var(--gold); font-weight: 600; }
