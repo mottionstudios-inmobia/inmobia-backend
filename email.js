@@ -766,6 +766,48 @@ export async function enviarCorreoBienvenidaAsesor({ email, nombre, slug }) {
   }
 }
 
+export async function enviarEmailBusquedaCliente({ email, nombre, tipo, operacion, zona, matches, linkPanel }) {
+  if (!email) return { ok: false };
+  const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
+  const matchesMsg = matches > 0
+    ? `Encontramos <strong>${matches} propiedad${matches > 1 ? 'es' : ''}</strong> que podrían encajar con tu búsqueda. Un asesor te contactará pronto a través de la plataforma.`
+    : `Tu búsqueda fue enviada a nuestra red de asesores. Te notificaremos en cuanto tengamos opciones que encajen.`;
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f0ede8;font-family:Arial,sans-serif">
+  <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <div style="background:#1e2d4a;border-top:4px solid #c9a84c;padding:28px 32px">
+      <h1 style="margin:0 0 4px;color:#fff;font-size:1.25rem;font-weight:600">¡Búsqueda activa, ${nombre}!</h1>
+      <p style="margin:0;color:rgba(255,255,255,0.6);font-size:0.85rem">Recibimos tu solicitud en InmobIA</p>
+    </div>
+    <div style="padding:28px 32px">
+      <p style="margin:0 0 18px;color:#444;font-size:0.95rem;line-height:1.6">${matchesMsg}</p>
+      <div style="background:#f4f6fb;border-radius:8px;padding:16px 20px;margin-bottom:24px;border-left:4px solid #c9a84c">
+        <p style="margin:0 0 6px;font-size:0.75rem;color:#999;text-transform:uppercase;letter-spacing:0.06em">Tu búsqueda</p>
+        <p style="margin:0;font-weight:600;color:#1e2d4a;font-size:0.95rem">${tipo || 'Propiedad'} · ${operacion || ''} ${zona ? '· ' + zona : ''}</p>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:16px 20px;margin-bottom:24px;font-size:0.85rem;color:#444;line-height:1.6">
+        <strong style="color:#065f46">Importante:</strong> Por tu privacidad, los asesores <strong>no tienen acceso a tu número de WhatsApp ni correo</strong>. Toda la comunicación se gestiona a través de la plataforma InmobIA.
+      </div>
+      <div style="text-align:center;margin:24px 0">
+        <a href="${linkPanel}" style="display:inline-block;background:#1e2d4a;color:#fff;text-decoration:none;padding:14px 32px;border-radius:7px;font-weight:600;font-size:0.92rem">Ver mis opciones en la plataforma →</a>
+      </div>
+      <p style="margin:16px 0 0;font-size:0.82rem;color:#999;text-align:center">Si tienes dudas escríbenos a <a href="https://wa.me/50242683255" style="color:#c9a84c">WhatsApp</a></p>
+    </div>
+    <div style="background:#f4f6fb;padding:12px 32px;text-align:center;font-size:0.72rem;color:#aaa;border-top:1px solid #e5e2da">
+      InmobIA · Notificación automática · Guatemala
+    </div>
+  </div>
+</body></html>`;
+  try {
+    await enviarEmail({ to: email, subject: '¡Tu búsqueda está activa! — InmobIA', html });
+    return { ok: true };
+  } catch (err) {
+    console.error('⚠️  Error email búsqueda cliente:', err.message);
+    return { ok: false };
+  }
+}
+
 // Mapeo de claves a etiquetas legibles
 function etiqueta(clave) {
   const mapa = {

@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { db } from '../database.js';
 import { crearCheckoutComision, keysConfigured } from '../lib/recurrente.js';
 import { propiedadEsDeAdmin } from '../lib/modelos.js';
-import { enviarCorreoComisionAsesor, enviarCorreoCierreConfirmado1D } from '../email.js';
+import { enviarCorreoComisionAsesor, enviarCorreoCierreConfirmado1D, enviarEmailBusquedaCliente } from '../email.js';
 
 const router = Router();
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
@@ -581,6 +581,131 @@ router.patch('/busqueda', (req, res) => {
   }
 
   res.json({ ok: true });
+});
+
+// ── POST /api/cliente/busqueda-publica  (pública — formulario de búsqueda personalizada)
+router.post('/busqueda-publica', async (req, res) => {
+  const {
+    nombre, telefono, email, operacion, tipo,
+    departamento, zona, presupuesto_max, moneda,
+    habitaciones, banos, parqueos, metros,
+    caracteristicas, fecha_mudanza, mascota, desc_mascota, descripcion,
+  } = req.body;
+
+  if (!nombre || !telefono || !email || !operacion || !tipo)
+    return res.status(400).json({ error: 'Faltan campos obligatorios' });
+
+  const primerNombre = nombre.trim().split(' ')[0];
+  const lugarStr = zona || departamento || 'Guatemala';
+  const presupMax = presupuesto_max ? Number(presupuesto_max) : null;
+  const monedaUso = moneda || 'GTQ';
+
+  const notasArr = [
+    fecha_mudanza ? `Fecha de mudanza: ${fecha_mudanza}` : '',
+    mascota ? `Mascota: ${mascota}${desc_mascota ? ' — ' + desc_mascota : ''}` : '',
+    descripcion || '',
+  ].filter(Boolean);
+
+  // 1. Obtener admin para asignar el requerimiento
+  const admin = db.prepare("SELECT id FROM usuarios WHERE rol = 'admin' LIMIT 1").get();
+  if (!admin) return res.status(500).json({ error: 'Sin admin configurado' });
+
+  const vence = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  try {
+    // 2. Crear requerimiento con fuente 'cliente'
+    db.prepare(`
+      INSERT INTO requerimientos
+        (asesor_id, fuente, cliente_origen_email, cliente_nombre, cliente_email,
+         operacion, tipo_propiedad, municipio, zona,
+         precio_max, moneda, habitaciones, banos, metros_min,
+         caracteristicas, notas, estado, vence_en)
+      VALUES (?, 'cliente', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'activo', ?)
+    `).run(
+      admin.id, email, primerNombre, email,
+      operacion, tipo,
+      departamento || null, zona || null,
+      presupMax, monedaUso,
+      habitaciones ? Number(habitaciones) : null,
+      banos ? Number(banos) : null,
+      metros ? Number(metros) : null,
+      caracteristicas || null,
+      notasArr.join('\n') || null,
+      vence,
+    );
+
+    // 3. Match contra propiedades publicadas en InmobIA
+    let sqlMatch = `SELECT p.id, p.titulo, p.usuario_id as asesor_id
+      FROM propiedades p WHERE p.publicado_inmobia = 1 AND p.estado = 'activo'`;
+    const params = [];
+    if (tipo)       { sqlMatch += ' AND LOWER(p.tipo) LIKE ?';      params.push(`%${tipo.toLowerCase()}%`); }
+    if (operacion)  { sqlMatch += ' AND LOWER(p.operacion) LIKE ?'; params.push(`%${operacion.toLowerCase()}%`); }
+    if (presupMax)  { sqlMatch += ' AND p.precio <= ?';             params.push(presupMax * 1.25); }
+    if (departamento && departamento !== 'Guatemala') {
+      sqlMatch += ' AND p.departamento = ?'; params.push(departamento);
+    } else if (zona) {
+      sqlMatch += ' AND (p.zona = ? OR p.municipio = ?)'; params.push(zona, zona);
+    }
+    sqlMatch += ' LIMIT 10';
+    const matches = db.prepare(sqlMatch).all(...params);
+
+    // 4. Crear lead por cada propiedad que encaja (sólo primer nombre — sin datos de contacto)
+    const resumen = `Busca: ${tipo} para ${operacion} en ${lugarStr}${presupMax ? ` · hasta ${monedaUso === 'USD' ? '$' : 'Q'}${presupMax.toLocaleString('es-GT')}` : ''}`;
+    const insertLead = db.prepare(`
+      INSERT INTO leads (asesor_id, nombre, email, telefono, mensaje, tipo,
+        propiedad_id, propiedad_titulo, origen, etapa, creado_en, actualizado_en)
+      VALUES (?, ?, ?, NULL, ?, 'busqueda_personalizada', ?, ?,
+        'busqueda_personalizada', 'nuevo', datetime('now'), datetime('now'))
+    `);
+    const insertNotif = db.prepare(`
+      INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje)
+      VALUES (?, 'lead_busqueda', ?, ?)
+    `);
+    const leadsCreados = [];
+    for (const m of matches) {
+      const r = insertLead.run(m.asesor_id, primerNombre, email, resumen, m.id, m.titulo);
+      leadsCreados.push(r.lastInsertRowid);
+      insertNotif.run(
+        m.asesor_id,
+        `🔍 Nuevo lead InmobIA — ${tipo} en ${lugarStr}`,
+        `${primerNombre} busca ${tipo} para ${operacion} en ${lugarStr}${presupMax ? ` · hasta ${monedaUso === 'USD' ? '$' : 'Q'}${presupMax.toLocaleString('es-GT')}` : ''}. Comunícate a través de la plataforma (el cliente no comparte datos de contacto directamente).`,
+      );
+    }
+
+    // 5. Si no hubo match, notificar a asesores activos en general
+    if (matches.length === 0) {
+      const activos = db.prepare(`
+        SELECT DISTINCT p.usuario_id as id FROM propiedades p
+        WHERE p.publicado_inmobia = 1 AND p.estado = 'activo' LIMIT 60
+      `).all();
+      for (const a of activos) {
+        insertNotif.run(
+          a.id,
+          `🔍 Requerimiento en red: ${tipo} en ${lugarStr}`,
+          `Un cliente InmobIA busca ${tipo} para ${operacion} en ${lugarStr}${presupMax ? ` · hasta ${monedaUso === 'USD' ? '$' : 'Q'}${presupMax.toLocaleString('es-GT')}` : ''}. Si tienes una propiedad que encaje y está publicada en InmobIA, aparecerás en las opciones del cliente.`,
+        );
+      }
+    }
+
+    // 6. Generar magic link para panel del cliente
+    const token = crypto.randomBytes(32).toString('hex');
+    const expira = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    db.prepare(`INSERT INTO magic_links (token, email, lead_id, expira_en) VALUES (?, ?, ?, ?)`)
+      .run(token, email.toLowerCase().trim(), leadsCreados[0] || null, expira);
+
+    // 7. Email de confirmación al cliente
+    const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
+    const linkPanel = `${BASE_URL}/panel-cliente.html?token=${token}`;
+    await enviarEmailBusquedaCliente({
+      email, nombre: primerNombre, tipo, operacion, zona: lugarStr,
+      matches: matches.length, linkPanel,
+    });
+
+    res.json({ ok: true, matches: matches.length });
+  } catch (err) {
+    console.error('[busqueda-publica] error:', err.message);
+    res.status(500).json({ error: 'Error interno al procesar la búsqueda' });
+  }
 });
 
 export default router;

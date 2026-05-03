@@ -1797,12 +1797,27 @@ user-select: none;
 
   <div class="visita-row" id="busqueda-personalizada">
   <div class="visita-content animate">
-    <h2 class="visita-title">Formulario de <em>búsqueda personalizada</em></h2>
-    <p class="visita-desc">Complete el formulario indicando las características de la propiedad de su interés. Buscaremos opciones con esas características y le enviaremos por WhatsApp las opciones disponibles.</p>
+    <h2 class="visita-title">Búsqueda <em>personalizada</em></h2>
+    <p class="visita-desc">Cuéntenos qué busca y activamos su búsqueda en nuestra red. Los asesores le contactarán a través de la plataforma — su número y correo son privados.</p>
   </div>
  
-  <div class="cita-form animate">
+  <!-- RESULTADO (oculto hasta envío) -->
+  <div class="cita-form animate" id="busqueda-resultado" style="display:none">
+    <div id="busqueda-resultado-inner" style="text-align:center;padding:2rem 1rem">
+      <div style="font-size:2.5rem;margin-bottom:1rem">✅</div>
+      <h3 style="color:#fff;font-family:var(--font-display);font-size:1.4rem;font-weight:300;margin:0 0 0.75rem">¡Búsqueda activa!</h3>
+      <p id="busqueda-resultado-msg" style="color:rgba(255,255,255,0.7);font-size:0.9rem;line-height:1.7;margin:0 0 1.5rem"></p>
+      <div style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);border-radius:8px;padding:1rem 1.25rem;font-size:0.82rem;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:1.5rem">
+        Por su privacidad, los asesores <strong style="color:rgba(255,255,255,0.85)">no tienen acceso a su número ni correo</strong>. Toda la comunicación es a través de la plataforma InmobIA.
+      </div>
+      <button onclick="document.getElementById('busqueda-resultado').style.display='none';document.getElementById('busqueda-form-wrap').style.display='block'" style="background:transparent;border:1.5px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);border-radius:20px;padding:0.5rem 1.5rem;font-size:0.8rem;cursor:pointer">Enviar otra búsqueda</button>
+    </div>
+  </div>
+
+  <div class="cita-form animate" id="busqueda-form-wrap">
     <form id="busqueda-form" onsubmit="enviarBusqueda(event)">
+      <!-- BLOQUE 1: Datos esenciales -->
+      <div style="margin-bottom:0.5rem;font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em">1 / Datos básicos</div>
       <div class="form-row">
         <div class="form-group">
           <label>Nombre y apellido <span class="req-mark">*</span></label>
@@ -1819,17 +1834,6 @@ user-select: none;
               <option value="+505">🇳🇮 +505</option>
               <option value="+506">🇨🇷 +506</option>
               <option value="+507">🇵🇦 +507</option>
-              <option value="+53">🇨🇺 +53</option>
-              <option value="+1-809">🇩🇴 +1-809</option>
-              <option value="+57">🇨🇴 +57</option>
-              <option value="+58">🇻🇪 +58</option>
-              <option value="+593">🇪🇨 +593</option>
-              <option value="+51">🇵🇪 +51</option>
-              <option value="+591">🇧🇴 +591</option>
-              <option value="+56">🇨🇱 +56</option>
-              <option value="+54">🇦🇷 +54</option>
-              <option value="+598">🇺🇾 +598</option>
-              <option value="+595">🇵🇾 +595</option>
             </select>
             <input id="b-whatsapp" type="tel" placeholder="0000-0000" required>
           </div>
@@ -1838,14 +1842,14 @@ user-select: none;
       <div class="form-row">
         <div class="form-group">
           <label>Correo electrónico <span class="req-mark">*</span></label>
-          <input id="b-email" type="email" placeholder="correo@ejemplo.com">
+          <input id="b-email" type="email" placeholder="correo@ejemplo.com" required>
         </div>
         <div class="form-group">
-          <label>Operación</label>
-          <select id="b-operacion" required onchange="actualizarObligatoriosRenta()">
+          <label>Operación <span class="req-mark">*</span></label>
+          <select id="b-operacion" required onchange="actualizarObligatoriosRenta();actualizarPresupuestoBusqueda()">
             <option value="">Seleccionar...</option>
-            <option>Renta</option>
-            <option>Compra</option>
+            <option value="Renta">Renta / Alquiler</option>
+            <option value="Compra">Compra / Venta</option>
           </select>
         </div>
       </div>
@@ -1863,89 +1867,88 @@ user-select: none;
             <option>Otro</option>
           </select>
         </div>
-        <div class="form-group" id="grp-fecha">
-          <label>Fecha prevista de mudanza <span class="req-mark">*</span></label>
-          <input id="b-fecha" type="date">
+        <div class="form-group">
+          <label>Departamento <span class="req-mark">*</span></label>
+          <select id="b-departamento" required onchange="actualizarZonaBusqueda()">
+            <option value="">Seleccionar...</option>
+            <option>Guatemala</option><option>Alta Verapaz</option><option>Baja Verapaz</option>
+            <option>Chimaltenango</option><option>Chiquimula</option><option>El Progreso</option>
+            <option>Escuintla</option><option>Huehuetenango</option><option>Izabal</option>
+            <option>Jalapa</option><option>Jutiapa</option><option>Petén</option>
+            <option>Quetzaltenango</option><option>Quiché</option><option>Retalhuleu</option>
+            <option>Sacatepéquez</option><option>San Marcos</option><option>Santa Rosa</option>
+            <option>Sololá</option><option>Suchitepéquez</option><option>Totonicapán</option>
+            <option>Zacapa</option>
+          </select>
         </div>
       </div>
-
-      <!-- ── VER MÁS ── -->
-      <div style="text-align:center;margin:1.2rem 0 0.25rem">
-        <button type="button" id="btn-ver-mas-b" onclick="toggleBusquedaExtra()" style="
-          background:rgba(201,168,76,0.15);border:1.5px solid var(--gold);
-          color:var(--gold);border-radius:20px;padding:0.55rem 1.8rem;
-          font-size:0.88rem;font-weight:600;font-family:var(--font-body);cursor:pointer;
-          transition:all 0.2s;display:inline-flex;align-items:center;gap:0.5rem;
-          letter-spacing:0.04em;
-        ">Ver más <span id="ver-mas-b-icon" style="font-size:1rem;line-height:1;transition:transform 0.3s">▼</span></button>
-      </div>
-
-      <!-- ── CAMPOS EXTRA ── -->
-      <div id="busqueda-extra" style="overflow:hidden;max-height:0;opacity:0;transition:max-height 0.45s ease,opacity 0.3s ease">
-      <div class="form-row">
+      <!-- Zona Guatemala -->
+      <div class="form-row" id="grp-b-zona-gt">
         <div class="form-group">
-          <label>Ubicación preferida <span class="req-mark">*</span></label>
+          <label>Zona / Municipio preferido</label>
           <select id="b-ubicacion">
-            <option value="">Seleccionar...</option>
+            <option value="">Cualquiera</option>
             <optgroup label="Zonas Ciudad de Guatemala">
-              <option>Zona 1</option>
-              <option>Zona 2</option>
-              <option>Zona 3</option>
-              <option>Zona 4</option>
-              <option>Zona 5</option>
-              <option>Zona 6</option>
-              <option>Zona 7</option>
-              <option>Zona 8</option>
-              <option>Zona 9</option>
-              <option>Zona 10</option>
-              <option>Zona 11</option>
-              <option>Zona 12</option>
-              <option>Zona 13</option>
-              <option>Zona 14</option>
-              <option>Zona 15</option>
-              <option>Zona 16</option>
-              <option>Zona 17</option>
-              <option>Zona 18</option>
-              <option>Zona 19</option>
-              <option>Zona 21</option>ord
-              <option>Zona 24</option>
-              <option>Zona 25</option>
+              <option>Zona 1</option><option>Zona 2</option><option>Zona 3</option>
+              <option>Zona 4</option><option>Zona 5</option><option>Zona 6</option>
+              <option>Zona 7</option><option>Zona 8</option><option>Zona 9</option>
+              <option>Zona 10</option><option>Zona 11</option><option>Zona 12</option>
+              <option>Zona 13</option><option>Zona 14</option><option>Zona 15</option>
+              <option>Zona 16</option><option>Zona 17</option><option>Zona 18</option>
+              <option>Zona 19</option><option>Zona 21</option>
             </optgroup>
             <optgroup label="Municipios">
-              <option>Mixco</option>
-              <option>Villa Nueva</option>
-              <option>San Miguel Petapa</option>
-              <option>Villa Canales</option>
-              <option>Amatitlán</option>
-              <option>Santa Catarina Pinula</option>
-              <option>San José Pinula</option>
-              <option>Fraijanes</option>
-              <option>Chinautla</option>
-              <option>San Pedro Ayampuc</option>
-              <option>Palencia</option>
-              <option>San Juan Sacatepéquez</option>
-              <option>San Pedro Sacatepéquez</option>
-              <option>San Raymundo</option>
-              <option>Chuarrancho</option>
-            </optgroup>
-            <optgroup label="Otro">
-              <option>Otro (describir en campo de detalles)</option>
+              <option>Mixco</option><option>Villa Nueva</option><option>San Miguel Petapa</option>
+              <option>Villa Canales</option><option>Amatitlán</option><option>Santa Catarina Pinula</option>
+              <option>San José Pinula</option><option>Fraijanes</option><option>Chinautla</option>
             </optgroup>
           </select>
         </div>
         <div class="form-group">
-          <label>(Más detalles) Colonias o sectores preferidos</label>
-          <input id="b-ubicacion-detalle" type="text" placeholder="Ej: Cayalá, Vista Hermosa, Los Eucaliptos...">
+          <label>Colonia o sector específico</label>
+          <input id="b-ubicacion-detalle" type="text" placeholder="Ej: Cayalá, Vista Hermosa...">
+        </div>
+      </div>
+      <!-- Zona otro departamento -->
+      <div class="form-row" id="grp-b-zona-otro" style="display:none">
+        <div class="form-group">
+          <label>Municipio o área específica</label>
+          <input id="b-zona-otro" type="text" placeholder="Ej: Antigua Guatemala, Quetzaltenango centro...">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Presupuesto máximo aproximado <span class="req-mark">*</span></label>
-          <input id="b-presupuesto" type="text" placeholder="Ej: Q5,000/mes o Q800,000">
+          <label>Presupuesto máximo <span class="req-mark">*</span></label>
+          <select id="b-presupuesto" required>
+            <option value="">Seleccionar...</option>
+          </select>
         </div>
+        <div class="form-group" id="grp-fecha">
+          <label>Fecha prevista de mudanza</label>
+          <input id="b-fecha" type="date">
+        </div>
+      </div>
+
+      <!-- BLOQUE 2: Detalles opcionales -->
+      <div style="text-align:center;margin:1.2rem 0 0.5rem">
+        <button type="button" id="btn-ver-mas-b" onclick="toggleBusquedaExtra()" style="
+          background:rgba(201,168,76,0.15);border:1.5px solid var(--gold);
+          color:var(--gold);border-radius:20px;padding:0.55rem 1.8rem;
+          font-size:0.88rem;font-weight:600;font-family:var(--font-body);cursor:pointer;
+          transition:all 0.2s;display:inline-flex;align-items:center;gap:0.5rem;letter-spacing:0.04em;
+        ">Agregar detalles (opcional) <span id="ver-mas-b-icon" style="font-size:1rem;line-height:1;transition:transform 0.3s">▼</span></button>
+      </div>
+
+      <div id="busqueda-extra" style="overflow:hidden;max-height:0;opacity:0;transition:max-height 0.45s ease,opacity 0.3s ease">
+      <div style="margin:0.5rem 0 1rem;font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em">2 / Características deseadas</div>
+      <div class="form-row">
         <div class="form-group">
-          <label>Mínimo de metros cuadrados <span class="req-mark" id="req-metros">*</span></label>
-          <input id="b-metros" type="text" placeholder="Ej: 80 m²">
+          <label>Mínimo de m² construidos</label>
+          <input id="b-metros" type="number" min="1" placeholder="Ej: 80">
+        </div>
+        <div class="form-group" id="grp-integrantes">
+          <label>Integrantes de la familia</label>
+          <input id="b-integrantes" type="number" min="1" placeholder="Ej: 4">
         </div>
       </div>
       <div class="form-row" id="grp-habitaciones-parqueos">
@@ -1975,9 +1978,9 @@ user-select: none;
           </select>
         </div>
       </div>
-      <div class="form-row" id="grp-banos-integrantes">
+      <div class="form-row">
         <div class="form-group">
-          <label>Baños <span class="req-mark">*</span></label>
+          <label>Baños</label>
           <select id="b-banos">
             <option value="">Seleccionar...</option>
             <option>1 baño</option>
@@ -1985,10 +1988,6 @@ user-select: none;
             <option>3 baños</option>
             <option>4 o más baños</option>
           </select>
-        </div>
-        <div class="form-group" id="grp-integrantes">
-          <label>Total de integrantes de la familia</label>
-          <input id="b-integrantes" type="number" min="1" placeholder="Ej: 4">
         </div>
       </div>
 
@@ -2055,83 +2054,11 @@ user-select: none;
         <input id="b-fotos-mascota" type="file" accept="image/*" multiple style="padding: 0.6rem 1rem; cursor: pointer;">
       </div>
 
-      <button type="submit" class="form-submit" style="margin-top:1.5rem">Enviar búsqueda personalizada →</button>
       </div><!-- /busqueda-extra -->
-    </form>
-  </div>
 
-  <div class="cita-form animate" style="display:none;">
-    <form id="cita-form" onsubmit="enviarCita(event)">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nombre y apellido</label>
-          <input type="text" placeholder="Su nombre" required>
-        </div>
-        <div class="form-group">
-          <label>WhatsApp</label>
-          <input type="tel" placeholder="+502 0000-0000" required>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Tipo de propiedad</label>
-          <select required>
-            <option value="">Seleccionar...</option>
-            <option>Apartamento en renta</option>
-            <option>Casa en renta</option>
-            <option>Apartamento en venta</option>
-            <option>Casa en venta</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Zona de interés</label>
-          <select>
-            <option>Cualquier zona</option>
-            <option>Zona 10</option>
-            <option>Zona 14</option>
-            <option>Zona 15</option>
-            <option>Zona 16 / Cayalá</option>
-            <option>Mixco</option>
-            <option>Villa Nueva</option>
-          </select>
-        </div>
-      </div>
- 
-      <div class="horarios-group">
-        <label class="main-label">Días disponibles para visita</label>
-        <div class="dias-checks">
-          <div class="dia-option"><input type="checkbox" id="lun" name="dias" value="Lunes"><label for="lun">Lunes</label></div>
-          <div class="dia-option"><input type="checkbox" id="mar" name="dias" value="Martes"><label for="mar">Martes</label></div>
-          <div class="dia-option"><input type="checkbox" id="mie" name="dias" value="Miércoles"><label for="mie">Miércoles</label></div>
-          <div class="dia-option"><input type="checkbox" id="jue" name="dias" value="Jueves"><label for="jue">Jueves</label></div>
-          <div class="dia-option"><input type="checkbox" id="vie" name="dias" value="Viernes"><label for="vie">Viernes</label></div>
-          <div class="dia-option"><input type="checkbox" id="sab" name="dias" value="Sábado"><label for="sab">Sábado</label></div>
-          <div class="dia-option"><input type="checkbox" id="dom" name="dias" value="Domingo"><label for="dom">Domingo</label></div>
-          <div class="dia-option"><input type="checkbox" id="flex" name="dias" value="Flexible"><label for="flex">Flexible</label></div>
-        </div>
-      </div>
- 
-      <div class="horarios-group">
-        <label class="main-label">Rango horario preferido</label>
-        <div class="horarios-checks">
-          <div class="horario-option"><input type="checkbox" id="manana" name="horario" value="Mañana (8am–12pm)"><label for="manana">Mañana<br><small>8am – 12pm</small></label></div>
-          <div class="horario-option"><input type="checkbox" id="tarde" name="horario" value="Tarde (12pm–5pm)"><label for="tarde">Tarde<br><small>12pm – 5pm</small></label></div>
-          <div class="horario-option"><input type="checkbox" id="noche" name="horario" value="Tarde-noche (5pm–7pm)"><label for="noche">Tarde-noche<br><small>5pm – 7pm</small></label></div>
-        </div>
-      </div>
- 
-      <div class="nota-cita">
-        Su cita está sujeta a confirmación por parte del propietario. Le notificaremos por WhatsApp a la brevedad.
-      </div>
- 
-      <div class="form-group">
-        <label>Comentario adicional (opcional)</label>
-        <textarea placeholder="Indique número de habitaciones, presupuesto, o cualquier detalle relevante..."></textarea>
-      </div>
- 
-      <button type="submit" class="form-submit">Solicitar visita →</button>
+      <button type="submit" class="form-submit" id="busqueda-submit" style="margin-top:1.5rem">Activar mi búsqueda personalizada →</button>
     </form>
-  </div>
+  </div><!-- /busqueda-form-wrap -->
   </div><!-- /visita-row -->
 </section>
  
@@ -3324,123 +3251,116 @@ user-select: none;
     });
   }
 
+  // ── PRESUPUESTO DINÁMICO SEGÚN OPERACIÓN (búsqueda personalizada)
+  const presupuestosRenta = [
+    { v: '',      t: 'Sin límite' },
+    { v: '3000',  t: 'Hasta Q3,000/mes' },
+    { v: '5000',  t: 'Hasta Q5,000/mes' },
+    { v: '8000',  t: 'Hasta Q8,000/mes' },
+    { v: '12000', t: 'Hasta Q12,000/mes' },
+    { v: '20000', t: 'Hasta Q20,000/mes' },
+    { v: '35000', t: 'Hasta Q35,000/mes' },
+    { v: '50000', t: 'Hasta Q50,000+/mes' },
+  ];
+  const presupuestosCompra = [
+    { v: '',        t: 'Sin límite' },
+    { v: '200000',  t: 'Hasta Q200,000' },
+    { v: '400000',  t: 'Hasta Q400,000' },
+    { v: '700000',  t: 'Hasta Q700,000' },
+    { v: '1000000', t: 'Hasta Q1,000,000' },
+    { v: '1500000', t: 'Hasta Q1,500,000' },
+    { v: '2500000', t: 'Hasta Q2,500,000' },
+    { v: '5000000', t: 'Q2,500,000+' },
+  ];
+  function actualizarPresupuestoBusqueda() {
+    const op = document.getElementById('b-operacion')?.value;
+    const sel = document.getElementById('b-presupuesto');
+    if (!sel) return;
+    const lista = op === 'Compra' ? presupuestosCompra : presupuestosRenta;
+    sel.innerHTML = lista.map(o => `<option value="${o.v}">${o.t}</option>`).join('');
+  }
+  actualizarPresupuestoBusqueda();
+
+  // ── ZONA SEGÚN DEPARTAMENTO (búsqueda personalizada)
+  function actualizarZonaBusqueda() {
+    const dep = document.getElementById('b-departamento')?.value;
+    const esGt = dep === 'Guatemala';
+    document.getElementById('grp-b-zona-gt').style.display  = esGt ? '' : 'none';
+    document.getElementById('grp-b-zona-otro').style.display = esGt ? 'none' : (dep ? '' : 'none');
+  }
+
   // ── BÚSQUEDA PERSONALIZADA SUBMIT
   async function enviarBusqueda(e) {
     e.preventDefault();
     const form = e.target;
-    const val = id => { const el = document.getElementById(id); return el ? el.value : ''; };
-    const nombre          = val('b-nombre');
-    const pais            = val('b-codigo-pais');
-    const tel             = pais + ' ' + val('b-whatsapp');
-    const email           = val('b-email');
-    const fecha           = val('b-fecha');
-    const operacion       = val('b-operacion');
-    const tipo            = val('b-tipo');
-    const zona            = val('b-ubicacion');
-    const zona_detalle    = val('b-ubicacion-detalle');
-    const presup          = val('b-presupuesto');
-    const metros          = val('b-metros');
-    const hab             = val('b-habitaciones');
-    const parq            = val('b-parqueos');
-    const banos           = val('b-banos');
-    const integrantes     = val('b-integrantes');
-    const caract          = [...form.querySelectorAll('input[name="caract-adic"]:checked')].map(i => i.value).join(', ');
-    const desc            = val('b-desc-adic');
-    const mascota         = document.querySelector('input[name="tiene-mascota"]:checked')?.value || '';
-    const desc_mascota    = val('b-desc-mascota');
-    const fotos_mascota   = document.getElementById('b-fotos-mascota')?.files?.length
-      ? `${document.getElementById('b-fotos-mascota').files.length} foto(s) adjunta(s)` : '';
+    const btn = document.getElementById('busqueda-submit');
+    btn.disabled = true;
+    btn.textContent = 'Activando búsqueda...';
 
-    // Enviar correo vía backend (FormData para incluir fotos)
-    let fotosUrls = [];
+    const val = id => document.getElementById(id)?.value || '';
+    const pais = val('b-codigo-pais');
+    const tel  = pais + ' ' + val('b-whatsapp');
+
+    const presupSel = document.getElementById('b-presupuesto');
+    const presupMax = presupSel?.value || '';
+    const dep = val('b-departamento');
+    const zonaGt = dep === 'Guatemala' ? val('b-ubicacion') : '';
+    const zonaOtro = dep !== 'Guatemala' ? val('b-zona-otro') : '';
+    const zonaFinal = zonaGt || zonaOtro || '';
+
+    const caract = [...form.querySelectorAll('input[name="caract-adic"]:checked')].map(i => i.value).join(', ');
+    const mascota = document.querySelector('input[name="tiene-mascota"]:checked')?.value || '';
+
+    const payload = {
+      nombre:        val('b-nombre'),
+      telefono:      tel,
+      email:         val('b-email'),
+      operacion:     val('b-operacion'),
+      tipo:          val('b-tipo'),
+      departamento:  dep,
+      zona:          zonaFinal,
+      presupuesto_max: presupMax,
+      moneda:        'GTQ',
+      habitaciones:  val('b-habitaciones'),
+      banos:         val('b-banos'),
+      parqueos:      val('b-parqueos'),
+      metros:        val('b-metros'),
+      caracteristicas: caract,
+      fecha_mudanza: val('b-fecha'),
+      mascota,
+      desc_mascota:  val('b-desc-mascota'),
+      descripcion:   val('b-desc-adic'),
+    };
+
     try {
-      const fd = new FormData();
-      fd.append('nombre', nombre);
-      fd.append('telefono', tel);
-      fd.append('email', email);
-      fd.append('fecha', fecha);
-      fd.append('operacion', operacion);
-      fd.append('tipo', tipo);
-      fd.append('zona', zona);
-      fd.append('zona_detalle', zona_detalle);
-      fd.append('presupuesto', presup);
-      fd.append('metros', metros);
-      fd.append('habitaciones', hab);
-      fd.append('banos', banos);
-      fd.append('parqueos', parq);
-      fd.append('integrantes', integrantes);
-      fd.append('caracteristicas', caract);
-      fd.append('detalle', desc);
-      fd.append('mascota', mascota);
-      fd.append('desc_mascota', desc_mascota);
-      const fotosInput = document.getElementById('b-fotos-mascota');
-      if (fotosInput && fotosInput.files.length) {
-        for (const file of fotosInput.files) fd.append('fotos', file);
-      }
-      const res = await fetch('https://inmobia.site/api/email/busqueda', { method: 'POST', body: fd });
+      const res  = await fetch('/api/cliente/busqueda-publica', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
       const json = await res.json();
-      if (json.fotosUrls && json.fotosUrls.length) fotosUrls = json.fotosUrls;
-    } catch {}
 
-
-    // WhatsApp
-    let msg = `*Busqueda Personalizada — InmobIA*\n\n`;
-    msg += `*Nombre:* ${nombre}\n`;
-    msg += `*WhatsApp:* ${tel}\n`;
-    if (email)         msg += `*Correo:* ${email}\n`;
-    if (fecha)         msg += `*Fecha de mudanza:* ${fecha}\n`;
-    msg += `*Operacion:* ${operacion}\n`;
-    msg += `*Tipo:* ${tipo}\n`;
-    msg += `*Zona:* ${zona}\n`;
-    if (zona_detalle)  msg += `*Sector/Colonia:* ${zona_detalle}\n`;
-    if (presup)        msg += `*Presupuesto:* ${presup}\n`;
-    if (metros)        msg += `*Minimo m2:* ${metros}\n`;
-    if (hab)           msg += `*Habitaciones:* ${hab}\n`;
-    if (banos)         msg += `*Banos:* ${banos}\n`;
-    if (parq)          msg += `*Parqueos:* ${parq}\n`;
-    if (integrantes)   msg += `*Integrantes:* ${integrantes}\n`;
-    if (caract)        msg += `*Caracteristicas:* ${caract}\n`;
-    if (desc)          msg += `*Descripcion:* ${desc}\n`;
-    if (mascota)       msg += `*Tiene mascota:* ${mascota}\n`;
-    if (desc_mascota)  msg += `*Desc. mascota:* ${desc_mascota}\n`;
-    if (fotosUrls.length) {
-      msg += `*Fotos de mascota:*\n`;
-      fotosUrls.forEach((url, i) => { msg += `Foto ${i + 1}: ${url}\n`; });
-    } else if (fotos_mascota) {
-      msg += `*Fotos mascota:* ${fotos_mascota} — enviadas al correo\n`;
+      if (json.ok) {
+        const matchN = json.matches || 0;
+        const msg = matchN > 0
+          ? `Encontramos <strong>${matchN} propiedad${matchN > 1 ? 'es' : ''}</strong> que pueden encajar con lo que busca. Recibirá una notificación cuando un asesor la contacte a través de la plataforma.<br><br>Revise su correo — le enviamos un enlace para acceder a su panel y ver las opciones.`
+          : `Su búsqueda fue enviada a nuestra red de asesores. Le notificaremos en cuanto tengamos opciones que encajen.<br><br>Revise su correo — le enviamos un enlace para seguir el avance desde su panel.`;
+        document.getElementById('busqueda-resultado-msg').innerHTML = msg;
+        document.getElementById('busqueda-form-wrap').style.display = 'none';
+        document.getElementById('busqueda-resultado').style.display = 'block';
+        form.reset();
+        actualizarPresupuestoBusqueda();
+      } else {
+        alert('Ocurrió un error al procesar su búsqueda. Por favor intente de nuevo.');
+      }
+    } catch {
+      alert('Error de conexión. Por favor intente de nuevo.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Activar mi búsqueda personalizada →';
     }
-
-    window.open(crearWhatsappAtencionUrl(msg), '_blank');
-    document.getElementById('modal').classList.add('active');
-    form.reset();
   }
 
-  // ── FORM SUBMIT
-  function enviarCita(e) {
-    e.preventDefault();
-    const form = e.target;
-    const nombre = form.querySelector('input[type="text"]').value;
-    const tel = form.querySelector('input[type="tel"]').value;
-    const tipo = form.querySelector('select').value;
-    const dias = [...form.querySelectorAll('input[name="dias"]:checked')].map(i => i.value).join(', ');
-    const horarios = [...form.querySelectorAll('input[name="horario"]:checked')].map(i => i.value).join(', ');
-    const comentario = form.querySelector('textarea').value;
- 
-    const msg = encodeURIComponent(
-      `🏠 *Nueva solicitud de visita — InmobIA*\n\n` +
-      `*Nombre:* ${nombre}\n` +
-      `*WhatsApp:* ${tel}\n` +
-      `*Tipo de propiedad:* ${tipo}\n` +
-      `*Días disponibles:* ${dias || 'No especificado'}\n` +
-      `*Horario preferido:* ${horarios || 'No especificado'}\n` +
-      `*Comentario:* ${comentario || 'Ninguno'}\n\n` +
-      `_Enviado desde urbainmueble.com_`
-    );
- 
-    window.open(crearWhatsappAtencionUrl(decodeURIComponent(msg)), '_blank');
-    document.getElementById('modal').classList.add('active');
-    form.reset();
-  }
  
   function cerrarModal() {
     document.getElementById('modal').classList.remove('active');
