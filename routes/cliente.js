@@ -696,13 +696,13 @@ router.post('/busqueda-publica', async (req, res) => {
       vence,
     );
 
-    // 3. Match contra propiedades publicadas en InmobIA
-    let sqlMatch = `SELECT p.id, p.titulo, p.usuario_id as asesor_id
+    // 3. Match contra propiedades publicadas en InmobIA (buffer 10% sobre presupuesto)
+    let sqlMatch = `SELECT p.id, p.titulo, p.precio, p.usuario_id as asesor_id
       FROM propiedades p WHERE p.publicado_inmobia = 1 AND p.estado = 'activo'`;
     const params = [];
     if (tipo)       { sqlMatch += ' AND LOWER(p.tipo) LIKE ?';      params.push(`%${tipo.toLowerCase()}%`); }
     if (operacion)  { sqlMatch += ' AND LOWER(p.operacion) LIKE ?'; params.push(`%${operacion.toLowerCase()}%`); }
-    if (presupMax)  { sqlMatch += ' AND p.precio <= ?';             params.push(presupMax * 1.25); }
+    if (presupMax)  { sqlMatch += ' AND p.precio <= ?';             params.push(presupMax * 1.10); }
     if (departamento && departamento !== 'Guatemala') {
       sqlMatch += ' AND p.departamento = ?'; params.push(departamento);
     } else if (zona) {
@@ -711,8 +711,13 @@ router.post('/busqueda-publica', async (req, res) => {
     sqlMatch += ' LIMIT 10';
     const matches = db.prepare(sqlMatch).all(...params);
 
-    // 4. Crear lead por cada propiedad que encaja (sólo primer nombre — sin datos de contacto)
-    const resumen = `Busca: ${tipo} para ${operacion} en ${lugarStr}${presupMax ? ` · hasta ${monedaUso === 'USD' ? '$' : 'Q'}${presupMax.toLocaleString('es-GT')}` : ''}`;
+    // Helper: detectar si la propiedad está sobre presupuesto del cliente
+    const sim = monedaUso === 'USD' ? '$' : 'Q';
+    const sobrePresup = (precio) => presupMax && precio > presupMax;
+    const pctSobre = (precio) => presupMax ? Math.round(((precio - presupMax) / presupMax) * 100) : 0;
+
+    // 4. Crear lead por cada propiedad que encaja
+    const resumen = `Busca: ${tipo} para ${operacion} en ${lugarStr}${presupMax ? ` · hasta ${sim}${Number(presupMax).toLocaleString('es-GT')}` : ''}`;
     const insertLead = db.prepare(`
       INSERT INTO leads (asesor_id, nombre, email, telefono, mensaje, tipo,
         propiedad_id, propiedad_titulo, origen, etapa, creado_en, actualizado_en)
@@ -723,7 +728,7 @@ router.post('/busqueda-publica', async (req, res) => {
       INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje)
       VALUES (?, 'lead_busqueda', ?, ?)
     `);
-    const presupTexto = presupMax ? `${monedaUso === 'USD' ? '$' : 'Q'}${presupMax.toLocaleString('es-GT')}` : null;
+    const presupTexto = presupMax ? `${sim}${Number(presupMax).toLocaleString('es-GT')}` : null;
     const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
     const leadsCreados = [];
 
@@ -731,11 +736,20 @@ router.post('/busqueda-publica', async (req, res) => {
       const r = insertLead.run(m.asesor_id, primerNombre, email, resumen, m.id, m.titulo);
       leadsCreados.push(r.lastInsertRowid);
 
+      const esSobrePresup = sobrePresup(m.precio);
+      const pct = pctSobre(m.precio);
+      const propPrecioTexto = m.precio ? `${sim}${Number(m.precio).toLocaleString('es-GT')}` : null;
+
+      // Nota de negociación si el precio está sobre el presupuesto del cliente
+      const notaNegociacion = esSobrePresup
+        ? `⚠️ Tu propiedad (${propPrecioTexto}) está un ${pct}% sobre el presupuesto del cliente (${presupTexto}) — puede haber margen de negociación.`
+        : '';
+
       // Notificación interna
       insertNotif.run(
         m.asesor_id,
         `🔍 Nuevo lead InmobIA — ${tipo} en ${lugarStr}`,
-        `${primerNombre} busca ${tipo} para ${operacion} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}. Comunícate a través de la plataforma.`,
+        `${primerNombre} busca ${tipo} para ${operacion} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}. ${notaNegociacion || 'Comunícate a través de la plataforma.'}`,
       );
 
       // Email al asesor
@@ -744,6 +758,7 @@ router.post('/busqueda-publica', async (req, res) => {
         enviarEmailNuevoLeadBusqueda({
           email: asesor.email, nombreAsesor: asesor.nombre,
           cliente: primerNombre, tipo, operacion, zona: lugarStr,
+          notaNegociacion,
           presupuesto: presupTexto,
           linkCRM: `${BASE_URL}/panel-asesor.html#crm`,
         }).catch(() => {});
@@ -751,7 +766,7 @@ router.post('/busqueda-publica', async (req, res) => {
 
       // WhatsApp al asesor (si tiene teléfono registrado)
       if (asesor?.telefono) {
-        const msgAsesor = `🔍 *Nuevo lead InmobIA*\n\nUn cliente busca: *${tipo}* para *${operacion}* en *${lugarStr}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}\n\nRevisa el lead en tu panel:\n${BASE_URL}/panel-asesor.html#crm`;
+        const msgAsesor = `🔍 *Nuevo lead InmobIA*\n\nUn cliente busca: *${tipo}* para *${operacion}* en *${lugarStr}*${presupTexto ? `\nPresupuesto cliente: hasta *${presupTexto}*` : ''}${esSobrePresup ? `\n⚠️ Tu propiedad está un *${pct}%* sobre su presupuesto — puede haber margen de negociación.` : ''}\n\nRevisa el lead en tu panel:\n${BASE_URL}/panel-asesor.html#crm`;
         sendWhatsApp(asesor.telefono, msgAsesor).catch(() => {});
       }
     }

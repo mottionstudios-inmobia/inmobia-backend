@@ -766,7 +766,7 @@ export async function enviarCorreoBienvenidaAsesor({ email, nombre, slug }) {
   }
 }
 
-export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, cliente, tipo, operacion, zona, presupuesto, linkCRM }) {
+export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, cliente, tipo, operacion, zona, presupuesto, linkCRM, notaNegociacion }) {
   if (!email) return { ok: false };
   const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
   const crm = linkCRM || `${BASE_URL}/panel-asesor.html#crm`;
@@ -785,8 +785,12 @@ export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, client
         <p style="margin:0;font-weight:700;color:#1e2d4a;font-size:1rem">${tipo} · ${operacion}</p>
         <p style="margin:4px 0 0;color:#555;font-size:0.88rem">${zona}${presupuesto ? ` · hasta ${presupuesto}` : ''}</p>
       </div>
+      ${notaNegociacion ? `
+      <div style="background:#fffbeb;border-radius:8px;padding:14px 18px;font-size:0.83rem;color:#78350f;line-height:1.6;margin-bottom:16px;border-left:4px solid #f59e0b">
+        ${notaNegociacion}
+      </div>` : ''}
       <div style="background:#f0fdf4;border-radius:8px;padding:14px 18px;font-size:0.83rem;color:#444;line-height:1.6;margin-bottom:22px">
-        <strong style="color:#065f46">Importante:</strong> El cliente <strong>no comparte sus datos de contacto</strong>. Toda la comunicación es a través del chat de la plataforma InmobIA. Si tienes una propiedad que encaje, el cliente podrá verla y contactarte desde su panel.
+        <strong style="color:#065f46">Importante:</strong> El cliente <strong>no comparte sus datos de contacto</strong>. Toda la comunicación es a través del chat de la plataforma InmobIA.
       </div>
       <div style="text-align:center;margin:20px 0 6px">
         <a href="${crm}" style="display:inline-block;background:#1e2d4a;color:#fff;text-decoration:none;padding:12px 28px;border-radius:7px;font-weight:600;font-size:0.9rem">Ver el lead en mi CRM →</a>
