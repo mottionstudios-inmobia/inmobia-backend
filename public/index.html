@@ -2116,13 +2116,13 @@ user-select: none;
       <div class="form-row">
         <div class="form-group">
           <label>Presupuesto máximo <span class="req-mark">*</span></label>
-          <div style="display:flex;gap:0.5rem;align-items:stretch">
-            <select id="b-moneda" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.18);border-radius:4px;color:rgba(255,255,255,0.8);padding:0.6rem 0.5rem;font-family:var(--font-body);font-size:0.82rem;flex-shrink:0;cursor:pointer">
+          <div style="display:flex;gap:0.5rem;align-items:stretch;width:100%;overflow:hidden">
+            <select id="b-moneda" style="width:85px;flex-shrink:0;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.18);border-radius:4px;color:rgba(255,255,255,0.8);padding:0.6rem 0.4rem;font-family:var(--font-body);font-size:0.8rem;cursor:pointer">
               <option value="GTQ">Q GTQ</option>
               <option value="USD">$ USD</option>
             </select>
             <input id="b-presupuesto-num" type="text" inputmode="numeric" placeholder="0" oninput="formatearMonto(this)"
-              style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);border-radius:4px;color:#fff;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.9rem;font-weight:500;outline:none">
+              style="flex:1;min-width:0;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);border-radius:4px;color:#fff;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.9rem;font-weight:500;outline:none;width:100%">
           </div>
           <small id="b-presupuesto-hint" style="font-size:0.68rem;color:rgba(255,255,255,0.35);margin-top:0.3rem;display:block">Ingrese el monto máximo mensual</small>
         </div>
