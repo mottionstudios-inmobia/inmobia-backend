@@ -1837,12 +1837,15 @@ user-select: none;
         <!-- Presupuesto máximo -->
         <div class="form-group" id="grp-enriq-presup" style="margin-bottom:1rem">
           <label>Presupuesto máximo <span class="req-mark">*</span></label>
-          <button type="button" id="btn-ep-toggle" onclick="toggleCapsPanel('ep-panel','btn-ep-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.6);color:rgba(255,255,255,0.7);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;text-align:left;">
-            <span id="ep-toggle-label">Seleccionar presupuesto ▾</span>
-          </button>
-          <div id="ep-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
-            <div class="zona-caps" id="ep-caps"></div>
+          <div style="display:flex;gap:0.5rem;align-items:stretch">
+            <select id="e-moneda" style="background:rgba(255,255,255,0.07);border:1px solid rgba(201,168,76,0.6);border-radius:4px;color:rgba(255,255,255,0.8);padding:0.6rem 0.5rem;font-family:var(--font-body);font-size:0.82rem;flex-shrink:0;cursor:pointer">
+              <option value="GTQ">Q GTQ</option>
+              <option value="USD">$ USD</option>
+            </select>
+            <input id="e-presupuesto-num" type="text" inputmode="numeric" placeholder="0" oninput="formatearMonto(this)"
+              style="flex:1;background:rgba(255,255,255,0.05);border:1.5px solid rgba(201,168,76,0.5);border-radius:4px;color:#fff;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.9rem;font-weight:500;outline:none">
           </div>
+          <small id="e-presupuesto-hint" style="font-size:0.68rem;color:rgba(255,255,255,0.35);margin-top:0.3rem;display:block">Ingrese el monto máximo</small>
         </div>
         <!-- Habitaciones -->
         <div class="form-group" style="margin-bottom:1rem">
@@ -2113,12 +2116,15 @@ user-select: none;
       <div class="form-row">
         <div class="form-group">
           <label>Presupuesto máximo <span class="req-mark">*</span></label>
-          <button type="button" id="btn-presup-toggle" onclick="toggleCapsPanel('presup-panel','btn-presup-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
-            <span id="presup-toggle-label">Seleccionar presupuesto ▾</span>
-          </button>
-          <div id="presup-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
-            <div class="zona-caps" id="presup-caps"></div>
+          <div style="display:flex;gap:0.5rem;align-items:stretch">
+            <select id="b-moneda" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.18);border-radius:4px;color:rgba(255,255,255,0.8);padding:0.6rem 0.5rem;font-family:var(--font-body);font-size:0.82rem;flex-shrink:0;cursor:pointer">
+              <option value="GTQ">Q GTQ</option>
+              <option value="USD">$ USD</option>
+            </select>
+            <input id="b-presupuesto-num" type="text" inputmode="numeric" placeholder="0" oninput="formatearMonto(this)"
+              style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);border-radius:4px;color:#fff;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.9rem;font-weight:500;outline:none">
           </div>
+          <small id="b-presupuesto-hint" style="font-size:0.68rem;color:rgba(255,255,255,0.35);margin-top:0.3rem;display:block">Ingrese el monto máximo mensual</small>
         </div>
         <div class="form-group" id="grp-fecha">
           <label>Fecha prevista de mudanza</label>
@@ -3457,18 +3463,13 @@ user-select: none;
     });
   }
 
-  // ── PRESUPUESTO EN ENRIQUECIMIENTO (mismo rango que el formulario principal)
+  // ── PRESUPUESTO EN ENRIQUECIMIENTO: actualizar hint
   function actualizarPresupuestoEnriq() {
-    const opRadio = document.querySelector('input[name="b-operacion"]:checked')?.value || '';
-    const lista = opRadio === 'Compra' ? presupuestosCompra : presupuestosRenta;
-    const caps = document.getElementById('ep-caps');
-    if (!caps) return;
-    caps.innerHTML = lista.filter(o => o.v !== '').map((o, i) => `
-      <div class="zona-cap">
-        <input type="radio" id="ep${i}" name="e-presupuesto" value="${o.v}"
-          onchange="selCapsRadio(this,'ep-panel','btn-ep-toggle','ep-toggle-label')">
-        <label for="ep${i}">${o.t}</label>
-      </div>`).join('');
+    const op = document.querySelector('input[name="b-operacion"]:checked')?.value || '';
+    const hint = document.getElementById('e-presupuesto-hint');
+    if (hint) hint.textContent = op === 'Compra'
+      ? 'Precio máximo de compra (ej: 1,200,000)'
+      : 'Monto máximo mensual (ej: 8,000)';
   }
 
   // ── ENRIQUECIMIENTO POST-ENVÍO
@@ -3479,9 +3480,11 @@ user-select: none;
     btn.disabled = true; btn.textContent = 'Guardando...';
     const form = e.target;
     const val = id => document.getElementById(id)?.value || '';
-    const presupEnriq = form.querySelector('input[name="e-presupuesto"]:checked')?.value || '';
+    const presupEnriq = document.getElementById('e-presupuesto-num')?.value.replace(/[^0-9]/g, '') || '';
+    const monedaEnriq = document.getElementById('e-moneda')?.value || 'GTQ';
     const payload = {
       presupuesto_max: presupEnriq,
+      moneda: monedaEnriq,
       habitaciones:   form.querySelector('input[name="e-habitaciones"]:checked')?.value || '',
       banos:          form.querySelector('input[name="e-banos"]:checked')?.value || '',
       parqueos:       form.querySelector('input[name="e-parqueos"]:checked')?.value || '',
@@ -3504,43 +3507,22 @@ user-select: none;
     } catch { btn.disabled = false; btn.textContent = 'Guardar detalles y mejorar mi match →'; }
   }
 
-  // ── PRESUPUESTO DINÁMICO SEGÚN OPERACIÓN (búsqueda personalizada)
-  const presupuestosRenta = [
-    { v: '',      t: 'Sin límite' },
-    { v: '3000',  t: 'Hasta Q3,000/mes' },
-    { v: '5000',  t: 'Hasta Q5,000/mes' },
-    { v: '8000',  t: 'Hasta Q8,000/mes' },
-    { v: '12000', t: 'Hasta Q12,000/mes' },
-    { v: '20000', t: 'Hasta Q20,000/mes' },
-    { v: '35000', t: 'Hasta Q35,000/mes' },
-    { v: '50000', t: 'Hasta Q50,000+/mes' },
-  ];
-  const presupuestosCompra = [
-    { v: '',        t: 'Sin límite' },
-    { v: '200000',  t: 'Hasta Q200,000' },
-    { v: '400000',  t: 'Hasta Q400,000' },
-    { v: '700000',  t: 'Hasta Q700,000' },
-    { v: '1000000', t: 'Hasta Q1,000,000' },
-    { v: '1500000', t: 'Hasta Q1,500,000' },
-    { v: '2500000', t: 'Hasta Q2,500,000' },
-    { v: '5000000', t: 'Q2,500,000+' },
-  ];
+  // ── PRESUPUESTO: formato de miles al escribir
+  function formatearMonto(input) {
+    const raw = input.value.replace(/[^0-9]/g, '');
+    input.value = raw ? Number(raw).toLocaleString('es-GT') : '';
+  }
+
+  // ── PRESUPUESTO: actualizar hint según operación
   function actualizarPresupuestoBusqueda() {
     const op = document.querySelector('input[name="b-operacion"]:checked')?.value || '';
-    const caps = document.getElementById('presup-caps');
-    if (!caps) return;
-    const lista = op === 'Compra' ? presupuestosCompra : presupuestosRenta;
-    caps.innerHTML = lista.filter(o => o.v !== '').map((o, i) => `
-      <div class="zona-cap">
-        <input type="radio" id="ps${i}" name="b-presupuesto" value="${o.v}"
-          onchange="selCapsRadio(this,'presup-panel','btn-presup-toggle','presup-toggle-label')">
-        <label for="ps${i}">${o.t}</label>
-      </div>`).join('');
-    // Resetear label si cambia operación
-    const lbl = document.getElementById('presup-toggle-label');
-    if (lbl) lbl.textContent = 'Seleccionar presupuesto ▾';
-    const btn = document.getElementById('btn-presup-toggle');
-    if (btn) { btn.style.borderColor = 'rgba(255,255,255,0.18)'; btn.style.color = 'rgba(255,255,255,0.55)'; }
+    const hint = document.getElementById('b-presupuesto-hint');
+    if (hint) hint.textContent = op === 'Compra'
+      ? 'Ingrese el precio máximo de compra (ej: 1,200,000)'
+      : 'Ingrese el monto máximo mensual (ej: 8,000)';
+    // Limpiar el input al cambiar operación
+    const inp = document.getElementById('b-presupuesto-num');
+    if (inp) inp.value = '';
   }
   actualizarPresupuestoBusqueda();
 
@@ -3656,7 +3638,9 @@ user-select: none;
     const pais = val('b-codigo-pais');
     const tel  = pais + ' ' + val('b-whatsapp');
 
-    const presupMax = form.querySelector('input[name="b-presupuesto"]:checked')?.value || '';
+    const presupRaw = document.getElementById('b-presupuesto-num')?.value.replace(/[^0-9]/g, '') || '';
+    const presupMax = presupRaw;
+    const monedaVal = document.getElementById('b-moneda')?.value || 'GTQ';
     const dep = form.querySelector('input[name="b-departamento"]:checked')?.value || '';
     const municipio  = form.querySelector('input[name="b-municipio"]:checked')?.value || '';
     const zonasGt    = [...form.querySelectorAll('input[name="b-zona-gt"]:checked')].map(i => i.value);
@@ -3676,7 +3660,7 @@ user-select: none;
       departamento:  dep,
       zona:          zonaFinal,
       presupuesto_max: presupMax,
-      moneda:        'GTQ',
+      moneda:        monedaVal,
       habitaciones:  form.querySelector('input[name="b-habitaciones"]:checked')?.value || '',
       banos:         form.querySelector('input[name="b-banos"]:checked')?.value || '',
       parqueos:      form.querySelector('input[name="b-parqueos"]:checked')?.value || '',
