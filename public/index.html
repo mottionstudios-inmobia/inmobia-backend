@@ -1834,6 +1834,16 @@ user-select: none;
         <p style="color:rgba(255,255,255,0.75);font-size:0.92rem;margin:0">Para que los asesores encuentren opciones más precisas,<br>indique algunos detalles adicionales — toma menos de 1 minuto.</p>
       </div>
       <form id="enriq-form" onsubmit="enviarEnriquecimiento(event)">
+        <!-- Presupuesto máximo -->
+        <div class="form-group" id="grp-enriq-presup" style="margin-bottom:1rem">
+          <label>Presupuesto máximo <span class="req-mark">*</span></label>
+          <button type="button" id="btn-ep-toggle" onclick="toggleCapsPanel('ep-panel','btn-ep-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.6);color:rgba(255,255,255,0.7);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;text-align:left;">
+            <span id="ep-toggle-label">Seleccionar presupuesto ▾</span>
+          </button>
+          <div id="ep-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+            <div class="zona-caps" id="ep-caps"></div>
+          </div>
+        </div>
         <!-- Habitaciones -->
         <div class="form-group" style="margin-bottom:1rem">
           <label>Habitaciones</label>
@@ -3447,6 +3457,20 @@ user-select: none;
     });
   }
 
+  // ── PRESUPUESTO EN ENRIQUECIMIENTO (mismo rango que el formulario principal)
+  function actualizarPresupuestoEnriq() {
+    const opRadio = document.querySelector('input[name="b-operacion"]:checked')?.value || '';
+    const lista = opRadio === 'Compra' ? presupuestosCompra : presupuestosRenta;
+    const caps = document.getElementById('ep-caps');
+    if (!caps) return;
+    caps.innerHTML = lista.filter(o => o.v !== '').map((o, i) => `
+      <div class="zona-cap">
+        <input type="radio" id="ep${i}" name="e-presupuesto" value="${o.v}"
+          onchange="selCapsRadio(this,'ep-panel','btn-ep-toggle','ep-toggle-label')">
+        <label for="ep${i}">${o.t}</label>
+      </div>`).join('');
+  }
+
   // ── ENRIQUECIMIENTO POST-ENVÍO
   async function enviarEnriquecimiento(e) {
     e.preventDefault();
@@ -3455,14 +3479,16 @@ user-select: none;
     btn.disabled = true; btn.textContent = 'Guardando...';
     const form = e.target;
     const val = id => document.getElementById(id)?.value || '';
+    const presupEnriq = form.querySelector('input[name="e-presupuesto"]:checked')?.value || '';
     const payload = {
-      habitaciones: form.querySelector('input[name="e-habitaciones"]:checked')?.value || '',
-      banos:        form.querySelector('input[name="e-banos"]:checked')?.value || '',
-      parqueos:     form.querySelector('input[name="e-parqueos"]:checked')?.value || '',
-      metros:       val('e-metros'),
+      presupuesto_max: presupEnriq,
+      habitaciones:   form.querySelector('input[name="e-habitaciones"]:checked')?.value || '',
+      banos:          form.querySelector('input[name="e-banos"]:checked')?.value || '',
+      parqueos:       form.querySelector('input[name="e-parqueos"]:checked')?.value || '',
+      metros:         val('e-metros'),
       caracteristicas: [...form.querySelectorAll('input[name="e-caract"]:checked')].map(i => i.value).join(', '),
-      mascota:      form.querySelector('input[name="e-mascota"]:checked')?.value || '',
-      descripcion:  val('e-descripcion'),
+      mascota:        form.querySelector('input[name="e-mascota"]:checked')?.value || '',
+      descripcion:    val('e-descripcion'),
     };
     try {
       const res = await fetch(`/api/cliente/busqueda-publica/${window._busquedaReqId}/detalles`, {
@@ -3682,10 +3708,16 @@ user-select: none;
         // Guardar ID para enriquecimiento
         window._busquedaReqId = json.requerimientoId;
 
-        // Mostrar paso B solo si no se llenaron los detalles opcionales
+        // Mostrar paso B si falta presupuesto O no se llenaron detalles opcionales
         const detallesLlenos = payload.habitaciones || payload.banos || payload.parqueos || payload.metros || payload.caracteristicas;
+        const presupuestoLleno = !!payload.presupuesto_max;
         const enriq = document.getElementById('busqueda-enriquecimiento');
-        if (enriq) enriq.style.display = detallesLlenos ? 'none' : '';
+        if (enriq) enriq.style.display = (!detallesLlenos || !presupuestoLleno) ? '' : 'none';
+        // Ocultar campo presupuesto en enriquecimiento si ya fue seleccionado
+        const grpEnriqPresup = document.getElementById('grp-enriq-presup');
+        if (grpEnriqPresup) grpEnriqPresup.style.display = presupuestoLleno ? 'none' : '';
+        // Poblar las cápsulas de presupuesto en el enriquecimiento
+        actualizarPresupuestoEnriq();
 
         form.reset();
         actualizarPresupuestoBusqueda();

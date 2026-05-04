@@ -766,6 +766,44 @@ export async function enviarCorreoBienvenidaAsesor({ email, nombre, slug }) {
   }
 }
 
+export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, cliente, tipo, operacion, zona, presupuesto, linkCRM }) {
+  if (!email) return { ok: false };
+  const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
+  const crm = linkCRM || `${BASE_URL}/panel-asesor.html#crm`;
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f0ede8;font-family:Arial,sans-serif">
+  <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <div style="background:#1e2d4a;border-top:4px solid #c9a84c;padding:24px 32px">
+      <p style="margin:0 0 4px;color:rgba(255,255,255,0.6);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em">🔍 Nuevo lead — Búsqueda personalizada</p>
+      <h1 style="margin:0;color:#fff;font-size:1.15rem;font-weight:600">Un cliente InmobIA busca una propiedad como la tuya</h1>
+    </div>
+    <div style="padding:28px 32px">
+      <p style="margin:0 0 18px;color:#444;line-height:1.6">Hola <strong>${nombreAsesor}</strong>, un cliente registrado en InmobIA tiene un requerimiento que podría encajar con tus propiedades.</p>
+      <div style="background:#f4f6fb;border-radius:8px;padding:16px 20px;margin-bottom:20px;border-left:4px solid #c9a84c">
+        <p style="margin:0 0 4px;font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.06em">Requerimiento del cliente</p>
+        <p style="margin:0;font-weight:700;color:#1e2d4a;font-size:1rem">${tipo} · ${operacion}</p>
+        <p style="margin:4px 0 0;color:#555;font-size:0.88rem">${zona}${presupuesto ? ` · hasta ${presupuesto}` : ''}</p>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:14px 18px;font-size:0.83rem;color:#444;line-height:1.6;margin-bottom:22px">
+        <strong style="color:#065f46">Importante:</strong> El cliente <strong>no comparte sus datos de contacto</strong>. Toda la comunicación es a través del chat de la plataforma InmobIA. Si tienes una propiedad que encaje, el cliente podrá verla y contactarte desde su panel.
+      </div>
+      <div style="text-align:center;margin:20px 0 6px">
+        <a href="${crm}" style="display:inline-block;background:#1e2d4a;color:#fff;text-decoration:none;padding:12px 28px;border-radius:7px;font-weight:600;font-size:0.9rem">Ver el lead en mi CRM →</a>
+      </div>
+    </div>
+    <div style="background:#f4f6fb;padding:12px 32px;text-align:center;font-size:0.72rem;color:#aaa;border-top:1px solid #e5e2da">InmobIA · Notificación automática de nuevo lead</div>
+  </div>
+</body></html>`;
+  try {
+    await enviarEmail({ to: email, subject: `🔍 Nuevo lead InmobIA — ${tipo} en ${zona}`, html });
+    return { ok: true };
+  } catch (err) {
+    console.error('⚠️  Error email lead asesor:', err.message);
+    return { ok: false };
+  }
+}
+
 export async function enviarEmailBusquedaCliente({ email, nombre, tipo, operacion, zona, matches, linkPanel }) {
   if (!email) return { ok: false };
   const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';

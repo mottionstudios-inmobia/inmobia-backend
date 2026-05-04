@@ -3,7 +3,8 @@ import crypto from 'crypto';
 import { db } from '../database.js';
 import { crearCheckoutComision, keysConfigured } from '../lib/recurrente.js';
 import { propiedadEsDeAdmin } from '../lib/modelos.js';
-import { enviarCorreoComisionAsesor, enviarCorreoCierreConfirmado1D, enviarEmailBusquedaCliente } from '../email.js';
+import { enviarCorreoComisionAsesor, enviarCorreoCierreConfirmado1D, enviarEmailBusquedaCliente, enviarEmailNuevoLeadBusqueda } from '../email.js';
+import { sendWhatsApp } from '../whatsapp.js';
 
 const router = Router();
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
@@ -586,7 +587,7 @@ router.patch('/busqueda', (req, res) => {
 // ── PATCH /api/cliente/busqueda-publica/:id/detalles  (enriquecimiento post-envío)
 router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
   const { id } = req.params;
-  const { habitaciones, banos, parqueos, metros, caracteristicas, mascota, desc_mascota, descripcion } = req.body;
+  const { presupuesto_max, habitaciones, banos, parqueos, metros, caracteristicas, mascota, desc_mascota, descripcion } = req.body;
 
   const req_ = db.prepare('SELECT * FROM requerimientos WHERE id = ? AND fuente = ?').get(id, 'cliente');
   if (!req_) return res.status(404).json({ error: 'Requerimiento no encontrado' });
@@ -599,13 +600,14 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
 
   db.prepare(`
     UPDATE requerimientos SET
-      habitaciones = ?, banos = ?, metros_min = ?,
+      precio_max = ?, habitaciones = ?, banos = ?, metros_min = ?,
       caracteristicas = ?, notas = ?, actualizado_en = datetime('now')
     WHERE id = ?
   `).run(
-    habitaciones ? Number(habitaciones) : req_.habitaciones,
-    banos        ? Number(banos)        : req_.banos,
-    metros       ? Number(metros)       : req_.metros_min,
+    presupuesto_max ? Number(presupuesto_max) : req_.precio_max,
+    habitaciones    ? Number(habitaciones)    : req_.habitaciones,
+    banos           ? Number(banos)           : req_.banos,
+    metros          ? Number(metros)          : req_.metros_min,
     caracteristicas || req_.caracteristicas,
     notasArr.join('\n') || req_.notas,
     id,
@@ -721,45 +723,85 @@ router.post('/busqueda-publica', async (req, res) => {
       INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje)
       VALUES (?, 'lead_busqueda', ?, ?)
     `);
+    const presupTexto = presupMax ? `${monedaUso === 'USD' ? '$' : 'Q'}${presupMax.toLocaleString('es-GT')}` : null;
+    const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
     const leadsCreados = [];
+
     for (const m of matches) {
       const r = insertLead.run(m.asesor_id, primerNombre, email, resumen, m.id, m.titulo);
       leadsCreados.push(r.lastInsertRowid);
+
+      // Notificación interna
       insertNotif.run(
         m.asesor_id,
         `🔍 Nuevo lead InmobIA — ${tipo} en ${lugarStr}`,
-        `${primerNombre} busca ${tipo} para ${operacion} en ${lugarStr}${presupMax ? ` · hasta ${monedaUso === 'USD' ? '$' : 'Q'}${presupMax.toLocaleString('es-GT')}` : ''}. Comunícate a través de la plataforma (el cliente no comparte datos de contacto directamente).`,
+        `${primerNombre} busca ${tipo} para ${operacion} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}. Comunícate a través de la plataforma.`,
       );
+
+      // Email al asesor
+      const asesor = db.prepare('SELECT nombre, email, telefono FROM usuarios WHERE id = ?').get(m.asesor_id);
+      if (asesor?.email) {
+        enviarEmailNuevoLeadBusqueda({
+          email: asesor.email, nombreAsesor: asesor.nombre,
+          cliente: primerNombre, tipo, operacion, zona: lugarStr,
+          presupuesto: presupTexto,
+          linkCRM: `${BASE_URL}/panel-asesor.html#crm`,
+        }).catch(() => {});
+      }
+
+      // WhatsApp al asesor (si tiene teléfono registrado)
+      if (asesor?.telefono) {
+        const msgAsesor = `🔍 *Nuevo lead InmobIA*\n\nUn cliente busca: *${tipo}* para *${operacion}* en *${lugarStr}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}\n\nRevisa el lead en tu panel:\n${BASE_URL}/panel-asesor.html#crm`;
+        sendWhatsApp(asesor.telefono, msgAsesor).catch(() => {});
+      }
     }
 
     // 5. Si no hubo match, notificar a asesores activos en general
     if (matches.length === 0) {
       const activos = db.prepare(`
-        SELECT DISTINCT p.usuario_id as id FROM propiedades p
+        SELECT DISTINCT u.id, u.nombre, u.email, u.telefono
+        FROM propiedades p JOIN usuarios u ON u.id = p.usuario_id
         WHERE p.publicado_inmobia = 1 AND p.estado = 'activo' LIMIT 60
       `).all();
       for (const a of activos) {
         insertNotif.run(
           a.id,
           `🔍 Requerimiento en red: ${tipo} en ${lugarStr}`,
-          `Un cliente InmobIA busca ${tipo} para ${operacion} en ${lugarStr}${presupMax ? ` · hasta ${monedaUso === 'USD' ? '$' : 'Q'}${presupMax.toLocaleString('es-GT')}` : ''}. Si tienes una propiedad que encaje y está publicada en InmobIA, aparecerás en las opciones del cliente.`,
+          `Un cliente InmobIA busca ${tipo} para ${operacion} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}. Si tienes una propiedad que encaje, aparecerás en sus opciones.`,
         );
+        if (a.email) {
+          enviarEmailNuevoLeadBusqueda({
+            email: a.email, nombreAsesor: a.nombre,
+            cliente: primerNombre, tipo, operacion, zona: lugarStr,
+            presupuesto: presupTexto,
+            linkCRM: `${BASE_URL}/panel-asesor.html#crm`,
+          }).catch(() => {});
+        }
+        if (a.telefono) {
+          sendWhatsApp(a.telefono, `🔍 *Requerimiento InmobIA*\n\nCliente busca: *${tipo}* para *${operacion}* en *${lugarStr}*${presupTexto ? `\nHasta: *${presupTexto}*` : ''}\n\nSi tienes una propiedad que encaje:\n${BASE_URL}/panel-asesor.html#crm`).catch(() => {});
+        }
       }
     }
 
-    // 6. Generar magic link para panel del cliente
+    // 6. Magic link + notificaciones al cliente
     const token = crypto.randomBytes(32).toString('hex');
     const expira = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     db.prepare(`INSERT INTO magic_links (token, email, lead_id, expira_en) VALUES (?, ?, ?, ?)`)
       .run(token, email.toLowerCase().trim(), leadsCreados[0] || null, expira);
 
-    // 7. Email de confirmación al cliente
-    const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
     const linkPanel = `${BASE_URL}/panel-cliente.html?token=${token}`;
+
+    // Email al cliente
     await enviarEmailBusquedaCliente({
       email, nombre: primerNombre, tipo, operacion, zona: lugarStr,
       matches: matches.length, linkPanel,
     });
+
+    // WhatsApp al cliente
+    if (telefono) {
+      const msgCliente = `✅ *¡Búsqueda activa, ${primerNombre}!*\n\nRecibimos su búsqueda de *${tipo}* para *${operacion}* en *${lugarStr}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}.\n\n${matches.length > 0 ? `Encontramos *${matches.length} propiedad${matches.length > 1 ? 'es' : ''}* que pueden encajar. Un asesor le contactará pronto.` : 'Notificamos a nuestra red de asesores. Le contactaremos cuando tengamos opciones.'}\n\nSiga su búsqueda desde su panel personal:\n${linkPanel}\n\n_Su número y correo son privados — los asesores se comunican a través de la plataforma._`;
+      sendWhatsApp(telefono, msgCliente).catch(() => {});
+    }
 
     res.json({ ok: true, matches: matches.length, requerimientoId: reqResult.lastInsertRowid });
   } catch (err) {
