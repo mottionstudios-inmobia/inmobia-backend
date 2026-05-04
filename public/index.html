@@ -564,6 +564,10 @@ user-select: none;
     min-width: 180px; max-width: 340px;
     z-index: 9999;
     padding: 0.75rem;
+    overflow-y: auto;
+    max-height: 70vh;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
   .pill-dropdown.open { display: block; animation: pillDrop 0.18s cubic-bezier(0.4,0,0.2,1); }
   .pill-dropdown-caps { display: flex; flex-wrap: wrap; gap: 0.35rem; }
@@ -1343,7 +1347,7 @@ user-select: none;
       white-space: nowrap;
     }
     .filtro-activo-field .select-pill label::after { display: none; }
-    .pill-dropdown { min-width: 160px; font-size: 0.8rem; }
+    .pill-dropdown { left: 8px !important; right: 8px !important; width: calc(100vw - 16px) !important; max-width: none !important; min-width: 0 !important; font-size: 0.85rem; border-radius: 16px; max-height: 60vh; }
     .filter-tabs { padding-left: 0 !important; padding-right: 0 !important; }
     .properties-grid, .testimonios-grid, .servicios-grid { grid-template-columns: 1fr; }
     .property-body { padding: 0.75rem 1rem; }
@@ -2510,7 +2514,11 @@ user-select: none;
   function initPillOverlays() {
     document.querySelectorAll('.select-pill').forEach(pill => buildPillDropdown(pill));
     document.addEventListener('click', closeAllDropdowns);
-    window.addEventListener('scroll', closeAllDropdowns, true);
+    window.addEventListener('scroll', e => {
+      const open = document.querySelector('.pill-dropdown.open');
+      if (open && open.contains(e.target)) return;
+      closeAllDropdowns();
+    }, true);
     window.addEventListener('resize', closeAllDropdowns);
   }
 
