@@ -1131,7 +1131,10 @@
   let WA_NUM = '50242683255'; // fallback — se reemplaza con el teléfono del asesor
 
   function mascararTelefonos(texto) {
-    return (texto || '').replace(/(\+?502[\s\-.]?)?\b\d{4}[\s\-.]?\d{4}\b/g, '[número oculto]');
+    if (!texto) return '';
+    const esc = texto.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return esc.replace(/(\+?502[\s\-.]?)?\b\d{4}[\s\-.]?\d{4}\b/g,
+      '<a href="#" onclick="abrirModalVisita();return false;" style="color:var(--gold);font-weight:700;text-decoration:underline;cursor:pointer">Agendar una visita</a>');
   }
 
   const params = new URLSearchParams(window.location.search);
@@ -1538,7 +1541,11 @@
     // Descripción persuasiva
     if (propData.descripcion_persuasiva) {
       const el = document.getElementById('prop-desc-persuasiva');
-      el.textContent = desdeAsesor ? propData.descripcion_persuasiva : mascararTelefonos(propData.descripcion_persuasiva);
+      if (desdeAsesor) {
+        el.textContent = propData.descripcion_persuasiva;
+      } else {
+        el.innerHTML = mascararTelefonos(propData.descripcion_persuasiva);
+      }
       el.style.display = 'block';
     }
 
@@ -1549,8 +1556,12 @@
       lbl.classList.replace('section-label', 'section-label-proyecto');
     }
     // Descripción (preservar saltos de línea)
-    document.getElementById('prop-descripcion').textContent =
-      (desdeAsesor ? (propData.descripcion || '') : mascararTelefonos(propData.descripcion)) || 'Sin descripción disponible.';
+    const descEl = document.getElementById('prop-descripcion');
+    if (desdeAsesor) {
+      descEl.textContent = propData.descripcion || 'Sin descripción disponible.';
+    } else {
+      descEl.innerHTML = mascararTelefonos(propData.descripcion) || 'Sin descripción disponible.';
+    }
 
     // Amenidades
     // ── Características Únicas (iconos)
