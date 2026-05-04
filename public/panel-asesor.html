@@ -4273,23 +4273,9 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
               Use esta opcion solo en casos aprobados por InmobIA. La comision disponible para usted sera el 50% de la comision total del negocio; cualquier reparto InmobIA se calculara sobre esa base disponible.
             </div>
           </div>
-          <div class="form-field" id="np-zona-wrap">
-            <label class="form-label">Zona <span style="font-weight:400;color:#999">(ciudad de Guatemala)</span></label>
-            <select class="form-input" id="np-zona">
-              <option value="">— Sin zona específica —</option>
-              <option>Zona 1</option><option>Zona 2</option><option>Zona 3</option>
-              <option>Zona 4</option><option>Zona 5</option><option>Zona 6</option>
-              <option>Zona 7</option><option>Zona 8</option><option>Zona 9</option>
-              <option>Zona 10</option><option>Zona 11</option><option>Zona 12</option>
-              <option>Zona 13</option><option>Zona 14</option><option>Zona 15</option>
-              <option>Zona 16</option><option>Zona 17</option><option>Zona 18</option>
-              <option>Zona 19</option><option>Zona 21</option><option>Zona 24</option>
-              <option>Zona 25</option>
-            </select>
-          </div>
           <div class="form-field">
             <label class="form-label">Departamento *</label>
-            <select class="form-input" id="np-departamento">
+            <select class="form-input" id="np-departamento" onchange="toggleDeptoPropiedades()">
               <option value="">— Seleccionar —</option>
               <option selected>Guatemala</option>
               <option>Sacatepéquez</option><option>Chimaltenango</option><option>Escuintla</option>
@@ -4301,7 +4287,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
               <option>Jalapa</option><option>Jutiapa</option><option>El Progreso</option>
             </select>
           </div>
-          <div class="form-field">
+          <div class="form-field" id="np-municipio-wrap">
             <label class="form-label">Municipio</label>
             <select class="form-input" id="np-municipio" onchange="toggleZonasEnPropiedades()">
               <option value="">— Seleccionar —</option>
@@ -4320,9 +4306,20 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
               <option>Chuarrancho</option>
               <option>Fraijanes</option>
               <option>Palencia</option>
-              <option>Antigua Guatemala</option>
-              <option>Escuintla</option>
-              <option>Quetzaltenango</option>
+            </select>
+          </div>
+          <div class="form-field" id="np-zona-wrap">
+            <label class="form-label">Zona <span style="font-weight:400;color:#999">(ciudad de Guatemala)</span></label>
+            <select class="form-input" id="np-zona">
+              <option value="">— Sin zona específica —</option>
+              <option>Zona 1</option><option>Zona 2</option><option>Zona 3</option>
+              <option>Zona 4</option><option>Zona 5</option><option>Zona 6</option>
+              <option>Zona 7</option><option>Zona 8</option><option>Zona 9</option>
+              <option>Zona 10</option><option>Zona 11</option><option>Zona 12</option>
+              <option>Zona 13</option><option>Zona 14</option><option>Zona 15</option>
+              <option>Zona 16</option><option>Zona 17</option><option>Zona 18</option>
+              <option>Zona 19</option><option>Zona 21</option><option>Zona 24</option>
+              <option>Zona 25</option>
             </select>
           </div>
           <div class="form-field">
@@ -13628,13 +13625,33 @@ function toggleCamposOperacion(operacion) {
   document.getElementById('np-impuestos-wrap').style.display    = esVenta ? '' : 'none';
 }
 
-// ── ZONAS: mostrar/ocultar según municipio ─────────────────────────────────────
+// ── DEPARTAMENTO / MUNICIPIO / ZONA: visibilidad condicional ─────────────────
+function toggleDeptoPropiedades() {
+  const depto = (document.getElementById('np-departamento')?.value || '').trim();
+  const esGuatemala = depto === '' || depto === 'Guatemala';
+  const muniWrap = document.getElementById('np-municipio-wrap');
+  if (muniWrap) {
+    muniWrap.style.display = esGuatemala ? '' : 'none';
+    if (!esGuatemala) {
+      const muni = document.getElementById('np-municipio');
+      if (muni) muni.value = '';
+    }
+  }
+  toggleZonasEnPropiedades();
+}
+
 function toggleZonasEnPropiedades() {
+  const depto     = (document.getElementById('np-departamento')?.value || '').trim();
   const municipio = (document.getElementById('np-municipio')?.value || '').trim();
+  const esGuatemala = depto === '' || depto === 'Guatemala';
   const zonaWrap = document.getElementById('np-zona-wrap');
   if (zonaWrap) {
-    zonaWrap.style.display = municipio === 'Guatemala' ? '' : 'none';
-    if (municipio !== 'Guatemala') document.getElementById('np-zona').value = '';
+    const mostrar = esGuatemala && municipio === 'Guatemala';
+    zonaWrap.style.display = mostrar ? '' : 'none';
+    if (!mostrar) {
+      const zona = document.getElementById('np-zona');
+      if (zona) zona.value = '';
+    }
   }
 }
 
@@ -14148,6 +14165,8 @@ function limpiarFormNueva() {
   ['np-tipo','np-operacion','np-zona','np-municipio'].forEach(id => {
     const el = document.getElementById(id); if (el) el.selectedIndex = 0;
   });
+  document.getElementById('np-departamento').value = 'Guatemala';
+  toggleDeptoPropiedades();
   toggleCamposOperacion('');
   document.getElementById('np-moneda').value = 'GTQ';
   const chkSinLB = document.getElementById('np-sin-lb-activo');
@@ -14259,6 +14278,7 @@ async function editarPropiedad(id) {
     document.getElementById('np-zona').value             = p.zona || '';
     document.getElementById('np-municipio').value        = p.municipio || '';
     document.getElementById('np-departamento').value     = p.departamento || 'Guatemala';
+    toggleDeptoPropiedades();
     document.getElementById('np-colonia').value          = p.colonia || '';
     // Radios
     document.querySelector(`input[name="np-mantenimiento"][value="${p.mantenimiento ? '1' : '0'}"]`).checked = true;
