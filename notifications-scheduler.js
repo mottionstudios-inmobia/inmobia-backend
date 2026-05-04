@@ -1,5 +1,6 @@
 import { db } from './database.js';
 import { crearTransporter } from './email.js';
+import { sendWhatsApp } from './whatsapp.js';
 
 // Tiempos en milisegundos
 const NOTIF_24H = 24 * 60 * 60 * 1000;
@@ -253,8 +254,64 @@ async function procesarRecordatoriosPago() {
   }
 }
 
+// ── SEGUIMIENTO DE REQUERIMIENTOS DE CLIENTES (búsqueda personalizada) ──
+const SEGUIMIENTO_3D  =  3 * 24 * 60 * 60 * 1000;
+const SEGUIMIENTO_7D  =  7 * 24 * 60 * 60 * 1000;
+const SEGUIMIENTO_12D = 12 * 24 * 60 * 60 * 1000;
+
+async function procesarSeguimientoRequerimientos() {
+  try {
+    const reqs = db.prepare(`
+      SELECT * FROM requerimientos
+      WHERE fuente = 'cliente' AND estado = 'activo'
+      AND cliente_telefono IS NOT NULL
+    `).all();
+
+    const ahora = Date.now();
+    const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
+
+    for (const req of reqs) {
+      const elapsed      = ahora - new Date(req.creado_en).getTime();
+      const primerNombre = (req.cliente_nombre || 'Cliente').split(' ')[0];
+      const tipo         = req.tipo_propiedad || 'propiedad';
+      const zona         = req.zona || req.municipio || 'Guatemala';
+
+      if (elapsed >= SEGUIMIENTO_3D && !req.notif_3d_en) {
+        await sendWhatsApp(req.cliente_telefono,
+          `🔍 *Hola ${primerNombre}*, tu búsqueda de *${tipo}* en *${zona}* sigue activa en InmobIA.\n\nSi quieres ajustar algún criterio (zona, presupuesto, tipo), puedes hacerlo desde tu panel:\n${BASE_URL}/panel-cliente.html\n\n_Seguimos buscando la propiedad ideal para ti._`
+        ).catch(() => {});
+        db.prepare('UPDATE requerimientos SET notif_3d_en = ? WHERE id = ?').run(new Date().toISOString(), req.id);
+        console.log(`[seguimiento-3d] req ${req.id}`);
+      }
+
+      if (elapsed >= SEGUIMIENTO_7D && !req.notif_7d_en) {
+        const sim        = (req.moneda || 'GTQ') === 'USD' ? '$' : 'Q';
+        const presupTexto = req.precio_max ? ` de hasta ${sim}${Number(req.precio_max).toLocaleString('es-GT')}` : '';
+        await sendWhatsApp(req.cliente_telefono,
+          `🏠 *${primerNombre}*, han pasado 7 días desde tu búsqueda de *${tipo}*${presupTexto} en *${zona}*.\n\nConsejo: ampliar la zona o ajustar el presupuesto puede aumentar tus opciones. Actualiza tu búsqueda:\n${BASE_URL}/panel-cliente.html\n\n_Estamos aquí para ayudarte._`
+        ).catch(() => {});
+        db.prepare('UPDATE requerimientos SET notif_7d_en = ? WHERE id = ?').run(new Date().toISOString(), req.id);
+        console.log(`[seguimiento-7d] req ${req.id}`);
+      }
+
+      if (elapsed >= SEGUIMIENTO_12D && !req.notif_12d_en) {
+        await sendWhatsApp(req.cliente_telefono,
+          `📋 *${primerNombre}*, tu búsqueda en InmobIA está por vencer (12 días).\n\n¿Sigues buscando propiedad? Ingresa a tu panel para renovar tu búsqueda:\n${BASE_URL}/panel-cliente.html\n\n¡Gracias por confiar en InmobIA!`
+        ).catch(() => {});
+        db.prepare(`UPDATE requerimientos SET notif_12d_en = ?, estado = 'expirado' WHERE id = ?`)
+          .run(new Date().toISOString(), req.id);
+        console.log(`[seguimiento-12d] req ${req.id} expirado`);
+      }
+    }
+  } catch (err) {
+    console.error('Error en procesarSeguimientoRequerimientos:', err.message);
+  }
+}
+
 // Ejecutar cada minuto
 setInterval(procesarNotificacionesAgendamiento, 60 * 1000);
 setInterval(procesarRecordatoriosPago, 60 * 1000);
+setInterval(procesarSeguimientoRequerimientos, 60 * 1000);
 console.log('Scheduler de notificaciones de agendamiento iniciado');
 console.log('Scheduler de recordatorios de pago 5RA iniciado');
+console.log('Scheduler de seguimiento de requerimientos iniciado');

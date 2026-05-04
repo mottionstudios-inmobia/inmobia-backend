@@ -4,6 +4,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { db } from '../database.js';
 import { authMiddleware, leerUsuarioToken } from '../auth.js';
+import { enviarEmailNuevoLeadBusqueda } from '../email.js';
+import { sendWhatsApp } from '../whatsapp.js';
+import crypto from 'crypto';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const router = Router();
@@ -195,6 +198,96 @@ router.get('/tripartito', (req, res) => {
   res.json({ propiedades: rows });
 });
 
+// Auto-match propiedad recién publicada contra requerimientos de clientes activos
+async function autoMatchRequerimientos(propId) {
+  try {
+    const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
+    const prop = db.prepare(`
+      SELECT p.*, u.nombre AS asesor_nombre, u.email AS asesor_email, u.telefono AS asesor_tel
+      FROM propiedades p LEFT JOIN usuarios u ON u.id = p.usuario_id
+      WHERE p.id = ?
+    `).get(propId);
+    if (!prop || prop.publicado_inmobia !== 1 || !prop.usuario_id) return;
+
+    const sim = (prop.moneda || 'GTQ') === 'USD' ? '$' : 'Q';
+    const reqs = db.prepare(`
+      SELECT * FROM requerimientos
+      WHERE fuente = 'cliente' AND estado = 'activo'
+      AND (operacion IS NULL OR LOWER(operacion) = LOWER(?))
+      AND (precio_max IS NULL OR ? <= precio_max * 1.10)
+    `).all(prop.operacion, prop.precio);
+
+    for (const req of reqs) {
+      if (req.tipo_propiedad && req.tipo_propiedad.toLowerCase() !== prop.tipo.toLowerCase()) continue;
+      const zonaTokens = (req.zona || '').split(',').map(z => z.trim().toLowerCase()).filter(Boolean);
+      if (zonaTokens.length > 0) {
+        const propZona = (prop.zona || '').toLowerCase();
+        const propMun  = (prop.municipio || '').toLowerCase();
+        if (!zonaTokens.some(z => propZona.includes(z) || propMun.includes(z))) continue;
+      }
+
+      const exists = db.prepare(`
+        SELECT id FROM leads WHERE asesor_id = ? AND propiedad_id = ?
+        AND (email = ? OR requerimiento_id = ?) AND origen = 'busqueda_personalizada'
+      `).get(prop.usuario_id, propId, req.cliente_email || '', req.id);
+      if (exists) continue;
+
+      const presupTexto    = req.precio_max ? `${sim}${Number(req.precio_max).toLocaleString('es-GT')}` : null;
+      const lugarStr       = req.zona || req.municipio || 'Guatemala';
+      const resumen        = `Busca: ${req.tipo_propiedad} para ${req.operacion} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}`;
+      const esSobre        = req.precio_max && prop.precio > req.precio_max;
+      const pct            = req.precio_max ? Math.round(((prop.precio - req.precio_max) / req.precio_max) * 100) : 0;
+      const propPrecioTexto = prop.precio ? `${sim}${Number(prop.precio).toLocaleString('es-GT')}` : null;
+      const notaNeg        = esSobre ? `⚠️ Tu propiedad (${propPrecioTexto}) está un ${pct}% sobre el presupuesto del cliente (${presupTexto}) — puede haber margen de negociación.` : '';
+
+      const r = db.prepare(`
+        INSERT INTO leads (asesor_id, nombre, email, telefono, mensaje, tipo,
+          propiedad_id, propiedad_titulo, origen, etapa, requerimiento_id, creado_en, actualizado_en)
+        VALUES (?, ?, ?, ?, ?, 'busqueda_personalizada', ?, ?,
+          'busqueda_personalizada', 'nuevo', ?, datetime('now'), datetime('now'))
+      `).run(
+        prop.usuario_id,
+        req.cliente_nombre || req.cliente_email || 'Cliente',
+        req.cliente_email || '',
+        req.cliente_telefono || null,
+        resumen, propId, prop.titulo, req.id,
+      );
+
+      db.prepare(`INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje) VALUES (?, 'lead_busqueda', ?, ?)`)
+        .run(prop.usuario_id,
+          `🔍 Nuevo lead — tu propiedad encaja con una búsqueda activa`,
+          `Un cliente busca ${req.tipo_propiedad || 'propiedad'} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}. "${prop.titulo}" encaja con su búsqueda.${notaNeg ? ' ' + notaNeg : ''}`);
+
+      if (prop.asesor_email) {
+        enviarEmailNuevoLeadBusqueda({
+          email: prop.asesor_email, nombreAsesor: prop.asesor_nombre,
+          cliente: req.cliente_nombre || 'Cliente', tipo: req.tipo_propiedad,
+          operacion: req.operacion, zona: lugarStr,
+          notaNegociacion: notaNeg, presupuesto: presupTexto,
+          linkCRM: `${BASE_URL}/panel-asesor.html#crm`,
+        }).catch(() => {});
+      }
+      if (prop.asesor_tel) {
+        sendWhatsApp(prop.asesor_tel,
+          `🔍 *Nuevo lead InmobIA*\n\nUn cliente busca: *${req.tipo_propiedad}* para *${req.operacion}* en *${lugarStr}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}${notaNeg ? `\n${notaNeg}` : ''}\n\nTu propiedad *"${prop.titulo}"* encaja. Revisa el lead:\n${BASE_URL}/panel-asesor.html#crm`
+        ).catch(() => {});
+      }
+      if (req.cliente_telefono) {
+        const tkn = crypto.randomBytes(32).toString('hex');
+        const exp = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        db.prepare(`INSERT INTO magic_links (token, email, lead_id, expira_en) VALUES (?, ?, ?, ?)`)
+          .run(tkn, (req.cliente_email || '').toLowerCase().trim(), r.lastInsertRowid, exp);
+        sendWhatsApp(req.cliente_telefono,
+          `✅ *¡${(req.cliente_nombre || 'Cliente').split(' ')[0]}, encontramos una propiedad!*\n\n*${prop.titulo}* encaja con tu búsqueda en *${lugarStr}*${propPrecioTexto ? `\nPrecio: *${propPrecioTexto}*` : ''}.\n\nUn asesor te contactará pronto. Revisa tu panel:\n${BASE_URL}/panel-cliente.html?token=${tkn}`
+        ).catch(() => {});
+      }
+      console.log(`[AutoMatch] Lead creado: req ${req.id} → prop ${propId} → asesor ${prop.usuario_id}`);
+    }
+  } catch (err) {
+    console.error('[autoMatch] Error:', err.message);
+  }
+}
+
 // ── PATCH /api/propiedades/:id/toggle-publicacion  (asesor autenticado)
 router.patch('/:id/toggle-publicacion', authMiddleware, (req, res) => {
   const { publicado, comision_pct, notas_convenio } = req.body;
@@ -207,6 +300,7 @@ router.patch('/:id/toggle-publicacion', authMiddleware, (req, res) => {
       notas_convenio = COALESCE(?, notas_convenio),
       convenio_aceptado_en = CURRENT_TIMESTAMP WHERE id = ?`)
       .run(comision_pct ?? null, notas_convenio ?? null, req.params.id);
+    autoMatchRequerimientos(Number(req.params.id)).catch(e => console.error('[autoMatch toggle]', e.message));
   } else {
     db.prepare('UPDATE propiedades SET publicado_inmobia = 0 WHERE id = ?').run(req.params.id);
   }
@@ -751,6 +845,7 @@ router.patch('/:id/toggle-inmobia-admin', authMiddleware, (req, res) => {
   const p = db.prepare('SELECT id FROM propiedades WHERE id = ?').get(req.params.id);
   if (!p) return res.status(404).json({ error: 'Propiedad no encontrada' });
   db.prepare('UPDATE propiedades SET publicado_inmobia = ? WHERE id = ?').run(publicado ? 1 : 0, req.params.id);
+  if (publicado) autoMatchRequerimientos(Number(req.params.id)).catch(e => console.error('[autoMatch admin]', e.message));
   res.json({ ok: true });
 });
 

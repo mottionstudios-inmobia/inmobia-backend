@@ -245,6 +245,61 @@ router.get('/:id/chat-2a', authMiddleware, (req, res) => {
   res.json({ mensajes });
 });
 
+// ── POST /api/leads/:id/presentar-propiedad  (asesor envía propiedad al cliente por WhatsApp)
+router.post('/:id/presentar-propiedad', authMiddleware, async (req, res) => {
+  const { propiedad_id, nota } = req.body;
+  if (!propiedad_id) return res.status(400).json({ error: 'propiedad_id requerido' });
+
+  const lead = db.prepare('SELECT * FROM leads WHERE id = ?').get(req.params.id);
+  if (!lead) return res.status(404).json({ error: 'Lead no encontrado' });
+  if (lead.asesor_id !== req.usuario.id) return res.status(403).json({ error: 'Sin permiso' });
+  if (!lead.telefono) return res.status(400).json({ error: 'El cliente no tiene teléfono registrado' });
+
+  const prop = db.prepare('SELECT * FROM propiedades WHERE id = ? AND usuario_id = ?').get(propiedad_id, req.usuario.id);
+  if (!prop) return res.status(404).json({ error: 'Propiedad no encontrada o no te pertenece' });
+
+  const asesor = db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(req.usuario.id);
+  const sim = (prop.moneda || 'GTQ') === 'USD' ? '$' : 'Q';
+  const precioTexto = prop.precio ? `${sim}${Number(prop.precio).toLocaleString('es-GT')}` : '';
+  const detalles = [
+    prop.habitaciones > 0 ? `${prop.habitaciones} hab.` : '',
+    prop.banos > 0 ? `${prop.banos} baños` : '',
+    prop.metros > 0 ? `${prop.metros} m²` : '',
+    precioTexto || '',
+  ].filter(Boolean).join(' · ');
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expira = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  db.prepare('INSERT INTO magic_links (token, email, lead_id, expira_en) VALUES (?, ?, ?, ?)')
+    .run(token, (lead.email || '').toLowerCase().trim(), lead.id, expira);
+  const linkPanel = `${BASE_URL}/panel-cliente.html?token=${token}`;
+  const linkProp  = `${BASE_URL}/?propiedad=${propiedad_id}`;
+
+  const msgWA =
+`🏠 *${asesor?.nombre || 'Su asesor'} le presenta una propiedad*
+
+*${prop.titulo}*${detalles ? `\n${detalles}` : ''}${nota?.trim() ? `\n\n_${nota.trim()}_` : ''}
+
+Ver propiedad completa:
+${linkProp}
+
+O ingrese a su panel personal:
+${linkPanel}`;
+
+  sendWhatsApp(lead.telefono, msgWA, lead.id).catch(e => console.error('[WA presentar-prop]', e.message));
+
+  db.prepare(`INSERT INTO lead_bitacora (lead_id, asesor_id, tipo, nota) VALUES (?, ?, 'wa-saliente', ?)`)
+    .run(lead.id, req.usuario.id,
+      nota?.trim() ? `Propiedad presentada: "${prop.titulo}". Nota: ${nota.trim()}` : `Propiedad presentada al cliente: "${prop.titulo}"`);
+
+  if (lead.etapa === 'nuevo') {
+    db.prepare('UPDATE leads SET etapa = ?, actualizado_en = ? WHERE id = ?')
+      .run('interesado', new Date().toISOString(), lead.id);
+  }
+
+  res.json({ ok: true, link: linkProp });
+});
+
 // ── POST /api/leads/:id/mensaje-cliente-paso3  (asesor envía mensaje post-visita)
 router.post('/:id/mensaje-cliente-paso3', authMiddleware, async (req, res) => {
   const { mensaje } = req.body;

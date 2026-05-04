@@ -678,13 +678,13 @@ router.post('/busqueda-publica', async (req, res) => {
     // 2. Crear requerimiento con fuente 'cliente'
     const reqResult = db.prepare(`
       INSERT INTO requerimientos
-        (asesor_id, fuente, cliente_origen_email, cliente_nombre, cliente_email,
+        (asesor_id, fuente, cliente_origen_email, cliente_nombre, cliente_email, cliente_telefono,
          operacion, tipo_propiedad, municipio, zona,
          precio_max, moneda, habitaciones, banos, metros_min,
          caracteristicas, notas, estado, vence_en)
-      VALUES (?, 'cliente', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'activo', ?)
+      VALUES (?, 'cliente', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'activo', ?)
     `).run(
-      admin.id, email, primerNombre, email,
+      admin.id, email, primerNombre, email, telefono || null,
       operacion, tipo,
       departamento || null, zona || null,
       presupMax, monedaUso,

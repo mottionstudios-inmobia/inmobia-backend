@@ -8646,6 +8646,26 @@ function verLead(id) {
     </a>`;
   })()) : (l.propiedad_titulo ? seccion('Propiedad de interés', `<span style="color:#e2e8f0;font-size:0.88rem">${l.propiedad_titulo}</span>`) : '');
 
+  // ── Sección: Enviar propiedad al cliente (solo busqueda_personalizada) ──
+  const bloqueEnviarPropiedad = l.origen === 'busqueda_personalizada' ? seccion('Enviar propiedad al cliente', `
+    <div style="display:flex;flex-direction:column;gap:0.75rem">
+      <div style="font-size:0.82rem;color:#94a3b8;line-height:1.5">Selecciona una de tus propiedades para presentársela al cliente por WhatsApp.</div>
+      <select id="env-prop-sel-${l.id}" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #2a3144;border-radius:7px;padding:0.5rem 0.75rem;color:#e2e8f0;font-size:0.85rem;outline:none">
+        <option value="">— Seleccionar propiedad —</option>
+        ${(todasLasPropiedades || []).filter(p => p.estado === 'activo').map(p =>
+          `<option value="${p.id}">${p.titulo}${p.zona ? ' · ' + p.zona : ''}${p.precio ? ' · ' + (p.moneda === 'USD' ? '$' : 'Q') + Number(p.precio).toLocaleString('es-GT') : ''}</option>`
+        ).join('')}
+      </select>
+      <textarea id="env-prop-nota-${l.id}" rows="2" placeholder="Nota opcional para el cliente..." style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #2a3144;border-radius:7px;padding:0.5rem 0.75rem;color:#e2e8f0;font-size:0.83rem;resize:none;font-family:inherit;outline:none"></textarea>
+      <button onclick="enviarPropiedadAlCliente(${l.id})" id="btn-env-prop-${l.id}"
+        style="background:#e07b39;color:#fff;border:none;border-radius:7px;padding:0.55rem 1.1rem;font-size:0.85rem;font-weight:700;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:0.4rem"
+        onmouseover="this.style.background='#c96a2d'" onmouseout="this.style.background='#e07b39'">
+        📤 Enviar propiedad por WhatsApp
+      </button>
+      ${!l.telefono ? `<div style="font-size:0.72rem;color:#f87171;margin-top:0.25rem">⚠️ El cliente no tiene teléfono — no se puede enviar por WhatsApp.</div>` : ''}
+    </div>
+  `) : '';
+
   // ── Sección: Visita ────────────────────────────────────────────
   const bloqueVisita = l.fecha_visita ? seccion('Visita', (() => {
     const hecha = !!l.visita_realizada_en;
@@ -9273,6 +9293,7 @@ function verLead(id) {
   document.getElementById('modal-lead-body').innerHTML =
     bloqueCliente +
     bloquePropiedad +
+    bloqueEnviarPropiedad +
     bloqueProgreso2A +
     bloqueConvenio2A +
     bloqueVisita +
@@ -10827,6 +10848,31 @@ function iniciarChatPoll(leadId) {
 
 function detenerChatPoll() {
   if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
+}
+
+async function enviarPropiedadAlCliente(leadId) {
+  const selEl  = document.getElementById(`env-prop-sel-${leadId}`);
+  const notaEl = document.getElementById(`env-prop-nota-${leadId}`);
+  const btn    = document.getElementById(`btn-env-prop-${leadId}`);
+  const propId = selEl?.value;
+  if (!propId) { toast('Selecciona una propiedad primero', 'error'); return; }
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const r = await fetch(`${API}/leads/${leadId}/presentar-propiedad`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ propiedad_id: Number(propId), nota: notaEl?.value?.trim() || '' }),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast('✅ Propiedad enviada al cliente por WhatsApp');
+      if (notaEl) notaEl.value = '';
+      cargarBitacora(leadId);
+    } else {
+      toast(d.error || 'Error al enviar', 'error');
+    }
+  } catch { toast('Error de conexión', 'error'); }
+  btn.disabled = false; btn.textContent = '📤 Enviar propiedad por WhatsApp';
 }
 
 async function enviarMensajeCliente2A(leadId) {

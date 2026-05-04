@@ -657,6 +657,9 @@ try { db.exec(`ALTER TABLE usuarios ADD COLUMN referidor_id INTEGER DEFAULT NULL
 // Requerimientos originados por clientes desde panel-cliente
 try { db.exec(`ALTER TABLE requerimientos ADD COLUMN fuente TEXT DEFAULT 'asesor'`); } catch {}
 try { db.exec(`ALTER TABLE requerimientos ADD COLUMN cliente_origen_email TEXT DEFAULT NULL`); } catch {}
+try { db.exec(`ALTER TABLE requerimientos ADD COLUMN notif_3d_en TEXT DEFAULT NULL`); } catch {}
+try { db.exec(`ALTER TABLE requerimientos ADD COLUMN notif_7d_en TEXT DEFAULT NULL`); } catch {}
+try { db.exec(`ALTER TABLE requerimientos ADD COLUMN notif_12d_en TEXT DEFAULT NULL`); } catch {}
 
 // leads_bonus_referidos: leads extra acumulados por referir asesores
 try { db.exec(`ALTER TABLE usuarios ADD COLUMN leads_bonus_referidos INTEGER DEFAULT 0`); } catch {}
