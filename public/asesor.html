@@ -436,6 +436,8 @@ footer {
 .filtros-tabs {
   display: flex; gap: 0; border-bottom: 1px solid var(--gray-border);
   overflow-x: auto; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 .filtros-tabs::-webkit-scrollbar { display: none; }
 .tab-btn {

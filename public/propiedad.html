@@ -801,6 +801,18 @@
     .caract-valor { font-size: 1.05rem; line-height: 1.1; }
     .caract-label { font-size: 0.62rem; letter-spacing: 0.08em; }
     .relacionadas-grid { grid-template-columns: 1fr; }
+    /* Carousel similares: scroll nativo con touch en mobile */
+    .carousel-track-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .carousel-track-wrap::-webkit-scrollbar { display: none; }
+    .relacionadas-carousel { transform: none !important; padding-bottom: 0.5rem; }
+    .rel-card { scroll-snap-align: start; flex: 0 0 76vw; }
+    .carousel-nav { display: none; }
   }
 </style>
 </head>
@@ -1856,6 +1868,13 @@
   document.getElementById('lightbox').addEventListener('click', e => {
     if (e.target === e.currentTarget) cerrarLightbox();
   });
+  // Swipe táctil en lightbox
+  let _lbX = 0;
+  document.getElementById('lightbox').addEventListener('touchstart', e => { _lbX = e.changedTouches[0].clientX; }, { passive: true });
+  document.getElementById('lightbox').addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - _lbX;
+    if (Math.abs(dx) > 40) navLightbox(dx < 0 ? 1 : -1);
+  }, { passive: true });
   document.addEventListener('keydown', e => {
     if (!document.getElementById('lightbox').classList.contains('open')) return;
     if (e.key === 'ArrowLeft')  navLightbox(-1);
