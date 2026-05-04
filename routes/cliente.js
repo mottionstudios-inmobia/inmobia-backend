@@ -583,6 +583,66 @@ router.patch('/busqueda', (req, res) => {
   res.json({ ok: true });
 });
 
+// ── PATCH /api/cliente/busqueda-publica/:id/detalles  (enriquecimiento post-envío)
+router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
+  const { id } = req.params;
+  const { habitaciones, banos, parqueos, metros, caracteristicas, mascota, desc_mascota, descripcion } = req.body;
+
+  const req_ = db.prepare('SELECT * FROM requerimientos WHERE id = ? AND fuente = ?').get(id, 'cliente');
+  if (!req_) return res.status(404).json({ error: 'Requerimiento no encontrado' });
+
+  const notasArr = [
+    req_.notas || '',
+    mascota ? `Mascota: ${mascota}${desc_mascota ? ' — ' + desc_mascota : ''}` : '',
+    descripcion || '',
+  ].filter(Boolean);
+
+  db.prepare(`
+    UPDATE requerimientos SET
+      habitaciones = ?, banos = ?, metros_min = ?,
+      caracteristicas = ?, notas = ?, actualizado_en = datetime('now')
+    WHERE id = ?
+  `).run(
+    habitaciones ? Number(habitaciones) : req_.habitaciones,
+    banos        ? Number(banos)        : req_.banos,
+    metros       ? Number(metros)       : req_.metros_min,
+    caracteristicas || req_.caracteristicas,
+    notasArr.join('\n') || req_.notas,
+    id,
+  );
+
+  // Re-notificar asesores con perfil completo
+  const hab  = habitaciones || req_.habitaciones;
+  const ban  = banos        || req_.banos;
+  const parq = parqueos;
+  const tipo = req_.tipo_propiedad;
+  const oper = req_.operacion;
+  const zona = req_.zona || req_.municipio || 'Guatemala';
+  const presup = req_.precio_max;
+  const monedaSim = (req_.moneda || 'GTQ') === 'USD' ? '$' : 'Q';
+
+  const detalles = [
+    hab  ? `${hab} hab.` : '',
+    ban  ? `${ban} baños` : '',
+    parq ? parq : '',
+    metros ? `${metros} m²+` : '',
+    caracteristicas ? caracteristicas.split(',').slice(0,3).join(', ') : '',
+  ].filter(Boolean).join(' · ');
+
+  const titulo  = `🔍 Perfil completo — ${tipo} en ${zona}`;
+  const mensaje = `${req_.cliente_nombre || 'Cliente'} completó su perfil: ${tipo} para ${oper} en ${zona}${presup ? ` · hasta ${monedaSim}${Number(presup).toLocaleString('es-GT')}` : ''}${detalles ? ` · ${detalles}` : ''}. Revise si tiene una propiedad que encaje mejor.`;
+
+  // Notificar a asesores que ya recibieron el lead original
+  const leadsOriginales = db.prepare(
+    `SELECT DISTINCT asesor_id FROM leads WHERE mensaje LIKE ? AND origen = 'busqueda_personalizada' AND email = ?`
+  ).all(`%${tipo}%`, req_.cliente_email || '');
+
+  const insertNotif = db.prepare(`INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje) VALUES (?, 'lead_busqueda', ?, ?)`);
+  for (const l of leadsOriginales) insertNotif.run(l.asesor_id, titulo, mensaje);
+
+  res.json({ ok: true });
+});
+
 // ── POST /api/cliente/busqueda-publica  (pública — formulario de búsqueda personalizada)
 router.post('/busqueda-publica', async (req, res) => {
   const {
@@ -614,7 +674,7 @@ router.post('/busqueda-publica', async (req, res) => {
 
   try {
     // 2. Crear requerimiento con fuente 'cliente'
-    db.prepare(`
+    const reqResult = db.prepare(`
       INSERT INTO requerimientos
         (asesor_id, fuente, cliente_origen_email, cliente_nombre, cliente_email,
          operacion, tipo_propiedad, municipio, zona,
@@ -701,7 +761,7 @@ router.post('/busqueda-publica', async (req, res) => {
       matches: matches.length, linkPanel,
     });
 
-    res.json({ ok: true, matches: matches.length });
+    res.json({ ok: true, matches: matches.length, requerimientoId: reqResult.lastInsertRowid });
   } catch (err) {
     console.error('[busqueda-publica] error:', err.message);
     res.status(500).json({ error: 'Error interno al procesar la búsqueda' });

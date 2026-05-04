@@ -1816,6 +1816,7 @@ user-select: none;
  
   <!-- RESULTADO (oculto hasta envío) -->
   <div class="cita-form animate" id="busqueda-resultado" style="display:none">
+    <!-- Paso A: confirmación -->
     <div id="busqueda-resultado-inner" style="text-align:center;padding:2rem 1rem">
       <div style="font-size:2.5rem;margin-bottom:1rem">✅</div>
       <h3 style="color:#fff;font-family:var(--font-display);font-size:1.4rem;font-weight:300;margin:0 0 0.75rem">¡Búsqueda activa!</h3>
@@ -1824,6 +1825,103 @@ user-select: none;
         Por su privacidad, los asesores <strong style="color:rgba(255,255,255,0.85)">no tienen acceso a su número ni correo</strong>. Toda la comunicación es a través de la plataforma InmobIA.
       </div>
       <button onclick="document.getElementById('busqueda-resultado').style.display='none';document.getElementById('busqueda-form-wrap').style.display='block'" style="background:transparent;border:1.5px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);border-radius:20px;padding:0.5rem 1.5rem;font-size:0.8rem;cursor:pointer">Enviar otra búsqueda</button>
+    </div>
+    <!-- Paso B: enriquecimiento (solo si no se llenaron detalles) -->
+    <div id="busqueda-enriquecimiento" style="display:none;padding:0 0.5rem 1rem">
+      <div style="border-top:1px solid rgba(255,255,255,0.1);margin:1.5rem 0 1.25rem"></div>
+      <div style="text-align:center;margin-bottom:1.25rem">
+        <p style="color:var(--gold);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 0.4rem">Mejore su match</p>
+        <p style="color:rgba(255,255,255,0.75);font-size:0.92rem;margin:0">Para que los asesores encuentren opciones más precisas,<br>indique algunos detalles adicionales — toma menos de 1 minuto.</p>
+      </div>
+      <form id="enriq-form" onsubmit="enviarEnriquecimiento(event)">
+        <!-- Habitaciones -->
+        <div class="form-group" style="margin-bottom:1rem">
+          <label>Habitaciones</label>
+          <button type="button" id="btn-eh-toggle" onclick="toggleCapsPanel('eh-panel','btn-eh-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;text-align:left;">
+            <span id="eh-toggle-label">Cualquier cantidad ▾</span>
+          </button>
+          <div id="eh-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+            <div class="zona-caps">
+              <div class="zona-cap"><input type="radio" id="eh1" name="e-habitaciones" value="1 habitación"        onchange="selCapsRadio(this,'eh-panel','btn-eh-toggle','eh-toggle-label')"><label for="eh1">1</label></div>
+              <div class="zona-cap"><input type="radio" id="eh2" name="e-habitaciones" value="2 habitaciones"      onchange="selCapsRadio(this,'eh-panel','btn-eh-toggle','eh-toggle-label')"><label for="eh2">2</label></div>
+              <div class="zona-cap"><input type="radio" id="eh3" name="e-habitaciones" value="3 habitaciones"      onchange="selCapsRadio(this,'eh-panel','btn-eh-toggle','eh-toggle-label')"><label for="eh3">3</label></div>
+              <div class="zona-cap"><input type="radio" id="eh4" name="e-habitaciones" value="4 habitaciones"      onchange="selCapsRadio(this,'eh-panel','btn-eh-toggle','eh-toggle-label')"><label for="eh4">4</label></div>
+              <div class="zona-cap"><input type="radio" id="eh5" name="e-habitaciones" value="5 o más habitaciones" onchange="selCapsRadio(this,'eh-panel','btn-eh-toggle','eh-toggle-label')"><label for="eh5">5+</label></div>
+            </div>
+          </div>
+        </div>
+        <!-- Baños y Parqueos -->
+        <div class="form-row" style="margin-bottom:1rem">
+          <div class="form-group">
+            <label>Baños</label>
+            <button type="button" id="btn-eba-toggle" onclick="toggleCapsPanel('eba-panel','btn-eba-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;text-align:left;">
+              <span id="eba-toggle-label">Cualquier cantidad ▾</span>
+            </button>
+            <div id="eba-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+              <div class="zona-caps">
+                <div class="zona-cap"><input type="radio" id="eba1" name="e-banos" value="1 baño"        onchange="selCapsRadio(this,'eba-panel','btn-eba-toggle','eba-toggle-label')"><label for="eba1">1</label></div>
+                <div class="zona-cap"><input type="radio" id="eba2" name="e-banos" value="2 baños"       onchange="selCapsRadio(this,'eba-panel','btn-eba-toggle','eba-toggle-label')"><label for="eba2">2</label></div>
+                <div class="zona-cap"><input type="radio" id="eba3" name="e-banos" value="3 baños"       onchange="selCapsRadio(this,'eba-panel','btn-eba-toggle','eba-toggle-label')"><label for="eba3">3</label></div>
+                <div class="zona-cap"><input type="radio" id="eba4" name="e-banos" value="4 o más baños" onchange="selCapsRadio(this,'eba-panel','btn-eba-toggle','eba-toggle-label')"><label for="eba4">4+</label></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Parqueos</label>
+            <button type="button" id="btn-epa-toggle" onclick="toggleCapsPanel('epa-panel','btn-epa-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;text-align:left;">
+              <span id="epa-toggle-label">Cualquier cantidad ▾</span>
+            </button>
+            <div id="epa-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
+              <div class="zona-caps">
+                <div class="zona-cap"><input type="radio" id="epa0"    name="e-parqueos" value="Sin parqueo"       onchange="selCapsRadio(this,'epa-panel','btn-epa-toggle','epa-toggle-label')"><label for="epa0">Sin parqueo</label></div>
+                <div class="zona-cap"><input type="radio" id="epa1"    name="e-parqueos" value="1 parqueo"         onchange="selCapsRadio(this,'epa-panel','btn-epa-toggle','epa-toggle-label')"><label for="epa1">1</label></div>
+                <div class="zona-cap"><input type="radio" id="epa2"    name="e-parqueos" value="2 parqueos"        onchange="selCapsRadio(this,'epa-panel','btn-epa-toggle','epa-toggle-label')"><label for="epa2">2</label></div>
+                <div class="zona-cap"><input type="radio" id="epa3"    name="e-parqueos" value="3 parqueos"        onchange="selCapsRadio(this,'epa-panel','btn-epa-toggle','epa-toggle-label')"><label for="epa3">3</label></div>
+                <div class="zona-cap"><input type="radio" id="epamot"  name="e-parqueos" value="Parqueo para moto" onchange="selCapsRadio(this,'epa-panel','btn-epa-toggle','epa-toggle-label')"><label for="epamot">Moto</label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- m² y mascota -->
+        <div class="form-row" style="margin-bottom:1rem">
+          <div class="form-group">
+            <label>Mínimo de m²</label>
+            <input id="e-metros" type="number" min="1" placeholder="Ej: 80">
+          </div>
+          <div class="form-group">
+            <label>¿Tiene mascota?</label>
+            <div style="display:flex;gap:0.5rem;margin-top:0.25rem">
+              <div class="zona-cap"><input type="radio" id="em-si" name="e-mascota" value="Sí"><label for="em-si">Sí</label></div>
+              <div class="zona-cap"><input type="radio" id="em-no" name="e-mascota" value="No"><label for="em-no">No</label></div>
+            </div>
+          </div>
+        </div>
+        <!-- Características -->
+        <div class="form-group" style="margin-bottom:1rem">
+          <label>Características importantes <span style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-weight:400;text-transform:none;letter-spacing:0">— seleccione las que apliquen</span></label>
+          <div class="zona-caps" style="margin-top:0.4rem">
+            <div class="zona-cap"><input type="checkbox" id="ec-jard" name="e-caract" value="Jardín"><label for="ec-jard">Jardín</label></div>
+            <div class="zona-cap"><input type="checkbox" id="ec-balc" name="e-caract" value="Balcón"><label for="ec-balc">Balcón</label></div>
+            <div class="zona-cap"><input type="checkbox" id="ec-terr" name="e-caract" value="Terraza"><label for="ec-terr">Terraza</label></div>
+            <div class="zona-cap"><input type="checkbox" id="ec-amue" name="e-caract" value="Amueblado"><label for="ec-amue">Amueblado</label></div>
+            <div class="zona-cap"><input type="checkbox" id="ec-resi" name="e-caract" value="Dentro de residencial"><label for="ec-resi">En residencial</label></div>
+            <div class="zona-cap"><input type="checkbox" id="ec-pisc" name="e-caract" value="Piscina"><label for="ec-pisc">Piscina</label></div>
+            <div class="zona-cap"><input type="checkbox" id="ec-gym"  name="e-caract" value="Gimnasio"><label for="ec-gym">Gimnasio</label></div>
+          </div>
+        </div>
+        <!-- Descripción libre -->
+        <div class="form-group" style="margin-bottom:1.25rem">
+          <label>Algo más que deberíamos saber (opcional)</label>
+          <textarea id="e-descripcion" placeholder="Ej: necesito patio para mis hijos, prefiero planta baja, zona segura con garita..." style="height:80px"></textarea>
+        </div>
+        <button type="submit" class="form-submit" id="enriq-submit">Guardar detalles y mejorar mi match →</button>
+      </form>
+      <!-- Confirmación guardado -->
+      <div id="enriq-confirmado" style="display:none;text-align:center;padding:1.5rem 0">
+        <div style="font-size:2rem;margin-bottom:0.75rem">✅</div>
+        <p style="color:rgba(255,255,255,0.8);font-size:0.9rem;margin:0 0 1rem">¡Detalles guardados! Los asesores recibieron su perfil completo.</p>
+        <button onclick="document.getElementById('busqueda-resultado').style.display='none';document.getElementById('busqueda-form-wrap').style.display='block'" style="background:transparent;border:1.5px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);border-radius:20px;padding:0.5rem 1.5rem;font-size:0.8rem;cursor:pointer">Enviar otra búsqueda</button>
+      </div>
     </div>
   </div>
 
@@ -3349,6 +3447,37 @@ user-select: none;
     });
   }
 
+  // ── ENRIQUECIMIENTO POST-ENVÍO
+  async function enviarEnriquecimiento(e) {
+    e.preventDefault();
+    if (!window._busquedaReqId) return;
+    const btn = document.getElementById('enriq-submit');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    const form = e.target;
+    const val = id => document.getElementById(id)?.value || '';
+    const payload = {
+      habitaciones: form.querySelector('input[name="e-habitaciones"]:checked')?.value || '',
+      banos:        form.querySelector('input[name="e-banos"]:checked')?.value || '',
+      parqueos:     form.querySelector('input[name="e-parqueos"]:checked')?.value || '',
+      metros:       val('e-metros'),
+      caracteristicas: [...form.querySelectorAll('input[name="e-caract"]:checked')].map(i => i.value).join(', '),
+      mascota:      form.querySelector('input[name="e-mascota"]:checked')?.value || '',
+      descripcion:  val('e-descripcion'),
+    };
+    try {
+      const res = await fetch(`/api/cliente/busqueda-publica/${window._busquedaReqId}/detalles`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        document.getElementById('enriq-form').style.display = 'none';
+        document.getElementById('enriq-confirmado').style.display = '';
+      }
+    } catch { btn.disabled = false; btn.textContent = 'Guardar detalles y mejorar mi match →'; }
+  }
+
   // ── PRESUPUESTO DINÁMICO SEGÚN OPERACIÓN (búsqueda personalizada)
   const presupuestosRenta = [
     { v: '',      t: 'Sin límite' },
@@ -3549,6 +3678,15 @@ user-select: none;
         document.getElementById('busqueda-resultado-msg').innerHTML = msg;
         document.getElementById('busqueda-form-wrap').style.display = 'none';
         document.getElementById('busqueda-resultado').style.display = 'block';
+
+        // Guardar ID para enriquecimiento
+        window._busquedaReqId = json.requerimientoId;
+
+        // Mostrar paso B solo si no se llenaron los detalles opcionales
+        const detallesLlenos = payload.habitaciones || payload.banos || payload.parqueos || payload.metros || payload.caracteristicas;
+        const enriq = document.getElementById('busqueda-enriquecimiento');
+        if (enriq) enriq.style.display = detallesLlenos ? 'none' : '';
+
         form.reset();
         actualizarPresupuestoBusqueda();
       } else {
