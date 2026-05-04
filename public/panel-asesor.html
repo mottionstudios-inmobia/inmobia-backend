@@ -4400,7 +4400,13 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
           <div style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.5rem;line-height:1.4">
             <strong style="color:#d4a017">Tip:</strong> no es necesario incluir amenidades, características ni lo que incluye la propiedad — esos datos se capturan en los campos siguientes y se mostrarán de forma estructurada en la ficha.
           </div>
-          <textarea class="form-input" id="np-descripcion" rows="3" placeholder="Detalles, ubicación, acceso, vecindario, acceso a servicios..."></textarea>
+          <div style="font-size:0.76rem;background:#fef2f2;border:1px solid #fca5a5;border-left:3px solid #ef4444;border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:0.5rem;color:#991b1b;line-height:1.45">
+            <strong>⛔ Importante:</strong> No se permite incluir números de teléfono en esta área. Los clientes se comunican únicamente a través de la plataforma. Cualquier número detectado será ocultado automáticamente en la vista del cliente.
+          </div>
+          <textarea class="form-input" id="np-descripcion" rows="3" placeholder="Detalles, ubicación, acceso, vecindario, acceso a servicios..." oninput="detectarTelEnDesc(this)"></textarea>
+          <div id="np-tel-aviso" style="display:none;font-size:0.75rem;background:#fff7ed;border:1px solid #fdba74;border-left:3px solid #f97316;border-radius:6px;padding:0.45rem 0.7rem;margin-top:0.4rem;color:#9a3412;line-height:1.4">
+            ⚠️ <strong>Se detectó un número de teléfono.</strong> Este dato será ocultado automáticamente para los clientes — aparecerá como <em>[número oculto]</em>.
+          </div>
         </div>
       </div>
 
@@ -13323,7 +13329,7 @@ function abrirDetalleCompartir(propId) {
       <div style="font-size:0.82rem;font-weight:700;color:#1e2d4a;margin-top:2px">${v}</div>
     </div>`).join('');
 
-  if (p.descripcion) { el('mdc-desc').textContent = p.descripcion; el('mdc-desc-wrap').style.display = 'block'; }
+  if (p.descripcion) { el('mdc-desc').textContent = mascararTelefonos(p.descripcion); el('mdc-desc-wrap').style.display = 'block'; }
   else el('mdc-desc-wrap').style.display = 'none';
 
   if (p.caracteristicas) {
@@ -13543,7 +13549,7 @@ function poblar1DModal(p, imagenes) {
       <div style="font-size:0.82rem;font-weight:700;color:#1e2d4a;margin-top:2px">${v}</div>
     </div>`).join('');
 
-  if (p.descripcion) { el('md1d-desc').textContent = p.descripcion; el('md1d-desc-wrap').style.display = 'block'; }
+  if (p.descripcion) { el('md1d-desc').textContent = mascararTelefonos(p.descripcion); el('md1d-desc-wrap').style.display = 'block'; }
   else el('md1d-desc-wrap').style.display = 'none';
 
   const solicitada = !!p.solicitud_id;
@@ -13623,6 +13629,19 @@ function toggleCamposOperacion(operacion) {
   document.getElementById('np-mant-incluye-wrap').style.display = esVenta ? 'none' : '';
   document.getElementById('np-renta-requisitos-wrap').style.display = esVenta ? 'none' : '';
   document.getElementById('np-impuestos-wrap').style.display    = esVenta ? '' : 'none';
+}
+
+// ── TELÉFONOS EN DESCRIPCIÓN: detección y enmascaramiento ────────────────────
+function mascararTelefonos(texto) {
+  // Detecta: 8 dígitos seguidos, formato xxxx-xxxx, xxxx xxxx, con o sin prefijo +502/502
+  return (texto || '').replace(/(\+?502[\s\-.]?)?\b\d{4}[\s\-.]?\d{4}\b/g, '[número oculto]');
+}
+
+function detectarTelEnDesc(el) {
+  const warn = document.getElementById('np-tel-aviso');
+  if (!warn) return;
+  const tiene = /(\+?502[\s\-.]?)?\b\d{4}[\s\-.]?\d{4}\b/.test(el.value || '');
+  warn.style.display = tiene ? '' : 'none';
 }
 
 // ── DEPARTAMENTO / MUNICIPIO / ZONA: visibilidad condicional ─────────────────

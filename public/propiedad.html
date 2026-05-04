@@ -1130,6 +1130,10 @@
   const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://inmobia.site';
   let WA_NUM = '50242683255'; // fallback — se reemplaza con el teléfono del asesor
 
+  function mascararTelefonos(texto) {
+    return (texto || '').replace(/(\+?502[\s\-.]?)?\b\d{4}[\s\-.]?\d{4}\b/g, '[número oculto]');
+  }
+
   const params = new URLSearchParams(window.location.search);
   const pathPropMatch = window.location.pathname.match(/^\/p\/(\d+)/) || window.location.pathname.match(/^\/propiedad\/[^/]+\/(\d+)/);
   const propId  = params.get('id') || pathPropMatch?.[1];
@@ -1534,7 +1538,7 @@
     // Descripción persuasiva
     if (propData.descripcion_persuasiva) {
       const el = document.getElementById('prop-desc-persuasiva');
-      el.textContent = propData.descripcion_persuasiva;
+      el.textContent = mascararTelefonos(propData.descripcion_persuasiva);
       el.style.display = 'block';
     }
 
@@ -1545,7 +1549,7 @@
       lbl.classList.replace('section-label', 'section-label-proyecto');
     }
     // Descripción (preservar saltos de línea)
-    document.getElementById('prop-descripcion').textContent = propData.descripcion || 'Sin descripción disponible.';
+    document.getElementById('prop-descripcion').textContent = mascararTelefonos(propData.descripcion) || 'Sin descripción disponible.';
 
     // Amenidades
     // ── Características Únicas (iconos)
