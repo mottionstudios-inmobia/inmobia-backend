@@ -1538,7 +1538,7 @@
     // Descripción persuasiva
     if (propData.descripcion_persuasiva) {
       const el = document.getElementById('prop-desc-persuasiva');
-      el.textContent = mascararTelefonos(propData.descripcion_persuasiva);
+      el.textContent = desdeAsesor ? propData.descripcion_persuasiva : mascararTelefonos(propData.descripcion_persuasiva);
       el.style.display = 'block';
     }
 
@@ -1549,7 +1549,8 @@
       lbl.classList.replace('section-label', 'section-label-proyecto');
     }
     // Descripción (preservar saltos de línea)
-    document.getElementById('prop-descripcion').textContent = mascararTelefonos(propData.descripcion) || 'Sin descripción disponible.';
+    document.getElementById('prop-descripcion').textContent =
+      (desdeAsesor ? (propData.descripcion || '') : mascararTelefonos(propData.descripcion)) || 'Sin descripción disponible.';
 
     // Amenidades
     // ── Características Únicas (iconos)
