@@ -703,7 +703,7 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
     caracteristicas ? caracteristicas.split(',').slice(0,3).join(', ') : '',
   ].filter(Boolean).join(' · ');
 
-  const tituloNotif = `🔍 Perfil completo — ${tipo} en ${zona}`;
+  const tituloNotif = `🔍 Nuevo cliente de búsqueda personalizada — ${tipo} en ${zona}`;
   const mensajeNotif = `${req_.cliente_nombre || 'Cliente'} completó su perfil: ${tipo} para ${oper} en ${zona}${presupTexto ? ` · hasta ${presupTexto}` : ''}${detalles ? ` · ${detalles}` : ''}. Revise si tiene una propiedad que encaje mejor.`;
 
   // 1. Enviar email + WA a asesores que ya tienen el lead
@@ -731,7 +731,7 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
       }).catch(() => {});
     }
     if (a.telefono) {
-      const msgAsesor = `🔍 *Perfil completo — ${tipo} en ${zona}*\n\nEl cliente *${req_.cliente_nombre}* completó su perfil de búsqueda:\n*${tipo}* para *${oper}* en *${zona}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}${detalles ? `\nDetalles: ${detalles}` : ''}\n\nRevise el lead en su panel:\n${BASE_URL_}/panel-asesor.html#crm`;
+      const msgAsesor = `🔍 *Nuevo cliente de búsqueda personalizada — ${tipo} en ${zona}*\n\n*${req_.cliente_nombre}* busca: *${tipo}* para *${oper}* en *${zona}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}${detalles ? `\nDetalles: ${detalles}` : ''}\n\nRevise el lead en su panel:\n${BASE_URL_}/panel-asesor.html#crm`;
       sendWhatsApp(a.telefono, msgAsesor).catch(e => console.error('[WA asesor busqueda]', e.message));
     }
   }
