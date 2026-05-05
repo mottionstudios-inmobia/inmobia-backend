@@ -936,6 +936,11 @@
         <span>Requerimientos</span>
         <span class="nav-badge" id="nav-req-badge" style="display:none">0</span>
       </div>
+      <div class="nav-item" onclick="irA('busquedas')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+        <span>Búsquedas clientes</span>
+        <span class="nav-badge" id="nav-busq-badge" style="display:none">0</span>
+      </div>
       <div class="nav-item" onclick="irA('informes')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
         <span>Informes por modelo</span>
@@ -1438,6 +1443,82 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- ── BÚSQUEDAS PERSONALIZADAS ── -->
+    <div id="sec-busquedas" class="section">
+      <div class="page-header">
+        <div>
+          <h1>Búsquedas personalizadas</h1>
+          <p id="busq-count-label">Clientes que llenaron el formulario de búsqueda</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="search-input" style="width:auto" onchange="filtrarBusquedas(this.value)" id="busq-filtro-estado">
+            <option value="">Todos</option>
+            <option value="activo">Activos</option>
+            <option value="expirado">Expirados</option>
+          </select>
+          <input type="text" class="search-input" placeholder="Buscar cliente o zona..." oninput="buscarBusquedas(this.value)" id="busq-search" style="width:220px">
+          <button class="btn btn-sm" onclick="cargarBusquedasAdmin()">↻ Actualizar</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="margin-bottom:1.5rem">
+        <div class="stat-card" style="border-left:3px solid #6366f1">
+          <div class="label">Total búsquedas</div>
+          <div class="value" id="busq-stat-total">—</div>
+          <div class="sub">formularios enviados</div>
+        </div>
+        <div class="stat-card" style="border-left:3px solid #f59e0b">
+          <div class="label">Perfil completo</div>
+          <div class="value" id="busq-stat-completo">—</div>
+          <div class="sub">completaron paso 2</div>
+        </div>
+        <div class="stat-card" style="border-left:3px solid #10b981">
+          <div class="label">Con propiedades</div>
+          <div class="value" id="busq-stat-leads">—</div>
+          <div class="sub">recibieron opciones</div>
+        </div>
+        <div class="stat-card" style="border-left:3px solid #e07b39">
+          <div class="label">En seguimiento</div>
+          <div class="value" id="busq-stat-seguimiento">—</div>
+          <div class="sub">interesado o agendado</div>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Cliente</th>
+            <th>Búsqueda</th>
+            <th>Presupuesto</th>
+            <th>Zona</th>
+            <th>Perfil</th>
+            <th>Leads</th>
+            <th>Etapa máx.</th>
+            <th>Última actividad</th>
+            <th>Acciones</th>
+          </tr></thead>
+          <tbody id="busq-tabla"></tbody>
+        </table>
+        <div id="busq-empty" class="empty-state" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <p>No hay búsquedas personalizadas aún</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal detalle de búsqueda -->
+    <div id="modal-busq-detalle" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)cerrarModalBusqDetalle()">
+      <div style="background:#141e2e;border:1px solid #2a3144;border-radius:14px;max-width:700px;width:100%;max-height:88vh;overflow-y:auto;padding:1.5rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+          <h3 style="font-size:1.1rem;font-weight:600;color:#f1f5f9">Detalle de búsqueda</h3>
+          <button onclick="cerrarModalBusqDetalle()" style="background:rgba(255,255,255,0.07);border:none;color:#94a3b8;border-radius:6px;padding:0.35rem 0.65rem;cursor:pointer;font-size:1rem">✕</button>
+        </div>
+        <div id="modal-busq-body"></div>
+      </div>
     </div>
 
     <!-- ── CONTACTOS ── -->
@@ -2446,6 +2527,7 @@ function irA(seccion) {
   if (seccion === 'leads') cargarLeads();
   if (seccion === 'informes') cargarInformeAdminModelos();
   if (seccion === 'requerimientos') cargarRequerimientosAdmin();
+  if (seccion === 'busquedas') cargarBusquedasAdmin();
   if (seccion === 'notificaciones') cargarNotificaciones();
   if (seccion === 'consultas-wa') cargarConsultasPendientes();
   if (seccion === 'configuracion') cargarConfiguracion();
@@ -5137,6 +5219,172 @@ zone.addEventListener('drop', e => {
   input.files = dt.files;
   previsualizarImagenes(input);
 });
+
+// ── BÚSQUEDAS PERSONALIZADAS ADMIN ────────────────────────────
+let _busqData = [];
+let _busqFiltro = '';
+let _busqSearch = '';
+
+const ETAPA_LABEL = { 6:'Cerrado', 5:'Negociando', 4:'Agendado', 3:'Interesado', 2:'Nuevo', 1:'Sin leads' };
+const ETAPA_COLOR = { 6:'#4ade80', 5:'#c9a84c', 4:'#38bdf8', 3:'#e07b39', 2:'#94a3b8', 1:'#475569' };
+
+async function cargarBusquedasAdmin() {
+  try {
+    const r = await fetch(`${API}/cliente/busquedas-admin`, { headers: { Authorization: `Bearer ${adminToken}` } });
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    _busqData = data.busquedas || [];
+    renderBusquedas();
+    // Badge en nav
+    const activos = _busqData.filter(b => b.estado === 'activo').length;
+    const badge = document.getElementById('nav-busq-badge');
+    if (badge) { badge.textContent = activos; badge.style.display = activos > 0 ? '' : 'none'; }
+  } catch { document.getElementById('busq-tabla').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#475569;padding:2rem">Error al cargar búsquedas</td></tr>'; }
+}
+
+function filtrarBusquedas(val) { _busqFiltro = val; renderBusquedas(); }
+function buscarBusquedas(val)  { _busqSearch = val.toLowerCase(); renderBusquedas(); }
+
+function renderBusquedas() {
+  let items = _busqData;
+  if (_busqFiltro) items = items.filter(b => b.estado === _busqFiltro);
+  if (_busqSearch) items = items.filter(b =>
+    (b.cliente_nombre||'').toLowerCase().includes(_busqSearch) ||
+    (b.cliente_email||'').toLowerCase().includes(_busqSearch) ||
+    (b.zona||'').toLowerCase().includes(_busqSearch) ||
+    (b.municipio||'').toLowerCase().includes(_busqSearch)
+  );
+
+  // Stats
+  const total     = _busqData.length;
+  const completo  = _busqData.filter(b => b.habitaciones || b.caracteristicas || b.precio_max).length;
+  const conLeads  = _busqData.filter(b => (b.total_leads||0) > 0).length;
+  const seguim    = _busqData.filter(b => (b.etapa_max_num||0) >= 3).length;
+  document.getElementById('busq-stat-total').textContent      = total;
+  document.getElementById('busq-stat-completo').textContent   = completo;
+  document.getElementById('busq-stat-leads').textContent      = conLeads;
+  document.getElementById('busq-stat-seguimiento').textContent = seguim;
+  document.getElementById('busq-count-label').textContent     = `${total} búsqueda${total!==1?'s':''} en total`;
+
+  const tbody = document.getElementById('busq-tabla');
+  const empty = document.getElementById('busq-empty');
+
+  if (!items.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  const sym = m => (m||'GTQ') === 'USD' ? '$' : 'Q';
+  tbody.innerHTML = items.map(b => {
+    const etNum   = b.etapa_max_num || 1;
+    const etLabel = ETAPA_LABEL[etNum] || 'Sin leads';
+    const etColor = ETAPA_COLOR[etNum] || '#475569';
+    const presup  = b.precio_max ? `${sym(b.moneda)}${Number(b.precio_max).toLocaleString('es-GT')}` : '—';
+    const zona    = b.zona || b.municipio || b.departamento || '—';
+    const perfilOk = !!(b.habitaciones || b.caracteristicas || b.precio_max);
+    const fecha   = b.ultima_actividad
+      ? parseAdminDate(b.ultima_actividad).toLocaleString('es-GT', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Guatemala' })
+      : parseAdminDate(b.creado_en).toLocaleDateString('es-GT', { day:'2-digit', month:'short', year:'numeric', timeZone:'America/Guatemala' });
+    const estado  = b.estado === 'activo'
+      ? '<span style="background:#052e16;color:#4ade80;border:1px solid #166534;border-radius:12px;padding:0.15rem 0.55rem;font-size:0.68rem;font-weight:600">Activo</span>'
+      : '<span style="background:#1e2533;color:#64748b;border:1px solid #334155;border-radius:12px;padding:0.15rem 0.55rem;font-size:0.68rem">Vencido</span>';
+    return `<tr>
+      <td>
+        <div style="font-weight:600;color:#f1f5f9;font-size:0.85rem">${b.cliente_nombre||'—'}</div>
+        <div style="font-size:0.72rem;color:#64748b">${b.cliente_email||''}</div>
+        ${b.cliente_telefono ? `<div style="font-size:0.7rem;color:#475569">${b.cliente_telefono}</div>` : ''}
+      </td>
+      <td>
+        <div style="font-size:0.82rem;color:#e2e8f0">${b.tipo_propiedad||'—'} · ${b.operacion||'—'}</div>
+        ${estado}
+      </td>
+      <td style="color:#c9a84c;font-weight:600;font-size:0.85rem">${presup}</td>
+      <td style="font-size:0.82rem;color:#94a3b8">${zona}</td>
+      <td style="text-align:center">
+        ${perfilOk
+          ? '<span style="color:#4ade80;font-weight:700;font-size:0.8rem">✓ Completo</span>'
+          : '<span style="color:#f59e0b;font-size:0.78rem">⏳ Parcial</span>'}
+      </td>
+      <td style="text-align:center;font-size:0.88rem;font-weight:700;color:${(b.total_leads||0)>0?'#38bdf8':'#475569'}">${b.total_leads||0}</td>
+      <td><span style="color:${etColor};font-weight:600;font-size:0.82rem">${etLabel}</span></td>
+      <td style="font-size:0.75rem;color:#64748b">${fecha}</td>
+      <td>
+        <button onclick="verDetalleBusqueda(${b.id})" style="background:#1e2d4a;color:#c9a84c;border:1px solid #2a3144;border-radius:6px;padding:0.3rem 0.7rem;font-size:0.75rem;cursor:pointer;white-space:nowrap">Ver detalle</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function parseAdminDate(s) {
+  if (!s) return new Date();
+  return new Date(s.includes('T') || s.endsWith('Z') ? s : s.replace(' ','T') + 'Z');
+}
+
+async function verDetalleBusqueda(id) {
+  const modal = document.getElementById('modal-busq-detalle');
+  const body  = document.getElementById('modal-busq-body');
+  modal.style.display = 'flex';
+  body.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b">Cargando...</div>';
+  try {
+    const r = await fetch(`${API}/cliente/busquedas-admin/${id}/leads`, { headers: { Authorization: `Bearer ${adminToken}` } });
+    const data = await r.json();
+    const req  = data.requerimiento;
+    const leads = data.leads || [];
+    const sym = (req.moneda||'GTQ')==='USD'?'$':'Q';
+    const presup = req.precio_max ? `${sym}${Number(req.precio_max).toLocaleString('es-GT')}` : 'No especificado';
+    const detalle = [
+      req.habitaciones ? `${req.habitaciones} habitaciones` : '',
+      req.banos        ? `${req.banos} baños` : '',
+      req.metros_min   ? `mín. ${req.metros_min} m²` : '',
+      req.caracteristicas || '',
+    ].filter(Boolean).join(' · ');
+    const created = parseAdminDate(req.creado_en).toLocaleString('es-GT', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Guatemala' });
+
+    body.innerHTML = `
+      <!-- Info del cliente -->
+      <div style="background:#0f172a;border:1px solid #1e2533;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem">
+        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin-bottom:0.65rem">Cliente</div>
+        <div style="font-size:1rem;font-weight:700;color:#f1f5f9">${req.cliente_nombre||'—'}</div>
+        <div style="font-size:0.8rem;color:#94a3b8;margin-top:0.2rem">${req.cliente_email||''} ${req.cliente_telefono ? '· '+req.cliente_telefono : ''}</div>
+        <div style="font-size:0.72rem;color:#475569;margin-top:0.4rem">Registrado el ${created}</div>
+      </div>
+      <!-- Criterios de búsqueda -->
+      <div style="background:#0f172a;border:1px solid #1e2533;border-left:3px solid #c9a84c;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem">
+        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin-bottom:0.65rem">Búsqueda</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.5rem;font-size:0.82rem">
+          <div><span style="color:#64748b">Tipo:</span> <strong style="color:#e2e8f0">${req.tipo_propiedad||'—'}</strong></div>
+          <div><span style="color:#64748b">Operación:</span> <strong style="color:#e2e8f0">${req.operacion||'—'}</strong></div>
+          <div><span style="color:#64748b">Zona:</span> <strong style="color:#e2e8f0">${req.zona||req.municipio||req.departamento||'—'}</strong></div>
+          <div><span style="color:#64748b">Presupuesto:</span> <strong style="color:#c9a84c">${presup}</strong></div>
+          ${detalle ? `<div style="grid-column:1/-1"><span style="color:#64748b">Detalles:</span> <span style="color:#94a3b8">${detalle}</span></div>` : ''}
+          ${req.notas ? `<div style="grid-column:1/-1"><span style="color:#64748b">Notas:</span> <span style="color:#94a3b8">${req.notas}</span></div>` : ''}
+        </div>
+      </div>
+      <!-- Leads asignados -->
+      <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin-bottom:0.5rem">${leads.length} asesor${leads.length!==1?'es asignados':'asignado'}</div>
+      ${leads.length === 0
+        ? '<div style="text-align:center;padding:1.5rem;color:#475569;font-size:0.85rem;background:#0f172a;border-radius:8px">Sin leads asignados aún</div>'
+        : leads.map(l => {
+          const etColor = ETAPA_COLOR[{cerrado:6,negociando:5,agendado:4,interesado:3,nuevo:2}[l.etapa]||1];
+          const act = parseAdminDate(l.actualizado_en).toLocaleString('es-GT', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Guatemala' });
+          return `<div style="background:#0f172a;border:1px solid #1e2533;border-radius:8px;padding:0.75rem 1rem;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem">
+            <div>
+              <div style="font-size:0.85rem;font-weight:600;color:#f1f5f9">${l.asesor_nombre||'—'}</div>
+              <div style="font-size:0.72rem;color:#64748b">${l.asesor_email||''}</div>
+              ${l.propiedad_titulo ? `<div style="font-size:0.75rem;color:#94a3b8;margin-top:0.2rem">🏠 ${l.propiedad_titulo}</div>` : ''}
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:0.82rem;font-weight:700;color:${etColor}">${ETAPA_LABEL[{cerrado:6,negociando:5,agendado:4,interesado:3,nuevo:2}[l.etapa]||1]}</div>
+              <div style="font-size:0.68rem;color:#475569;margin-top:0.2rem">${act}</div>
+            </div>
+          </div>`;
+        }).join('')}`;
+  } catch {
+    body.innerHTML = '<div style="color:#ef4444;text-align:center;padding:1.5rem">Error al cargar el detalle.</div>';
+  }
+}
+
+function cerrarModalBusqDetalle() {
+  document.getElementById('modal-busq-detalle').style.display = 'none';
+}
 
 // ── REQUERIMIENTOS ADMIN ───────────────────────────────────────
 let _reqAdminData = [];

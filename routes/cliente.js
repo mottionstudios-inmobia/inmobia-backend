@@ -447,6 +447,57 @@ router.post('/disputar-cierre', (req, res) => {
 });
 
 // ── GET /api/cliente/busqueda  — perfil de búsqueda del cliente
+// ── GET /api/cliente/busquedas-admin  (admin — panel de búsquedas personalizadas)
+router.get('/busquedas-admin', authMiddleware, (req, res) => {
+  if (req.usuario.rol !== 'admin') return res.status(403).json({ error: 'Solo admin' });
+  const busquedas = db.prepare(`
+    SELECT r.*,
+      (SELECT COUNT(*) FROM leads l
+       WHERE l.origen = 'busqueda_personalizada' AND l.email = r.cliente_email
+         AND datetime(l.creado_en) >= datetime(r.creado_en, '-10 minutes')
+      ) AS total_leads,
+      (SELECT MAX(
+        CASE l.etapa
+          WHEN 'cerrado'     THEN 6
+          WHEN 'negociando'  THEN 5
+          WHEN 'agendado'    THEN 4
+          WHEN 'interesado'  THEN 3
+          WHEN 'nuevo'       THEN 2
+          ELSE 1 END)
+       FROM leads l
+       WHERE l.origen = 'busqueda_personalizada' AND l.email = r.cliente_email
+         AND datetime(l.creado_en) >= datetime(r.creado_en, '-10 minutes')
+      ) AS etapa_max_num,
+      (SELECT MAX(l.actualizado_en)
+       FROM leads l
+       WHERE l.origen = 'busqueda_personalizada' AND l.email = r.cliente_email
+         AND datetime(l.creado_en) >= datetime(r.creado_en, '-10 minutes')
+      ) AS ultima_actividad
+    FROM requerimientos r
+    WHERE r.fuente = 'cliente'
+    ORDER BY r.creado_en DESC
+  `).all();
+  res.json({ busquedas, total: busquedas.length });
+});
+
+// ── GET /api/cliente/busquedas-admin/:id/leads  (admin — leads de una búsqueda específica)
+router.get('/busquedas-admin/:id/leads', authMiddleware, (req, res) => {
+  if (req.usuario.rol !== 'admin') return res.status(403).json({ error: 'Solo admin' });
+  const req_ = db.prepare('SELECT * FROM requerimientos WHERE id = ? AND fuente = ?').get(req.params.id, 'cliente');
+  if (!req_) return res.status(404).json({ error: 'No encontrado' });
+  const leads = db.prepare(`
+    SELECT l.id, l.etapa, l.nombre as cliente_nombre, l.propiedad_titulo,
+      l.creado_en, l.actualizado_en,
+      u.nombre as asesor_nombre, u.email as asesor_email, u.telefono as asesor_telefono
+    FROM leads l
+    JOIN usuarios u ON u.id = l.asesor_id
+    WHERE l.origen = 'busqueda_personalizada' AND l.email = ?
+      AND datetime(l.creado_en) >= datetime(?, '-10 minutes')
+    ORDER BY l.etapa DESC, l.actualizado_en DESC
+  `).all(req_.cliente_email, req_.creado_en);
+  res.json({ leads, requerimiento: req_ });
+});
+
 router.get('/busqueda', (req, res) => {
   const token = req.query.token;
   if (!token) return res.status(400).json({ error: 'Token requerido' });
