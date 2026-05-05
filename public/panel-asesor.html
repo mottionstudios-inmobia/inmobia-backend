@@ -8724,52 +8724,134 @@ function verLead(id) {
     </a>`;
   })()) : (l.propiedad_titulo ? seccion('Propiedad de interés', `<span style="color:#e2e8f0;font-size:0.88rem">${l.propiedad_titulo}</span>`) : '');
 
-  // ── Sección: Enviar propiedad al cliente (solo busqueda_personalizada) ──
+  // ── Sección: Seguimiento búsqueda personalizada ──────────────────
   const bloqueEnviarPropiedad = l.origen === 'busqueda_personalizada' ? (() => {
-    // Extraer criterios del mensaje del lead para filtrar propiedades que coinciden
-    const msgLead = l.mensaje || '';
-    const tipoReq = ((msgLead.match(/Busca:\s*([^·\n]+?)\s+para\s/i) || [])[1] || '').trim().toLowerCase();
-    const operReq = ((msgLead.match(/para\s+(\w+)/i) || [])[1] || '').trim().toLowerCase();
-    const presupStr = ((msgLead.match(/hasta\s+[Q$]([\d,.]+)/i) || [])[1] || '').replace(/,/g, '');
-    const presupReq = presupStr ? Number(presupStr) : null;
+    const etapa = l.etapa || 'nuevo';
+    const propiedadEnviada = !['nuevo'].includes(etapa);
 
-    const todasActivas = (todasLasPropiedades || []).filter(p => p.estado === 'activo');
-    const propsFiltradas = todasActivas.filter(p => {
-      if (tipoReq && !p.tipo?.toLowerCase().includes(tipoReq) && !tipoReq.includes(p.tipo?.toLowerCase() || '')) return false;
-      if (operReq && !(p.operacion?.toLowerCase().includes(operReq) || operReq.includes(p.operacion?.toLowerCase() || ''))) return false;
-      if (presupReq && p.precio > presupReq * 1.15) return false;
-      return true;
-    });
-    const propsList = propsFiltradas.length > 0 ? propsFiltradas : todasActivas;
-    const labelMatch = propsFiltradas.length > 0
-      ? `<span style="color:#4ade80;font-weight:600">${propsFiltradas.length} propiedad${propsFiltradas.length > 1 ? 'es coinciden' : ' coincide'} con la búsqueda</span> — selecciona una o más:`
-      : 'Selecciona una o más de tus propiedades:';
+    // Tracker de pasos
+    const pasos = [
+      { key: 'nuevo',        label: 'Propiedad\ncompartida',   icon: '📤' },
+      { key: 'interesado',   label: 'Esperando\nrespuesta',    icon: '⏳' },
+      { key: 'agendado',     label: 'Visita\ncoordinada',      icon: '📅' },
+      { key: 'negociando',   label: 'En\nnegociación',         icon: '🤝' },
+      { key: 'cerrado',      label: 'Cierre',                  icon: '🏁' },
+    ];
+    const etapaIdx = { nuevo: 0, interesado: 1, agendado: 2, negociando: 3, cerrado: 4, no_interesado: -1 }[etapa] ?? 1;
+    const isClosed = etapa === 'cerrado' || etapa === 'no_interesado';
 
-    const notaDefault = 'Le comparto esta propiedad que coincide con las características de su interés para que pueda revisarla y, si es de su interés, con gusto podemos coordinar una visita.';
+    const tracker = propiedadEnviada && !isClosed ? `
+      <div style="display:flex;align-items:flex-start;gap:0;margin-bottom:1rem;padding:0.85rem 0.75rem;background:#0a0f1a;border-radius:8px;border:1px solid #1e2533;overflow-x:auto">
+        ${pasos.map((p, i) => {
+          const done   = i < etapaIdx;
+          const active = i === etapaIdx;
+          const line   = i < pasos.length - 1;
+          return `<div style="display:flex;align-items:flex-start;flex:1;min-width:52px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex:0 0 52px">
+              <div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;
+                background:${done?'#16a34a':active?'#e07b39':'#1e2533'};
+                border:2px solid ${done?'#16a34a':active?'#e07b39':'#2a3144'};
+                color:${done?'#fff':active?'#fff':'#475569'}">${done?'✓':p.icon}</div>
+              <div style="font-size:0.6rem;text-align:center;color:${active?'#e07b39':done?'#4ade80':'#475569'};white-space:pre;line-height:1.25;font-weight:${active?'700':'400'}">${p.label}</div>
+            </div>
+            ${line ? `<div style="height:2px;flex:1;background:${done?'#16a34a':'#1e2533'};margin-top:14px"></div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>` : '';
 
-    const items = propsList.map(p => {
-      const sym = p.moneda === 'USD' ? '$' : 'Q';
-      const precio = p.precio ? `${sym}${Number(p.precio).toLocaleString('es-GT')}` : '';
-      const match = propsFiltradas.some(m => m.id === p.id);
-      return `<label style="display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.65rem;border-radius:7px;cursor:pointer;border:1px solid ${match ? 'rgba(74,222,128,0.3)' : '#2a3144'};background:${match ? 'rgba(74,222,128,0.05)' : 'rgba(255,255,255,0.02)'};margin-bottom:0.3rem;transition:background 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='${match ? 'rgba(74,222,128,0.05)' : 'rgba(255,255,255,0.02)'}'">
-        <input type="checkbox" name="env-prop-cb-${l.id}" value="${p.id}" ${match && propsFiltradas.length === 1 ? 'checked' : ''} style="flex-shrink:0;accent-color:#e07b39;width:15px;height:15px">
-        <span style="flex:1;min-width:0;font-size:0.82rem;color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.titulo}${p.zona ? ` <span style="color:#64748b">· ${p.zona}</span>` : ''}${precio ? ` <span style="color:#c9a84c;font-weight:600">· ${precio}</span>` : ''}${match ? ' <span style="color:#4ade80;font-size:0.68rem">✓ coincide</span>' : ''}</span>
-      </label>`;
-    }).join('');
+    // ── Estado: Nuevo → mostrar formulario de envío de propiedad ──
+    if (!propiedadEnviada) {
+      const msgLead   = l.mensaje || '';
+      const tipoReq   = ((msgLead.match(/Busca:\s*([^·\n]+?)\s+para\s/i)||[])[1]||'').trim().toLowerCase();
+      const operReq   = ((msgLead.match(/para\s+(\w+)/i)||[])[1]||'').trim().toLowerCase();
+      const presupStr = ((msgLead.match(/hasta\s+[Q$]([\d,.]+)/i)||[])[1]||'').replace(/,/g,'');
+      const presupReq = presupStr ? Number(presupStr) : null;
+      const todasActivas = (todasLasPropiedades||[]).filter(p=>p.estado==='activo');
+      const propsFiltradas = todasActivas.filter(p=>{
+        if (tipoReq && !p.tipo?.toLowerCase().includes(tipoReq) && !tipoReq.includes(p.tipo?.toLowerCase()||'')) return false;
+        if (operReq && !(p.operacion?.toLowerCase().includes(operReq)||operReq.includes(p.operacion?.toLowerCase()||''))) return false;
+        if (presupReq && p.precio > presupReq * 1.15) return false;
+        return true;
+      });
+      const propsList  = propsFiltradas.length > 0 ? propsFiltradas : todasActivas;
+      const labelMatch = propsFiltradas.length > 0
+        ? `<span style="color:#4ade80;font-weight:600">${propsFiltradas.length} propiedad${propsFiltradas.length>1?'es coinciden':' coincide'} con la búsqueda</span> — selecciona una o más:`
+        : 'Selecciona una o más de tus propiedades:';
+      const notaDefault = 'Le comparto esta propiedad que coincide con las características de su interés para que pueda revisarla y, si es de su interés, con gusto podemos coordinar una visita.';
+      const items = propsList.map(p=>{
+        const sym = p.moneda==='USD'?'$':'Q';
+        const precio = p.precio?`${sym}${Number(p.precio).toLocaleString('es-GT')}`:'' ;
+        const match  = propsFiltradas.some(m=>m.id===p.id);
+        return `<label style="display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.65rem;border-radius:7px;cursor:pointer;border:1px solid ${match?'rgba(74,222,128,0.3)':'#2a3144'};background:${match?'rgba(74,222,128,0.05)':'rgba(255,255,255,0.02)'};margin-bottom:0.3rem">
+          <input type="checkbox" name="env-prop-cb-${l.id}" value="${p.id}" ${match&&propsFiltradas.length===1?'checked':''} style="flex-shrink:0;accent-color:#e07b39;width:15px;height:15px">
+          <span style="flex:1;min-width:0;font-size:0.82rem;color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.titulo}${p.zona?` <span style="color:#64748b">· ${p.zona}</span>`:''}${precio?` <span style="color:#c9a84c;font-weight:600">· ${precio}</span>`:''}${match?' <span style="color:#4ade80;font-size:0.68rem">✓ coincide</span>':''}</span>
+        </label>`;
+      }).join('');
+      return seccion('Enviar propiedad al cliente', `
+        <div style="display:flex;flex-direction:column;gap:0.7rem">
+          <div style="font-size:0.8rem;color:#94a3b8;line-height:1.4">${labelMatch}</div>
+          <div>${items||'<div style="font-size:0.82rem;color:#475569">Sin propiedades activas disponibles.</div>'}</div>
+          <textarea id="env-prop-nota-${l.id}" rows="3" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #2a3144;border-radius:7px;padding:0.5rem 0.75rem;color:#e2e8f0;font-size:0.82rem;resize:vertical;font-family:inherit;outline:none;line-height:1.5">${notaDefault}</textarea>
+          <div style="font-size:0.7rem;color:#475569;line-height:1.4">💬 InmobIA enviará el mensaje al cliente por WhatsApp. El seguimiento se realiza desde el chat de esta ficha.</div>
+          <button onclick="enviarPropiedadAlCliente(${l.id})" id="btn-env-prop-${l.id}"
+            style="background:#e07b39;color:#fff;border:none;border-radius:7px;padding:0.55rem 1.1rem;font-size:0.85rem;font-weight:700;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:0.4rem"
+            onmouseover="this.style.background='#c96a2d'" onmouseout="this.style.background='#e07b39'">
+            📤 Enviar propiedad al cliente
+          </button>
+        </div>`);
+    }
 
-    return seccion('Enviar propiedad al cliente', `
-      <div style="display:flex;flex-direction:column;gap:0.7rem">
-        <div style="font-size:0.8rem;color:#94a3b8;line-height:1.4">${labelMatch}</div>
-        <div>${items || '<div style="font-size:0.82rem;color:#475569">Sin propiedades activas disponibles.</div>'}</div>
-        <textarea id="env-prop-nota-${l.id}" rows="3" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #2a3144;border-radius:7px;padding:0.5rem 0.75rem;color:#e2e8f0;font-size:0.82rem;resize:vertical;font-family:inherit;outline:none;line-height:1.5">${notaDefault}</textarea>
-        <div style="font-size:0.7rem;color:#475569;line-height:1.4">💬 InmobIA enviará el mensaje al cliente por WhatsApp. El seguimiento se realiza desde el chat de esta ficha.</div>
-        <button onclick="enviarPropiedadAlCliente(${l.id})" id="btn-env-prop-${l.id}"
-          style="background:#e07b39;color:#fff;border:none;border-radius:7px;padding:0.55rem 1.1rem;font-size:0.85rem;font-weight:700;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:0.4rem"
-          onmouseover="this.style.background='#c96a2d'" onmouseout="this.style.background='#e07b39'">
-          📤 Enviar propiedad al cliente
+    // ── Estado: Interesado → chat + acciones de siguiente paso ──────
+    const esAgendado    = etapa === 'agendado';
+    const esCerrado     = etapa === 'cerrado' || etapa === 'no_interesado';
+    const botonesAccion = esCerrado ? '' : `
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem">
+        ${!esAgendado ? `
+          <button onclick="coordinarVisitaBusqueda(${l.id})"
+            style="background:#c9a84c;color:#1e2d4a;border:none;border-radius:6px;padding:0.5rem 1rem;font-size:0.8rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:0.35rem"
+            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+            📅 Coordinar visita
+          </button>` : ''}
+        <button onclick="noInteresadoBusqueda(${l.id})"
+          style="background:transparent;color:#f87171;border:1px solid #7f1d1d;border-radius:6px;padding:0.5rem 0.9rem;font-size:0.78rem;font-weight:600;cursor:pointer"
+          onmouseover="this.style.background='#7f1d1d20'" onmouseout="this.style.background='transparent'">
+          ✕ No interesado
         </button>
-      </div>
-    `);
+      </div>`;
+
+    return `
+      <div style="background:#161c28;border-radius:10px;overflow:hidden;margin-bottom:1rem">
+        <div style="background:rgba(224,123,57,0.08);padding:0.75rem 1.25rem;border-bottom:1px solid rgba(224,123,57,0.2)">
+          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:#e07b39;font-weight:700;margin-bottom:0.15rem">Seguimiento del cliente</div>
+          <div style="font-size:0.95rem;font-weight:700;color:#f1f5f9">${esAgendado ? 'Visita coordinada — confirme cuando se realice' : 'Propiedad enviada — espere respuesta del cliente'}</div>
+        </div>
+        <div style="padding:1rem 1.25rem;display:flex;flex-direction:column;gap:0.75rem">
+          ${tracker}
+          <!-- Chat de seguimiento -->
+          <div style="border:1px solid #1e3a4a;border-radius:8px;overflow:hidden">
+            <div style="background:#0c1e2a;padding:0.55rem 0.9rem;border-bottom:1px solid #1e3a4a;display:flex;align-items:center;gap:0.5rem">
+              <span style="font-size:0.75rem">💬</span>
+              <span style="font-size:0.72rem;font-weight:700;color:#e07b39;text-transform:uppercase;letter-spacing:0.05em">Mensajes enviados al cliente</span>
+              <span style="font-size:0.68rem;color:#475569;margin-left:auto">vía WhatsApp InmobIA</span>
+            </div>
+            <div id="chat-busq-msgs-${l.id}" style="min-height:100px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:0.4rem;padding:0.6rem 0.75rem;background:#0a0f1a">
+              <div style="text-align:center;font-size:0.72rem;color:#334155;padding:0.5rem">Cargando historial...</div>
+            </div>
+            <div style="padding:0.6rem 0.75rem;border-top:1px solid #1e3a4a;display:flex;gap:0.5rem;align-items:flex-end">
+              <textarea id="chat-busq-input-${l.id}" rows="2"
+                placeholder="Enviar mensaje de seguimiento al cliente..."
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarSeguimientoBusqueda(${l.id})}"
+                style="flex:1;background:#0f172a;border:1px solid #1e3a4a;border-radius:6px;padding:0.5rem 0.7rem;font-size:0.82rem;color:#e2e8f0;resize:none;font-family:inherit;line-height:1.45;outline:none"></textarea>
+              <button onclick="enviarSeguimientoBusqueda(${l.id})"
+                style="background:#e07b39;color:#fff;border:none;border-radius:6px;padding:0.5rem 0.85rem;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0"
+                onmouseover="this.style.background='#c96a2d'" onmouseout="this.style.background='#e07b39'">
+                Enviar →
+              </button>
+            </div>
+          </div>
+          ${botonesAccion}
+        </div>
+      </div>`;
   })() : '';
 
   // ── Sección: Visita ────────────────────────────────────────────
@@ -9413,16 +9495,101 @@ function verLead(id) {
 
   document.getElementById('modal-lead').classList.add('open');
   cargarBitacora(l.id);
+  // Chat de búsqueda personalizada (interesado+)
+  if (l.origen === 'busqueda_personalizada' && !['nuevo','cerrado','no_interesado'].includes(l.etapa || 'nuevo')) {
+    cargarChatBusqueda(l.id);
+  }
   // Iniciar chat poll según etapa
   if ((l.modelo === '2A' || l.origen === 'inmobia') && l.convenio_captor_en) {
     if (!l.visita_coordinada_en) {
-      // Paso 2: Coordinar visita
       iniciarChatPoll(l.id);
     } else if (l.visita_coordinada_en && !l.visita_realizada_en) {
-      // Paso 3: Confirmar visita realizada
       iniciarChatPollPaso3(l.id);
     }
   }
+}
+
+// ── Chat y acciones para leads búsqueda personalizada ─────────────────
+async function cargarChatBusqueda(leadId) {
+  const div = document.getElementById(`chat-busq-msgs-${leadId}`);
+  if (!div) return;
+  try {
+    const r = await fetch(`${API}/leads/${leadId}/bitacora`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const todas = data.bitacora || data || [];
+    const msgs = todas.filter(e => ['wa-saliente','wa-saliente-busqueda'].includes(e.tipo));
+    if (msgs.length === 0) {
+      div.innerHTML = `<div style="text-align:center;font-size:0.72rem;color:#334155;padding:0.5rem">Aún no hay mensajes enviados al cliente.</div>`;
+      return;
+    }
+    div.innerHTML = [...msgs].reverse().map(m => {
+      const hora = m.creado_en ? formatNotifTime(m.creado_en) : '';
+      return `<div style="background:#0f172a;border:1px solid #1e2533;border-radius:6px;padding:0.5rem 0.7rem;font-size:0.8rem;color:#cbd5e1;line-height:1.4">
+        <div style="font-size:0.65rem;color:#e07b39;font-weight:700;margin-bottom:0.2rem">📤 Enviado${hora ? ' · ' + hora : ''}</div>
+        ${m.nota || ''}
+      </div>`;
+    }).join('');
+    div.scrollTop = div.scrollHeight;
+  } catch {
+    div.innerHTML = `<div style="text-align:center;font-size:0.72rem;color:#334155;padding:0.5rem">No se pudo cargar el historial.</div>`;
+  }
+}
+
+async function enviarSeguimientoBusqueda(leadId) {
+  const input = document.getElementById(`chat-busq-input-${leadId}`);
+  const msg = input?.value.trim();
+  if (!msg) return;
+  const btn = input.nextElementSibling;
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const r = await fetch(`${API}/leads/${leadId}/mensaje-seguimiento`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ mensaje: msg }),
+    });
+    if (r.ok) {
+      input.value = '';
+      await cargarChatBusqueda(leadId);
+    } else {
+      const err = await r.json().catch(() => ({}));
+      alert(err.error || 'No se pudo enviar el mensaje. Intente de nuevo.');
+    }
+  } catch { alert('Error de conexión.'); }
+  finally { btn.disabled = false; btn.textContent = 'Enviar →'; }
+}
+
+async function coordinarVisitaBusqueda(leadId) {
+  if (!confirm('¿Confirmar que se coordinó una visita con este cliente? El lead pasará a etapa "Agendado".')) return;
+  try {
+    const r = await fetch(`${API}/leads/${leadId}/etapa`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ etapa: 'agendado' }),
+    });
+    if (r.ok) {
+      const lead = leadsData.find(l => l.id === leadId);
+      if (lead) lead.etapa = 'agendado';
+      verLead(leadId);
+    }
+  } catch {}
+}
+
+async function noInteresadoBusqueda(leadId) {
+  if (!confirm('¿Marcar este lead como "No interesado"? El lead se cerrará.')) return;
+  try {
+    const r = await fetch(`${API}/leads/${leadId}/etapa`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ etapa: 'no_interesado' }),
+    });
+    if (r.ok) {
+      const lead = leadsData.find(l => l.id === leadId);
+      if (lead) lead.etapa = 'no_interesado';
+      document.getElementById('modal-lead').classList.remove('open');
+      await cargarLeads();
+    }
+  } catch {}
 }
 
 // ── Modelo 1D · estado del pago al asesor por transferencia bancaria ──

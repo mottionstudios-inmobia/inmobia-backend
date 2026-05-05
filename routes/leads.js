@@ -822,10 +822,27 @@ router.get('/recientes', authMiddleware, (req, res) => {
   res.json({ leads });
 });
 
+// ── POST /api/leads/:id/mensaje-seguimiento  (asesor envía mensaje de seguimiento a cliente búsqueda)
+router.post('/:id/mensaje-seguimiento', authMiddleware, async (req, res) => {
+  const { mensaje } = req.body;
+  if (!mensaje?.trim()) return res.status(400).json({ error: 'Mensaje vacío' });
+  const lead = db.prepare('SELECT * FROM leads WHERE id = ?').get(req.params.id);
+  if (!lead) return res.status(404).json({ error: 'Lead no encontrado' });
+  if (lead.asesor_id !== req.usuario.id) return res.status(403).json({ error: 'Sin permiso' });
+  if (lead.origen !== 'busqueda_personalizada') return res.status(400).json({ error: 'Solo para búsqueda personalizada' });
+  if (lead.telefono) {
+    const { sendWhatsApp } = await import('../whatsapp.js');
+    sendWhatsApp(lead.telefono, mensaje.trim(), lead.id).catch(e => console.error('[WA seg-busqueda]', e.message));
+  }
+  db.prepare(`INSERT INTO lead_bitacora (lead_id, asesor_id, tipo, nota) VALUES (?, ?, 'wa-saliente', ?)`)
+    .run(lead.id, req.usuario.id, mensaje.trim());
+  res.json({ ok: true });
+});
+
 // ── PATCH /api/leads/:id/etapa  (asesor autenticado — mover en kanban)
 router.patch('/:id/etapa', authMiddleware, (req, res) => {
   const { etapa, razon } = req.body;
-  const etapasValidas = ['nuevo', 'agendado', 'visita-realizada', 'interesado', 'negociando', 'cerrado', 'inactivo', 'perdido', 'cliente-aprobado', 'contrato-agendado', 'comision-pagada'];
+  const etapasValidas = ['nuevo', 'agendado', 'visita-realizada', 'interesado', 'negociando', 'cerrado', 'inactivo', 'perdido', 'no_interesado', 'cliente-aprobado', 'contrato-agendado', 'comision-pagada'];
   if (!etapasValidas.includes(etapa))
     return res.status(400).json({ error: 'Etapa inválida' });
 
