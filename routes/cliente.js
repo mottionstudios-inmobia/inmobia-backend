@@ -799,55 +799,16 @@ router.post('/busqueda-publica', async (req, res) => {
       VALUES (?, ?, ?, ?, ?, 'busqueda_personalizada', ?, ?,
         'busqueda_personalizada', 'nuevo', datetime('now'), datetime('now'))
     `);
-    const insertNotif = db.prepare(`
-      INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje)
-      VALUES (?, 'lead_busqueda', ?, ?)
-    `);
     const presupTexto = presupMax ? `${sim}${Number(presupMax).toLocaleString('es-GT')}` : null;
-    const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
     const leadsCreados = [];
 
+    // 4. Crear leads silenciosamente — notificaciones se envían al completar perfil (PATCH /detalles)
     for (const m of matches) {
       const r = insertLead.run(m.asesor_id, primerNombre, email, telefono || null, resumen, m.id, m.titulo);
       leadsCreados.push(r.lastInsertRowid);
-
-      const esSobrePresup = sobrePresup(m.precio);
-      const pct = pctSobre(m.precio);
-      const propPrecioTexto = m.precio ? `${sim}${Number(m.precio).toLocaleString('es-GT')}` : null;
-
-      // Nota de negociación si el precio está sobre el presupuesto del cliente
-      const notaNegociacion = esSobrePresup
-        ? `⚠️ Tu propiedad (${propPrecioTexto}) está un ${pct}% sobre el presupuesto del cliente (${presupTexto}) — puede haber margen de negociación.`
-        : '';
-
-      // Notificación interna
-      insertNotif.run(
-        m.asesor_id,
-        `🔍 Nuevo lead InmobIA — ${tipo} en ${lugarStr}`,
-        `${primerNombre} busca ${tipo} para ${operacion} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}. ${notaNegociacion || 'Comunícate a través de la plataforma.'}`,
-      );
-
-      // Email y WhatsApp al asesor se envían al completar el perfil (PATCH /detalles)
     }
 
-    // 5. Si no hubo match, solo notificación interna a asesores activos (sin email/WA aún)
-    if (matches.length === 0) {
-      const activos = db.prepare(`
-        SELECT DISTINCT u.id, u.nombre, u.email, u.telefono
-        FROM propiedades p JOIN usuarios u ON u.id = p.usuario_id
-        WHERE p.publicado_inmobia = 1 AND p.estado = 'activo' LIMIT 60
-      `).all();
-      for (const a of activos) {
-        insertNotif.run(
-          a.id,
-          `🔍 Requerimiento en red: ${tipo} en ${lugarStr}`,
-          `Un cliente InmobIA busca ${tipo} para ${operacion} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}. Si tienes una propiedad que encaje, aparecerás en sus opciones.`,
-        );
-        // Email y WA se envían al completar el perfil
-      }
-    }
-
-    // 6. No enviar notificaciones al cliente aún — se envían al completar el perfil (PATCH /detalles)
+    // Todas las notificaciones (asesores + cliente) se envían en el PATCH /detalles con perfil completo
 
     res.json({
       ok: true,
