@@ -7756,6 +7756,8 @@ async function actualizarNotificaciones() {
   hoy.setHours(0,0,0,0);
   const leadsHoy = todosLosLeads.filter(l => {
     if (l._esEspejo) return false;
+    // Búsqueda personalizada: notificación llega por backend (PATCH /detalles), no duplicar aquí
+    if (l.origen === 'busqueda_personalizada') return false;
     const created = parseSQL(l.creado_en);
     created.setHours(0,0,0,0);
     return created.getTime() === hoy.getTime() && l.etapa === 'nuevo';
