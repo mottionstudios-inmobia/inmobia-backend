@@ -792,9 +792,14 @@ function renderVisitas() {
     const fvHora  = fvDate ? fvDate.toLocaleTimeString('es-GT', { hour:'numeric', minute:'2-digit', hour12:true }) : '';
     const fecha = l.creado_en ? parseSQL(l.creado_en).toLocaleDateString('es-GT', { day:'numeric', month:'short', year:'numeric' }) : '';
 
-    const asesorAvatar = l.asesor_foto
-      ? `<img src="${BASE_URL}${l.asesor_foto}" alt="${l.asesor_nombre || ''}">`
-      : `<div class="asesor-iniciales">${(l.asesor_nombre||'A').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>`;
+    // Propiedad de InmobIA (modelo 1D desde búsqueda personalizada) → mostrar InmobIA como contacto
+    const esInmobIADirect = l.modelo === '1D' && l.origen === 'busqueda_personalizada';
+    const nombreContacto = esInmobIADirect ? 'InmobIA' : (l.asesor_nombre || 'Asesor');
+    const asesorAvatar = esInmobIADirect
+      ? `<div class="asesor-iniciales" style="background:linear-gradient(135deg,#c9a84c,#e07b39);color:#fff;font-weight:700">IA</div>`
+      : (l.asesor_foto
+          ? `<img src="${BASE_URL}${l.asesor_foto}" alt="${l.asesor_nombre || ''}">`
+          : `<div class="asesor-iniciales">${(l.asesor_nombre||'A').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>`);
 
     const yaCalificado = !!l.calificacion_estrellas;
     const visitaRealizada = !!l.visita_realizada_en;
@@ -825,8 +830,8 @@ function renderVisitas() {
           </div>
           <div class="visita-asesor">
             ${asesorAvatar}
-            <span>${l.asesor_nombre || 'Asesor'}</span>
-            ${l.asesor_empresa ? `<span>· ${l.asesor_empresa}</span>` : ''}
+            <span>${nombreContacto}</span>
+            ${!esInmobIADirect && l.asesor_empresa ? `<span>· ${l.asesor_empresa}</span>` : ''}
           </div>
         </div>
       </div>

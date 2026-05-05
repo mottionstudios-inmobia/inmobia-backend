@@ -707,12 +707,14 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
   const mensajeNotif = `${req_.cliente_nombre || 'Cliente'} completó su perfil: ${tipo} para ${oper} en ${zona}${presupTexto ? ` · hasta ${presupTexto}` : ''}${detalles ? ` · ${detalles}` : ''}. Revise si tiene una propiedad que encaje mejor.`;
 
   // 1. Enviar email + WA a asesores que ya tienen el lead
-  // Filtrar por ventana de tiempo para evitar notificar leads de búsquedas anteriores del mismo email
+  // Solo asesores externos (no admin/InmobIA) — los leads 1D los gestiona InmobIA directamente
+  const adminUser = db.prepare("SELECT id FROM usuarios WHERE rol = 'admin' LIMIT 1").get();
   const leadsOriginales = db.prepare(
     `SELECT DISTINCT l.asesor_id, u.nombre, u.email, u.telefono
      FROM leads l JOIN usuarios u ON u.id = l.asesor_id
      WHERE l.origen = 'busqueda_personalizada' AND l.email = ?
-       AND datetime(l.creado_en) >= datetime(?, '-15 minutes')`
+       AND datetime(l.creado_en) >= datetime(?, '-15 minutes')
+       AND (l.modelo IS NULL OR l.modelo != '1D')`
   ).all(req_.cliente_email || '', req_.creado_en);
 
   const insertNotif = db.prepare(`INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje) VALUES (?, 'lead_busqueda', ?, ?)`);
@@ -893,8 +895,13 @@ router.post('/busqueda-publica', async (req, res) => {
     const leadsCreados = [];
 
     // 4. Crear leads silenciosamente — notificaciones se envían al completar perfil (PATCH /detalles)
+    // Propiedades de InmobIA (admin) → modelo '1D', InmobIA gestiona directamente
+    // Propiedades de asesores → modelo '2A', asesor recibe el lead
+    const tagLead = db.prepare("UPDATE leads SET modelo = ? WHERE id = ?");
     for (const m of matches) {
+      const esInmobIA = m.asesor_id === admin.id;
       const r = insertLead.run(m.asesor_id, primerNombre, email, telefono || null, resumen, m.id, m.titulo);
+      if (esInmobIA) tagLead.run('1D', r.lastInsertRowid);
       leadsCreados.push(r.lastInsertRowid);
     }
 
