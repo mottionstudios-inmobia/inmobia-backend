@@ -796,7 +796,7 @@ function renderVisitas() {
     const esInmobIADirect = l.modelo === '1D' && l.origen === 'busqueda_personalizada';
     const nombreContacto = esInmobIADirect ? 'InmobIA' : (l.asesor_nombre || 'Asesor');
     const asesorAvatar = esInmobIADirect
-      ? `<div class="asesor-iniciales" style="background:linear-gradient(135deg,#c9a84c,#e07b39);color:#fff;font-weight:700">IA</div>`
+      ? `<img src="/logo-inmobia-avatar.png" alt="InmobIA" style="width:36px;height:36px;border-radius:50%;object-fit:contain;background:#1e2d4a;padding:3px;flex-shrink:0">`
       : (l.asesor_foto
           ? `<img src="${BASE_URL}${l.asesor_foto}" alt="${l.asesor_nombre || ''}">`
           : `<div class="asesor-iniciales">${(l.asesor_nombre||'A').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>`);
