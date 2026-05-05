@@ -715,6 +715,7 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
      WHERE l.origen = 'busqueda_personalizada' AND l.email = ?
        AND datetime(l.creado_en) >= datetime(?, '-15 minutes')
        AND (l.modelo IS NULL OR l.modelo != '1D')
+       AND u.rol != 'admin'
      GROUP BY l.asesor_id, u.nombre, u.email, u.telefono`
   ).all(req_.cliente_email || '', req_.creado_en);
 
@@ -742,7 +743,9 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
     const activos = db.prepare(`
       SELECT DISTINCT u.id as asesor_id, u.nombre, u.email, u.telefono
       FROM propiedades p JOIN usuarios u ON u.id = p.usuario_id
-      WHERE p.publicado_inmobia = 1 AND p.estado = 'activo' LIMIT 60
+      WHERE p.publicado_inmobia = 1 AND p.estado = 'activo'
+        AND u.rol != 'admin'
+      LIMIT 60
     `).all();
     for (const a of activos) {
       insertNotif.run(a.asesor_id, tituloNotif, mensajeNotif, null);
