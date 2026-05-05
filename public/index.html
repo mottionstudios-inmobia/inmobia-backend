@@ -3563,12 +3563,60 @@ user-select: none;
       });
       const json = await res.json();
       if (json.ok) {
-        document.getElementById('enriq-form').style.display = 'none';
-        document.getElementById('enriq-confirmado').style.display = '';
+        mostrarResultadosBusqueda(json);
       } else {
         btn.disabled = false; btn.textContent = 'Guardar y finalizar →';
       }
     } catch { btn.disabled = false; btn.textContent = 'Guardar y finalizar →'; }
+  }
+
+  // ── RESULTADOS FINALES: modal de propiedades tras guardar el perfil ─────────────
+  function mostrarResultadosBusqueda(json) {
+    const BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
+    const props = (json.propiedades_preview || []);
+    const matchN = json.matches || 0;
+    const linkPanel = json.linkPanel || null;
+
+    const propsHtml = props.length > 0
+      ? props.map(p => `
+          <div style="border-radius:10px;overflow:hidden;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)">
+            ${p.imagen
+              ? `<img src="${BASE}${p.imagen}" alt="" style="width:100%;height:110px;object-fit:cover;display:block">`
+              : `<div style="width:100%;height:110px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:2rem">🏠</div>`}
+            <div style="padding:0.5rem 0.65rem;font-size:0.72rem;color:rgba(255,255,255,0.7);line-height:1.35">${p.titulo || ''}</div>
+          </div>`).join('')
+      : `<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;font-style:italic;text-align:center;margin:0">
+           Estamos buscando opciones en nuestra red — le avisaremos pronto.
+         </p>`;
+
+    const portalBtn = linkPanel
+      ? `<a href="${linkPanel}" target="_blank"
+           style="display:block;width:100%;box-sizing:border-box;text-align:center;background:linear-gradient(135deg,#e07b39,#c9602a);color:#fff;text-decoration:none;border-radius:8px;padding:0.9rem 1.5rem;font-size:0.95rem;font-weight:700;letter-spacing:0.02em;margin-top:1.25rem;box-shadow:0 4px 18px rgba(224,123,57,0.4)">
+           Ver mis opciones en la plataforma →
+         </a>`
+      : '';
+
+    const inner = document.querySelector('#modal-busqueda-exito > div');
+    if (!inner) return;
+    inner.innerHTML = `
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <div style="font-size:3rem;margin-bottom:0.6rem">🎉</div>
+        <h3 style="color:#fff;font-family:var(--font-display);font-size:1.4rem;font-weight:300;margin:0 0 0.5rem">¡Perfil completo!</h3>
+        <p style="color:rgba(255,255,255,0.65);font-size:0.88rem;margin:0;line-height:1.6">
+          ${matchN > 0
+            ? `Encontramos <strong style="color:#fff">${matchN} propiedad${matchN > 1 ? 'es' : ''}</strong> que podrían encajar.<br>Un asesor le contactará por WhatsApp pronto.`
+            : 'Su búsqueda fue enviada a la red de asesores.<br>Le avisaremos en cuanto tengamos opciones.'}
+        </p>
+      </div>
+      ${matchN > 0 ? `
+        <div style="margin-bottom:1rem">
+          <p style="color:rgba(255,255,255,0.4);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 0.65rem;text-align:center">Opciones encontradas</p>
+          <div style="display:grid;grid-template-columns:repeat(${Math.min(props.length,3)},1fr);gap:0.6rem">${propsHtml}</div>
+        </div>` : `<div style="margin-bottom:1.25rem">${propsHtml}</div>`}
+      ${portalBtn}
+      <button onclick="cerrarModalBusqueda()" style="display:block;width:100%;box-sizing:border-box;margin-top:0.75rem;background:transparent;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.45);border-radius:8px;padding:0.65rem;font-size:0.82rem;cursor:pointer">
+        Cerrar
+      </button>`;
   }
 
   // ── MATCHES DINÁMICOS EN MODAL: actualiza las tarjetas al completar enriquecimiento

@@ -690,11 +690,11 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
   // 3. Magic link + email + WA al cliente con perfil completo
   const clienteEmail = req_.cliente_email || req_.cliente_origen_email;
   const clienteTel   = req_.cliente_telefono;
+  let linkPanel = null;
   console.log(`[busqueda-detalles] req=${id} email=${clienteEmail} tel=${clienteTel} leads=${leadsOriginales.length}`);
   if (clienteEmail) {
     const token = crypto.randomBytes(32).toString('hex');
     const expira = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-    // Tomar el lead más reciente de esta búsqueda (dentro de la ventana de 15 min)
     const leadReciente = db.prepare(
       `SELECT id FROM leads WHERE origen = 'busqueda_personalizada' AND email = ?
        AND datetime(creado_en) >= datetime(?, '-15 minutes')
@@ -702,21 +702,40 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
     ).get(clienteEmail, req_.creado_en);
     db.prepare(`INSERT INTO magic_links (token, email, lead_id, expira_en) VALUES (?, ?, ?, ?)`)
       .run(token, clienteEmail.toLowerCase().trim(), leadReciente?.id || null, expira);
-    const linkPanel = `${BASE_URL_}/panel-cliente.html?token=${token}`;
+    linkPanel = `${BASE_URL_}/panel-cliente.html?token=${token}`;
     const totalLeads = leadsOriginales.length || 0;
     await enviarEmailBusquedaCliente({
       email: clienteEmail, nombre: req_.cliente_nombre, tipo, operacion: oper, zona,
       matches: totalLeads, linkPanel,
     }).catch(e => console.error('[email cliente busqueda]', e.message));
     if (clienteTel) {
+      const numLimpio = String(clienteTel).replace(/\D/g, '');
+      console.log(`[WA cliente] intentando enviar a tel=${clienteTel} → num=${numLimpio}`);
       const msgCliente = `✅ *¡Búsqueda lista, ${req_.cliente_nombre}!*\n\nSu perfil completo fue enviado a los asesores de nuestra red.\n\n*Búsqueda:* ${tipo} para ${oper} en ${zona}${presupTexto ? `\n*Presupuesto:* hasta ${presupTexto}` : ''}${detalles ? `\n*Detalles:* ${detalles}` : ''}\n\n${totalLeads > 0 ? `Encontramos *${totalLeads} propiedad${totalLeads > 1 ? 'es' : ''}* que pueden encajar. Un asesor le contactará pronto.` : 'Notificamos a nuestra red. Le contactaremos cuando tengamos opciones.'}\n\nSiga su búsqueda:\n${linkPanel}\n\n_Su número y correo son privados._`;
-      sendWhatsApp(clienteTel, msgCliente).catch(e => console.error('[WA cliente busqueda] tel=' + clienteTel, e.message));
+      sendWhatsApp(clienteTel, msgCliente)
+        .then(ok => console.log(`[WA cliente] resultado: ${ok ? 'enviado' : 'fallido'}`))
+        .catch(e => console.error('[WA cliente busqueda] tel=' + clienteTel, e.message));
     } else {
-      console.warn('[busqueda-detalles] cliente sin telefono, omitiendo WA');
+      console.warn('[busqueda-detalles] cliente sin telefono — no se envio WA');
     }
   }
 
-  res.json({ ok: true });
+  // Retornar linkPanel y propiedades para mostrar al cliente en el frontend
+  const propiedadesPreview = db.prepare(`
+    SELECT DISTINCT l.propiedad_id, l.propiedad_titulo,
+      (SELECT url FROM imagenes WHERE propiedad_id = l.propiedad_id AND principal = 1 LIMIT 1) AS imagen
+    FROM leads l
+    WHERE l.origen = 'busqueda_personalizada' AND l.email = ?
+      AND datetime(l.creado_en) >= datetime(?, '-15 minutes')
+    LIMIT 3
+  `).all(clienteEmail || '', req_.creado_en);
+
+  res.json({
+    ok: true,
+    linkPanel,
+    propiedades_preview: propiedadesPreview.map(p => ({ titulo: p.propiedad_titulo, imagen: p.imagen || null })),
+    matches: leadsOriginales.length,
+  });
 });
 
 // ── POST /api/cliente/busqueda-publica  (pública — formulario de búsqueda personalizada)
