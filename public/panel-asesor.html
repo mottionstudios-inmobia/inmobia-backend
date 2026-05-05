@@ -7834,12 +7834,24 @@ function formatNotifTime(iso) {
   } catch { return ''; }
 }
 
+const _notifExpandidas = new Set();
+
 function toggleNotifExpand(id) {
   const card = document.getElementById(`notif-card-${id}`);
   const hint = document.getElementById(`notif-hint-${id}`);
   if (!card) return;
   const expanded = card.classList.toggle('expanded');
+  if (expanded) _notifExpandidas.add(id); else _notifExpandidas.delete(id);
   if (hint) hint.textContent = expanded ? '▴ Ver menos' : '▾ Ver más';
+}
+
+function _restaurarNotifExpandidas() {
+  _notifExpandidas.forEach(id => {
+    const card = document.getElementById(`notif-card-${id}`);
+    const hint = document.getElementById(`notif-hint-${id}`);
+    if (card) { card.classList.add('expanded'); if (hint) hint.textContent = '▴ Ver menos'; }
+    else _notifExpandidas.delete(id); // ya no existe — limpiar
+  });
 }
 
 function renderNotificaciones(notifs) {
@@ -7935,6 +7947,7 @@ function renderNotificaciones(notifs) {
   }
   window._notifPage = 0;
   ajustarItems();
+  _restaurarNotifExpandidas();
   window.addEventListener('resize', ajustarItems);
 }
 
