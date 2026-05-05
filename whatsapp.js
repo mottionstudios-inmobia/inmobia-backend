@@ -102,7 +102,56 @@ async function sendViaTwilio(num, mensaje, leadId, { sid, token, from }) {
 }
 
 export function whatsappReady() {
-  return getCreds().listo;
+  return getGreenCreds().listo || getTwilioCreds().listo;
+}
+
+/**
+ * Procesa mensajes entrantes del webhook de Green API.
+ * Green API envía POST JSON con typeWebhook + senderData + messageData
+ */
+export function procesarWebhookGreenAPI(body) {
+  try {
+    if (body?.typeWebhook !== 'incomingMessageReceived') return;
+    const chatId = body?.senderData?.chatId || '';
+    const texto  = body?.messageData?.textMessageData?.textMessage || '';
+    // chatId formato: 502XXXXXXXX@c.us
+    const numRaw = chatId.replace('@c.us', '').replace(/\D/g, '');
+    if (!texto.trim() || !numRaw) return;
+
+    const ahora = Date.now();
+    if (cooldown.has(numRaw) && ahora - cooldown.get(numRaw) < 5 * 60 * 1000) {
+      registrarEntrante(numRaw, texto);
+      return;
+    }
+    registrarEntrante(numRaw, texto);
+    cooldown.set(numRaw, ahora);
+
+    const lead = buscarLead(numRaw);
+    if (!lead) {
+      console.log(`[WA Green] Mensaje de ${numRaw} — sin lead activo`);
+      return;
+    }
+
+    const token  = crypto.randomBytes(32).toString('hex');
+    const expira = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    db.prepare('INSERT INTO magic_links (token, email, lead_id, expira_en) VALUES (?, ?, ?, ?)')
+      .run(token, (lead.email || '').toLowerCase().trim(), lead.id, expira);
+    const linkPanel = `${BASE_URL}/panel-cliente.html?token=${token}`;
+
+    const primerNombre = (lead.nombre || 'Cliente').split(' ')[0];
+    const autoReply =
+`Hola *${primerNombre}*, gracias por escribirnos. 🏠
+
+Recibimos tu mensaje. Para coordinar los detalles de tu visita, ingresa a tu panel personal:
+
+${linkPanel}
+
+Si tienes alguna duda urgente, responde a este mensaje.`;
+
+    sendWhatsApp(numRaw, autoReply).catch(e => console.error('[WA Green auto-reply]', e.message));
+  } catch (e) {
+    console.error('[WA Green webhook]', e.message);
+  }
 }
 
 /**

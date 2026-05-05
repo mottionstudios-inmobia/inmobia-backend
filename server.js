@@ -370,7 +370,7 @@ app.get('/api/home-stats', (_req, res) => {
   }
 });
 
-import { procesarWebhookMeta } from './whatsapp.js';
+import { procesarWebhookMeta, procesarWebhookGreenAPI } from './whatsapp.js';
 const WH_VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || 'inmobia_wh_2026';
 
 // Verificación del webhook (GET que Meta llama al configurar)
@@ -388,7 +388,13 @@ app.get('/api/webhook/whatsapp', (req, res) => {
 // Mensajes entrantes de Twilio (POST con form-urlencoded)
 app.post('/api/webhook/whatsapp', (req, res) => {
   res.sendStatus(200);
-  procesarWebhookMeta(req.body); // body ya parseado por express.urlencoded
+  procesarWebhookMeta(req.body);
+});
+
+// Mensajes entrantes de Green API (POST JSON)
+app.post('/api/webhook/greenapi', (req, res) => {
+  res.sendStatus(200);
+  procesarWebhookGreenAPI(req.body);
 });
 
 // Rutas públicas
