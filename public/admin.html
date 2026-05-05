@@ -5230,7 +5230,7 @@ const ETAPA_COLOR = { 6:'#4ade80', 5:'#c9a84c', 4:'#38bdf8', 3:'#e07b39', 2:'#94
 
 async function cargarBusquedasAdmin() {
   try {
-    const r = await fetch(`${API}/cliente/busquedas-admin`, { headers: { Authorization: `Bearer ${adminToken}` } });
+    const r = await fetch(`${API}/cliente/busquedas-admin`, { headers: { Authorization: `Bearer ${token}` } });
     if (!r.ok) throw new Error();
     const data = await r.json();
     _busqData = data.busquedas || [];
@@ -5324,7 +5324,7 @@ async function verDetalleBusqueda(id) {
   modal.style.display = 'flex';
   body.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b">Cargando...</div>';
   try {
-    const r = await fetch(`${API}/cliente/busquedas-admin/${id}/leads`, { headers: { Authorization: `Bearer ${adminToken}` } });
+    const r = await fetch(`${API}/cliente/busquedas-admin/${id}/leads`, { headers: { Authorization: `Bearer ${token}` } });
     const data = await r.json();
     const req  = data.requerimiento;
     const leads = data.leads || [];
