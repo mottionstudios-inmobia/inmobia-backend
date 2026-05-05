@@ -2312,7 +2312,7 @@ user-select: none;
       <!-- Confirmación guardado -->
       <div id="enriq-confirmado" style="display:none;text-align:center;padding:1.5rem 0">
         <div style="font-size:2.5rem;margin-bottom:0.75rem">✅</div>
-        <p style="color:rgba(255,255,255,0.85);font-size:0.95rem;margin:0 0 0.5rem;font-weight:500">¡Perfil completo enviado!</p>
+        <p style="color:rgba(255,255,255,0.85);font-size:0.95rem;margin:0 0 0.5rem;font-weight:500">¡Características completas enviadas!</p>
         <p style="color:rgba(255,255,255,0.6);font-size:0.85rem;margin:0 0 1.5rem;line-height:1.5">Los asesores recibieron su perfil completo y le contactarán con las mejores opciones.</p>
         <button onclick="cerrarModalBusqueda()" style="background:var(--gold);color:#1e2d4a;border:none;border-radius:20px;padding:0.7rem 2.5rem;font-size:0.9rem;font-weight:700;cursor:pointer;letter-spacing:0.02em">Entendido →</button>
       </div>
@@ -3438,14 +3438,14 @@ user-select: none;
     inner.innerHTML = `
       <div style="text-align:center;margin-bottom:1.5rem">
         <div style="font-size:3rem;margin-bottom:0.6rem">🎉</div>
-        <h3 style="color:#fff;font-family:var(--font-display);font-size:1.4rem;font-weight:300;margin:0 0 0.5rem">¡Perfil completo!</h3>
+        <h3 style="color:#fff;font-family:var(--font-display);font-size:1.4rem;font-weight:300;margin:0 0 0.5rem">¡Características completas!</h3>
         <p style="color:rgba(255,255,255,0.65);font-size:0.88rem;margin:0;line-height:1.6">
-          ${matchN > 0
-            ? `Encontramos <strong style="color:#fff">${matchN} propiedad${matchN > 1 ? 'es' : ''}</strong> que podrían encajar.<br>Un asesor le contactará por WhatsApp pronto.`
+          ${props.length > 0
+            ? `Encontramos <strong style="color:#fff">${props.length} propiedad${props.length > 1 ? 'es' : ''}</strong> que podrían encajar.<br>Un asesor le contactará por WhatsApp pronto.`
             : 'Su búsqueda fue enviada a la red de asesores.<br>Le avisaremos en cuanto tengamos opciones.'}
         </p>
       </div>
-      ${matchN > 0 ? `
+      ${props.length > 0 ? `
         <div style="margin-bottom:1rem">
           <p style="color:rgba(255,255,255,0.4);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 0.65rem;text-align:center">Opciones encontradas</p>
           <div style="display:grid;grid-template-columns:repeat(${Math.min(props.length,3)},1fr);gap:0.6rem">${propsHtml}</div>
