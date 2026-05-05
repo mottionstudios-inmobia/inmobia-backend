@@ -2014,142 +2014,6 @@ user-select: none;
         </div>
       </div>
 
-      <!-- BLOQUE 2: Detalles opcionales -->
-      <div style="text-align:center;margin:1.2rem 0 0.5rem">
-        <button type="button" id="btn-ver-mas-b" onclick="toggleBusquedaExtra()" style="
-          background:rgba(201,168,76,0.15);border:1.5px solid var(--gold);
-          color:var(--gold);border-radius:20px;padding:0.55rem 1.8rem;
-          font-size:0.88rem;font-weight:600;font-family:var(--font-body);cursor:pointer;
-          transition:all 0.2s;display:inline-flex;align-items:center;gap:0.5rem;letter-spacing:0.04em;
-        ">Agregar detalles (opcional) <span id="ver-mas-b-icon" style="font-size:1rem;line-height:1;transition:transform 0.3s">▼</span></button>
-      </div>
-
-      <div id="busqueda-extra" style="overflow:hidden;max-height:0;opacity:0;transition:max-height 0.45s ease,opacity 0.3s ease">
-      <div style="margin:0.5rem 0 1rem;font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em">2 / Características deseadas</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Mínimo de m² construidos</label>
-          <input id="b-metros" type="number" min="1" placeholder="Ej: 80">
-        </div>
-        <div class="form-group" id="grp-integrantes">
-          <label>Integrantes de la familia</label>
-          <input id="b-integrantes" type="number" min="1" placeholder="Ej: 4">
-        </div>
-      </div>
-      <div id="grp-habitaciones-parqueos">
-        <div class="form-group" style="margin-bottom:1rem">
-          <label id="lbl-habitaciones">Habitaciones</label>
-          <button type="button" id="btn-hab-toggle" onclick="toggleCapsPanel('hab-panel','btn-hab-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
-            <span id="hab-toggle-label">Cualquier cantidad ▾</span>
-          </button>
-          <div id="hab-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
-            <div class="zona-caps">
-              <div class="zona-cap"><input type="radio" id="h1" name="b-habitaciones" value="1 habitación"       onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h1">1</label></div>
-              <div class="zona-cap"><input type="radio" id="h2" name="b-habitaciones" value="2 habitaciones"     onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h2">2</label></div>
-              <div class="zona-cap"><input type="radio" id="h3" name="b-habitaciones" value="3 habitaciones"     onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h3">3</label></div>
-              <div class="zona-cap"><input type="radio" id="h4" name="b-habitaciones" value="4 habitaciones"     onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h4">4</label></div>
-              <div class="zona-cap"><input type="radio" id="h5" name="b-habitaciones" value="5 o más habitaciones" onchange="selCapsRadio(this,'hab-panel','btn-hab-toggle','hab-toggle-label')"><label for="h5">5+</label></div>
-            </div>
-          </div>
-        </div>
-        <div class="form-group" style="margin-bottom:1rem">
-          <label>Parqueos</label>
-          <button type="button" id="btn-parq-toggle" onclick="toggleCapsPanel('parq-panel','btn-parq-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
-            <span id="parq-toggle-label">Cualquier cantidad ▾</span>
-          </button>
-          <div id="parq-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
-            <div class="zona-caps">
-              <div class="zona-cap"><input type="radio" id="p0"    name="b-parqueos" value="Sin parqueo"      onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p0">Sin parqueo</label></div>
-              <div class="zona-cap"><input type="radio" id="p1"    name="b-parqueos" value="1 parqueo"        onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p1">1</label></div>
-              <div class="zona-cap"><input type="radio" id="p2"    name="b-parqueos" value="2 parqueos"       onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p2">2</label></div>
-              <div class="zona-cap"><input type="radio" id="p3"    name="b-parqueos" value="3 parqueos"       onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p3">3</label></div>
-              <div class="zona-cap"><input type="radio" id="p4"    name="b-parqueos" value="4 parqueos"       onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p4">4</label></div>
-              <div class="zona-cap"><input type="radio" id="p5"    name="b-parqueos" value="5 parqueos"       onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p5">5</label></div>
-              <div class="zona-cap"><input type="radio" id="p6"    name="b-parqueos" value="6 o más parqueos" onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="p6">6+</label></div>
-              <div class="zona-cap"><input type="radio" id="pmoto" name="b-parqueos" value="Parqueo para moto" onchange="selCapsRadio(this,'parq-panel','btn-parq-toggle','parq-toggle-label')"><label for="pmoto">Moto</label></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-group" style="margin-bottom:1rem">
-        <label>Baños</label>
-        <button type="button" id="btn-banos-toggle" onclick="toggleCapsPanel('banos-panel','btn-banos-toggle')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);border-radius:4px;padding:0.6rem 1rem;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:border-color 0.2s;text-align:left;">
-          <span id="banos-toggle-label">Cualquier cantidad ▾</span>
-        </button>
-        <div id="banos-panel" style="display:none;border:1px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 4px 4px;background:rgba(20,30,50,0.95);padding:1rem;">
-          <div class="zona-caps">
-            <div class="zona-cap"><input type="radio" id="ba1" name="b-banos" value="1 baño"       onchange="selCapsRadio(this,'banos-panel','btn-banos-toggle','banos-toggle-label')"><label for="ba1">1</label></div>
-            <div class="zona-cap"><input type="radio" id="ba2" name="b-banos" value="2 baños"      onchange="selCapsRadio(this,'banos-panel','btn-banos-toggle','banos-toggle-label')"><label for="ba2">2</label></div>
-            <div class="zona-cap"><input type="radio" id="ba3" name="b-banos" value="3 baños"      onchange="selCapsRadio(this,'banos-panel','btn-banos-toggle','banos-toggle-label')"><label for="ba3">3</label></div>
-            <div class="zona-cap"><input type="radio" id="ba4" name="b-banos" value="4 o más baños" onchange="selCapsRadio(this,'banos-panel','btn-banos-toggle','banos-toggle-label')"><label for="ba4">4+</label></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="horarios-group">
-        <label class="main-label">Características deseadas <span style="font-size:0.65rem; color:rgba(255,255,255,0.35); font-weight:400; text-transform:none; letter-spacing:0;">— seleccione una o más opciones</span></label>
-        <div class="dias-checks">
-          <div class="dia-option caract-no-terreno caract-no-local"><input type="checkbox" id="balcon" name="caract-adic" value="Balcón"><label for="balcon">Balcón</label></div>
-          <div class="dia-option caract-no-terreno caract-no-local"><input type="checkbox" id="jardin-adic" name="caract-adic" value="Jardín"><label for="jardin-adic">Jardín</label></div>
-          <div class="dia-option caract-no-terreno caract-no-local"><input type="checkbox" id="terraza" name="caract-adic" value="Terraza"><label for="terraza">Terraza</label></div>
-          <div class="dia-option caract-no-local"><input type="checkbox" id="residencial" name="caract-adic" value="Dentro de residencial"><label for="residencial">Dentro de residencial</label></div>
-          <div class="dia-option caract-no-terreno caract-no-casa caract-no-local"><input type="checkbox" id="primer-nivel" name="caract-adic" value="Primer nivel"><label for="primer-nivel">Primer nivel</label></div>
-          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="dorm-servicio" name="caract-adic" value="Dormitorio de servicio"><label for="dorm-servicio">Dormitorio de servicio</label></div>
-          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="estudio" name="caract-adic" value="Estudio"><label for="estudio">Estudio</label></div>
-          <div class="dia-option caract-no-terreno caract-no-casa caract-no-local"><input type="checkbox" id="gimnasio-adic" name="caract-adic" value="Gimnasio"><label for="gimnasio-adic">Gimnasio</label></div>
-          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="cd-amueblado" name="caract-adic" value="Amueblado"><label for="cd-amueblado">Amueblado</label></div>
-          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="cd-linea" name="caract-adic" value="Solo línea blanca"><label for="cd-linea">Solo línea blanca</label></div>
-          <div class="dia-option caract-no-terreno caract-no-oficina caract-no-local"><input type="checkbox" id="cd-sin-linea" name="caract-adic" value="Sin línea blanca"><label for="cd-sin-linea">Sin línea blanca</label></div>
-          <div class="dia-option caract-solo-casa"><input type="checkbox" id="parqueo-techado" name="caract-adic" value="Parqueo techado"><label for="parqueo-techado">Parqueo techado</label></div>
-          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="recepcion" name="caract-adic" value="Recepción en oficina"><label for="recepcion">Recepción en oficina</label></div>
-          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="no-tabicada" name="caract-adic" value="No tabicada"><label for="no-tabicada">No tabicada</label></div>
-          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="cocina-of" name="caract-adic" value="Cocina"><label for="cocina-of">Cocina</label></div>
-          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="sala-reunion-of" name="caract-adic" value="Sala de reuniones dentro de oficinas"><label for="sala-reunion-of">Sala de reuniones dentro de oficinas</label></div>
-          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="sala-reunion-ed" name="caract-adic" value="Sala de reuniones en edificio"><label for="sala-reunion-ed">Sala de reuniones en edificio</label></div>
-          <div class="dia-option caract-solo-oficina"><input type="checkbox" id="casa-oficina" name="caract-adic" value="Casa como oficina"><label for="casa-oficina">Casa como oficina</label></div>
-          <div class="dia-option caract-solo-local"><input type="checkbox" id="recepcion-local" name="caract-adic" value="Recepción dentro de local"><label for="recepcion-local">Recepción dentro de local</label></div>
-          <div class="dia-option caract-solo-local"><input type="checkbox" id="tabicado" name="caract-adic" value="Tabicado"><label for="tabicado">Tabicado</label></div>
-          <div class="dia-option caract-solo-local"><input type="checkbox" id="no-tabicado-local" name="caract-adic" value="No tabicado"><label for="no-tabicado-local">No tabicado</label></div>
-          <div class="dia-option caract-solo-local"><input type="checkbox" id="centro-comercial" name="caract-adic" value="Dentro de centro comercial"><label for="centro-comercial">Dentro de centro comercial</label></div>
-          <div class="dia-option caract-solo-local"><input type="checkbox" id="calle-principal" name="caract-adic" value="Sobre calle principal"><label for="calle-principal">Sobre calle principal</label></div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Descripción adicional (opcional)</label>
-        <textarea id="b-desc-adic" placeholder="Indique cualquier detalle importante: piso preferido, vista, tamaño aproximado, fecha de ingreso, etc."></textarea>
-      </div>
-
-      <div class="form-row" id="grp-giro" style="display:none;">
-        <div class="form-group">
-          <label>Giro de negocio</label>
-          <input type="text" placeholder="Ej: Restaurante, Consultorio, Tienda de ropa...">
-        </div>
-        <div class="form-group">
-          <label>Descripción del giro de negocio</label>
-          <input type="text" placeholder="Describa brevemente su actividad comercial">
-        </div>
-      </div>
-
-      <div class="horarios-group" id="grp-mascota">
-        <label class="main-label">¿Tiene mascota?</label>
-        <div class="horarios-checks" style="grid-template-columns: repeat(2, 1fr); max-width: 260px;">
-          <div class="horario-option"><input type="radio" id="mascota-si" name="tiene-mascota" value="Sí" onchange="toggleDetalleMascota()"><label for="mascota-si">Sí</label></div>
-          <div class="horario-option"><input type="radio" id="mascota-no" name="tiene-mascota" value="No" onchange="toggleDetalleMascota()"><label for="mascota-no">No</label></div>
-        </div>
-      </div>
-
-      <div class="form-group" id="grp-desc-mascota">
-        <label>Descripción de mascota(s)</label>
-        <textarea id="b-desc-mascota" placeholder="Indique cantidad, raza y peso aproximado de cada mascota. Ej: 1 Golden Retriever, 30 kg / 1 gato doméstico, 4 kg"></textarea>
-      </div>
-
-      <div class="form-group" id="grp-fotos-mascota">
-        <label>Fotografías de mascota(s) (Importante)</label>
-        <input id="b-fotos-mascota" type="file" accept="image/*" multiple style="padding: 0.6rem 1rem; cursor: pointer;">
-      </div>
-
-      </div><!-- /busqueda-extra -->
 
       <button type="submit" id="busqueda-submit" style="margin-top:1.75rem;width:100%;padding:1.1rem 1.5rem;background:linear-gradient(135deg,#e07b39,#c9602a);color:#fff;border:none;border-radius:8px;font-family:var(--font-body);font-size:1rem;font-weight:700;letter-spacing:0.03em;cursor:pointer;transition:all 0.25s;box-shadow:0 4px 20px rgba(224,123,57,0.45);display:flex;align-items:center;justify-content:center;gap:0.6rem"
         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 28px rgba(224,123,57,0.6)'"
@@ -3484,29 +3348,6 @@ user-select: none;
     });
   }
 
-  // ── MASCOTA: ocultar detalles si selecciona "No"
-  let busquedaExtraAbierto = false;
-  function toggleBusquedaExtra() {
-    busquedaExtraAbierto = !busquedaExtraAbierto;
-    const extra = document.getElementById('busqueda-extra');
-    const icon  = document.getElementById('ver-mas-b-icon');
-    const btn   = document.getElementById('btn-ver-mas-b');
-    if (busquedaExtraAbierto) {
-      extra.style.maxHeight = (extra.scrollHeight + 2000) + 'px';
-      extra.style.opacity   = '1';
-      btn.innerHTML = 'Ver menos <span id="ver-mas-b-icon" style="font-size:1rem;line-height:1;transition:transform 0.3s;transform:rotate(180deg)">▼</span>';
-      btn.style.borderColor = 'var(--gold)';
-      btn.style.color       = 'var(--gold)';
-      btn.style.background  = 'rgba(201,168,76,0.25)';
-    } else {
-      extra.style.maxHeight = '0';
-      extra.style.opacity   = '0';
-      btn.innerHTML = 'Ver más <span id="ver-mas-b-icon" style="font-size:1rem;line-height:1;transition:transform 0.3s">▼</span>';
-      btn.style.borderColor = 'var(--gold)';
-      btn.style.color       = 'var(--gold)';
-      btn.style.background  = 'rgba(201,168,76,0.15)';
-    }
-  }
 
   function toggleDetalleMascota() {
     const si = document.getElementById('mascota-si');
@@ -3880,28 +3721,16 @@ user-select: none;
     const zonaOtro   = dep !== 'Guatemala' ? val('b-zona-otro') : '';
     const zonaFinal = zonaGt || zonaOtro || '';
 
-    const caract = [...form.querySelectorAll('input[name="caract-adic"]:checked')].map(i => i.value).join(', ');
-    const mascota = document.querySelector('input[name="tiene-mascota"]:checked')?.value || '';
-
     const payload = {
-      nombre:        val('b-nombre'),
-      telefono:      tel,
-      email:         val('b-email'),
-      operacion:     form.querySelector('input[name="b-operacion"]:checked')?.value || '',
-      tipo:          (() => { const t = form.querySelector('input[name="b-tipo"]:checked')?.value || ''; return t === 'Otro' ? ('Otro: ' + (val('b-tipo-otro') || '')) : t; })(),
-      departamento:  dep,
-      zona:          zonaFinal,
+      nombre:          val('b-nombre'),
+      telefono:        tel,
+      email:           val('b-email'),
+      operacion:       form.querySelector('input[name="b-operacion"]:checked')?.value || '',
+      tipo:            (() => { const t = form.querySelector('input[name="b-tipo"]:checked')?.value || ''; return t === 'Otro' ? ('Otro: ' + (val('b-tipo-otro') || '')) : t; })(),
+      departamento:    dep,
+      zona:            zonaFinal,
       presupuesto_max: presupMax,
-      moneda:        monedaVal,
-      habitaciones:  form.querySelector('input[name="b-habitaciones"]:checked')?.value || '',
-      banos:         form.querySelector('input[name="b-banos"]:checked')?.value || '',
-      parqueos:      form.querySelector('input[name="b-parqueos"]:checked')?.value || '',
-      metros:        val('b-metros'),
-      caracteristicas: caract,
-      fecha_mudanza: val('b-fecha'),
-      mascota,
-      desc_mascota:  val('b-desc-mascota'),
-      descripcion:   val('b-desc-adic'),
+      moneda:          monedaVal,
     };
 
     try {
