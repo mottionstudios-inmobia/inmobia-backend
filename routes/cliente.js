@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import { db } from '../database.js';
+import { authMiddleware } from '../auth.js';
 import { crearCheckoutComision, keysConfigured } from '../lib/recurrente.js';
 import { propiedadEsDeAdmin } from '../lib/modelos.js';
 import { enviarCorreoComisionAsesor, enviarCorreoCierreConfirmado1D, enviarEmailBusquedaCliente, enviarEmailNuevoLeadBusqueda } from '../email.js';
