@@ -8647,18 +8647,20 @@ function verLead(id) {
     const es2A = l.modelo === '2A' || l.origen === 'inmobia';
     const telDigits = (l.telefono || '').replace(/\D/g,'');
     const waClienteHref = telDigits ? `https://wa.me/${telDigits}?text=${encodeURIComponent('Hola ' + (l.nombre||'') + ', soy tu asesor en InmobIA. ¿Cómo puedo ayudarte?')}` : '';
-    const contactBtns = `<div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap">
-      ${waClienteHref && l.origen !== 'tripartito' && !es2A ? `<a href="${waClienteHref}" target="_blank" style="display:inline-flex;align-items:center;gap:0.35rem;background:#25d366;color:#fff;text-decoration:none;padding:0.4rem 0.85rem;border-radius:6px;font-size:0.78rem;font-weight:600">💬 WhatsApp</a>` : ''}
-      ${l.email && l.origen !== 'tripartito' && !es2A ? `<a href="mailto:${l.email}" style="display:inline-flex;align-items:center;gap:0.35rem;background:#1e2d4a;color:#fff;text-decoration:none;padding:0.4rem 0.85rem;border-radius:6px;font-size:0.78rem;font-weight:600">✉ Email</a>` : ''}
-    </div>`;
+    const esBusqueda = l.origen === 'busqueda_personalizada';
+    const mostrarContacto = !esBusqueda && l.origen !== 'tripartito' && !es2A;
+    const contactBtns = mostrarContacto ? `<div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap">
+      ${waClienteHref ? `<a href="${waClienteHref}" target="_blank" style="display:inline-flex;align-items:center;gap:0.35rem;background:#25d366;color:#fff;text-decoration:none;padding:0.4rem 0.85rem;border-radius:6px;font-size:0.78rem;font-weight:600">💬 WhatsApp</a>` : ''}
+      ${l.email ? `<a href="mailto:${l.email}" style="display:inline-flex;align-items:center;gap:0.35rem;background:#1e2d4a;color:#fff;text-decoration:none;padding:0.4rem 0.85rem;border-radius:6px;font-size:0.78rem;font-weight:600">✉ Email</a>` : ''}
+    </div>` : (esBusqueda ? `<div style="margin-top:0.5rem;font-size:0.73rem;color:#475569;background:#0f172a;border:1px solid #1e3a4a;border-radius:6px;padding:0.45rem 0.7rem;line-height:1.4">💬 La comunicación con este cliente se gestiona automáticamente a través del WhatsApp de InmobIA. Utilice la sección "Enviar propiedad" para contactarle.</div>` : '');
 
     let contenido = grid([
       campo('Nombre', l.nombre),
-      l.origen !== 'tripartito' && !es2A ? campo('Teléfono', l.telefono || '—') : '',
-      l.origen !== 'tripartito' && !es2A ? campo('Correo', l.email || '—') : '',
+      mostrarContacto ? campo('Teléfono', l.telefono || '—') : '',
+      mostrarContacto ? campo('Correo', l.email || '—') : '',
       campo('Tipo de contacto', tipoLabel[l.tipo] || l.tipo),
       campo('Recibido el', fecha),
-    ].filter(Boolean).join('')) + (l.origen !== 'tripartito' && !es2A ? contactBtns : '');
+    ].filter(Boolean).join('')) + contactBtns;
 
     // Para 2A: fusionar detalles de la solicitud en este mismo bloque
     if (es2A) {
@@ -8722,24 +8724,52 @@ function verLead(id) {
   })()) : (l.propiedad_titulo ? seccion('Propiedad de interés', `<span style="color:#e2e8f0;font-size:0.88rem">${l.propiedad_titulo}</span>`) : '');
 
   // ── Sección: Enviar propiedad al cliente (solo busqueda_personalizada) ──
-  const bloqueEnviarPropiedad = l.origen === 'busqueda_personalizada' ? seccion('Enviar propiedad al cliente', `
-    <div style="display:flex;flex-direction:column;gap:0.75rem">
-      <div style="font-size:0.82rem;color:#94a3b8;line-height:1.5">Selecciona una de tus propiedades para presentársela al cliente por WhatsApp.</div>
-      <select id="env-prop-sel-${l.id}" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #2a3144;border-radius:7px;padding:0.5rem 0.75rem;color:#e2e8f0;font-size:0.85rem;outline:none">
-        <option value="">— Seleccionar propiedad —</option>
-        ${(todasLasPropiedades || []).filter(p => p.estado === 'activo').map(p =>
-          `<option value="${p.id}">${p.titulo}${p.zona ? ' · ' + p.zona : ''}${p.precio ? ' · ' + (p.moneda === 'USD' ? '$' : 'Q') + Number(p.precio).toLocaleString('es-GT') : ''}</option>`
-        ).join('')}
-      </select>
-      <textarea id="env-prop-nota-${l.id}" rows="2" placeholder="Nota opcional para el cliente..." style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #2a3144;border-radius:7px;padding:0.5rem 0.75rem;color:#e2e8f0;font-size:0.83rem;resize:none;font-family:inherit;outline:none"></textarea>
-      <button onclick="enviarPropiedadAlCliente(${l.id})" id="btn-env-prop-${l.id}"
-        style="background:#e07b39;color:#fff;border:none;border-radius:7px;padding:0.55rem 1.1rem;font-size:0.85rem;font-weight:700;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:0.4rem"
-        onmouseover="this.style.background='#c96a2d'" onmouseout="this.style.background='#e07b39'">
-        📤 Enviar propiedad por WhatsApp
-      </button>
-      ${!l.telefono ? `<div style="font-size:0.72rem;color:#f87171;margin-top:0.25rem">⚠️ El cliente no tiene teléfono — no se puede enviar por WhatsApp.</div>` : ''}
-    </div>
-  `) : '';
+  const bloqueEnviarPropiedad = l.origen === 'busqueda_personalizada' ? (() => {
+    // Extraer criterios del mensaje del lead para filtrar propiedades que coinciden
+    const msgLead = l.mensaje || '';
+    const tipoReq = ((msgLead.match(/Busca:\s*([^·\n]+?)\s+para\s/i) || [])[1] || '').trim().toLowerCase();
+    const operReq = ((msgLead.match(/para\s+(\w+)/i) || [])[1] || '').trim().toLowerCase();
+    const presupStr = ((msgLead.match(/hasta\s+[Q$]([\d,.]+)/i) || [])[1] || '').replace(/,/g, '');
+    const presupReq = presupStr ? Number(presupStr) : null;
+
+    const todasActivas = (todasLasPropiedades || []).filter(p => p.estado === 'activo');
+    const propsFiltradas = todasActivas.filter(p => {
+      if (tipoReq && !p.tipo?.toLowerCase().includes(tipoReq) && !tipoReq.includes(p.tipo?.toLowerCase() || '')) return false;
+      if (operReq && !(p.operacion?.toLowerCase().includes(operReq) || operReq.includes(p.operacion?.toLowerCase() || ''))) return false;
+      if (presupReq && p.precio > presupReq * 1.15) return false;
+      return true;
+    });
+    const propsList = propsFiltradas.length > 0 ? propsFiltradas : todasActivas;
+    const labelMatch = propsFiltradas.length > 0
+      ? `<span style="color:#4ade80;font-weight:600">${propsFiltradas.length} propiedad${propsFiltradas.length > 1 ? 'es coinciden' : ' coincide'} con la búsqueda</span> — selecciona una o más:`
+      : 'Selecciona una o más de tus propiedades:';
+
+    const notaDefault = 'Le comparto esta propiedad que coincide con las características de su interés para que pueda revisarla y, si es de su interés, con gusto podemos coordinar una visita.';
+
+    const items = propsList.map(p => {
+      const sym = p.moneda === 'USD' ? '$' : 'Q';
+      const precio = p.precio ? `${sym}${Number(p.precio).toLocaleString('es-GT')}` : '';
+      const match = propsFiltradas.some(m => m.id === p.id);
+      return `<label style="display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.65rem;border-radius:7px;cursor:pointer;border:1px solid ${match ? 'rgba(74,222,128,0.3)' : '#2a3144'};background:${match ? 'rgba(74,222,128,0.05)' : 'rgba(255,255,255,0.02)'};margin-bottom:0.3rem;transition:background 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='${match ? 'rgba(74,222,128,0.05)' : 'rgba(255,255,255,0.02)'}'">
+        <input type="checkbox" name="env-prop-cb-${l.id}" value="${p.id}" ${match && propsFiltradas.length === 1 ? 'checked' : ''} style="flex-shrink:0;accent-color:#e07b39;width:15px;height:15px">
+        <span style="flex:1;min-width:0;font-size:0.82rem;color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.titulo}${p.zona ? ` <span style="color:#64748b">· ${p.zona}</span>` : ''}${precio ? ` <span style="color:#c9a84c;font-weight:600">· ${precio}</span>` : ''}${match ? ' <span style="color:#4ade80;font-size:0.68rem">✓ coincide</span>' : ''}</span>
+      </label>`;
+    }).join('');
+
+    return seccion('Enviar propiedad al cliente', `
+      <div style="display:flex;flex-direction:column;gap:0.7rem">
+        <div style="font-size:0.8rem;color:#94a3b8;line-height:1.4">${labelMatch}</div>
+        <div>${items || '<div style="font-size:0.82rem;color:#475569">Sin propiedades activas disponibles.</div>'}</div>
+        <textarea id="env-prop-nota-${l.id}" rows="3" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #2a3144;border-radius:7px;padding:0.5rem 0.75rem;color:#e2e8f0;font-size:0.82rem;resize:vertical;font-family:inherit;outline:none;line-height:1.5">${notaDefault}</textarea>
+        <div style="font-size:0.7rem;color:#475569;line-height:1.4">💬 InmobIA enviará el mensaje al cliente por WhatsApp. El seguimiento se realiza desde el chat de esta ficha.</div>
+        <button onclick="enviarPropiedadAlCliente(${l.id})" id="btn-env-prop-${l.id}"
+          style="background:#e07b39;color:#fff;border:none;border-radius:7px;padding:0.55rem 1.1rem;font-size:0.85rem;font-weight:700;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:0.4rem"
+          onmouseover="this.style.background='#c96a2d'" onmouseout="this.style.background='#e07b39'">
+          📤 Enviar propiedad por WhatsApp
+        </button>
+      </div>
+    `);
+  })() : '';
 
   // ── Sección: Visita ────────────────────────────────────────────
   const bloqueVisita = l.fecha_visita ? seccion('Visita', (() => {
@@ -10926,27 +10956,28 @@ function detenerChatPoll() {
 }
 
 async function enviarPropiedadAlCliente(leadId) {
-  const selEl  = document.getElementById(`env-prop-sel-${leadId}`);
-  const notaEl = document.getElementById(`env-prop-nota-${leadId}`);
-  const btn    = document.getElementById(`btn-env-prop-${leadId}`);
-  const propId = selEl?.value;
-  if (!propId) { toast('Selecciona una propiedad primero', 'error'); return; }
+  const notaEl  = document.getElementById(`env-prop-nota-${leadId}`);
+  const btn     = document.getElementById(`btn-env-prop-${leadId}`);
+  const checked = [...document.querySelectorAll(`input[name="env-prop-cb-${leadId}"]:checked`)];
+  if (!checked.length) { toast('Selecciona al menos una propiedad', 'error'); return; }
   btn.disabled = true; btn.textContent = 'Enviando...';
-  try {
-    const r = await fetch(`${API}/leads/${leadId}/presentar-propiedad`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ propiedad_id: Number(propId), nota: notaEl?.value?.trim() || '' }),
-    });
-    const d = await r.json();
-    if (r.ok) {
-      toast('✅ Propiedad enviada al cliente por WhatsApp');
-      if (notaEl) notaEl.value = '';
-      cargarBitacora(leadId);
-    } else {
-      toast(d.error || 'Error al enviar', 'error');
-    }
-  } catch { toast('Error de conexión', 'error'); }
+  let ok = 0;
+  for (const cb of checked) {
+    try {
+      const r = await fetch(`${API}/leads/${leadId}/presentar-propiedad`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ propiedad_id: Number(cb.value), nota: notaEl?.value?.trim() || '' }),
+      });
+      const d = await r.json();
+      if (r.ok) ok++;
+      else toast(d.error || 'Error al enviar', 'error');
+    } catch { toast('Error de conexión', 'error'); }
+  }
+  if (ok > 0) {
+    toast(`✅ ${ok === 1 ? 'Propiedad enviada' : ok + ' propiedades enviadas'} al cliente por WhatsApp`);
+    cargarBitacora(leadId);
+  }
   btn.disabled = false; btn.textContent = '📤 Enviar propiedad por WhatsApp';
 }
 
