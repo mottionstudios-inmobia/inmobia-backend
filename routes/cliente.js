@@ -584,7 +584,7 @@ router.patch('/busqueda', (req, res) => {
   res.json({ ok: true });
 });
 
-// ── PATCH /api/cliente/busqueda-publica/:id/detalles  (enriquecimiento post-envío)
+// ── PATCH /api/cliente/busqueda-publica/:id/detalles  (enriquecimiento — aquí se envían TODAS las notificaciones)
 router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
   const { id } = req.params;
   const { presupuesto_max, habitaciones, banos, parqueos, metros, caracteristicas, mascota, desc_mascota, descripcion } = req.body;
@@ -613,34 +613,100 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
     id,
   );
 
-  // Re-notificar asesores con perfil completo
-  const hab  = habitaciones || req_.habitaciones;
-  const ban  = banos        || req_.banos;
-  const parq = parqueos;
-  const tipo = req_.tipo_propiedad;
-  const oper = req_.operacion;
-  const zona = req_.zona || req_.municipio || 'Guatemala';
-  const presup = req_.precio_max;
+  const hab     = habitaciones ? Number(habitaciones) : req_.habitaciones;
+  const ban     = banos        ? Number(banos)        : req_.banos;
+  const parq    = parqueos;
+  const tipo    = req_.tipo_propiedad;
+  const oper    = req_.operacion;
+  const zona    = req_.zona || req_.municipio || 'Guatemala';
+  const presup  = presupuesto_max ? Number(presupuesto_max) : req_.precio_max;
   const monedaSim = (req_.moneda || 'GTQ') === 'USD' ? '$' : 'Q';
+  const presupTexto = presup ? `${monedaSim}${Number(presup).toLocaleString('es-GT')}` : null;
+  const BASE_URL_  = process.env.BASE_URL || 'https://inmobia.site';
 
   const detalles = [
-    hab  ? `${hab} hab.` : '',
-    ban  ? `${ban} baños` : '',
-    parq ? parq : '',
+    hab   ? `${hab} hab.` : '',
+    ban   ? `${ban} baños` : '',
+    parq  ? parq : '',
     metros ? `${metros} m²+` : '',
     caracteristicas ? caracteristicas.split(',').slice(0,3).join(', ') : '',
   ].filter(Boolean).join(' · ');
 
-  const titulo  = `🔍 Perfil completo — ${tipo} en ${zona}`;
-  const mensaje = `${req_.cliente_nombre || 'Cliente'} completó su perfil: ${tipo} para ${oper} en ${zona}${presup ? ` · hasta ${monedaSim}${Number(presup).toLocaleString('es-GT')}` : ''}${detalles ? ` · ${detalles}` : ''}. Revise si tiene una propiedad que encaje mejor.`;
+  const tituloNotif = `🔍 Perfil completo — ${tipo} en ${zona}`;
+  const mensajeNotif = `${req_.cliente_nombre || 'Cliente'} completó su perfil: ${tipo} para ${oper} en ${zona}${presupTexto ? ` · hasta ${presupTexto}` : ''}${detalles ? ` · ${detalles}` : ''}. Revise si tiene una propiedad que encaje mejor.`;
 
-  // Notificar a asesores que ya recibieron el lead original
+  // 1. Enviar email + WA a asesores que ya tienen el lead
   const leadsOriginales = db.prepare(
-    `SELECT DISTINCT asesor_id FROM leads WHERE mensaje LIKE ? AND origen = 'busqueda_personalizada' AND email = ?`
-  ).all(`%${tipo}%`, req_.cliente_email || '');
+    `SELECT DISTINCT l.asesor_id, u.nombre, u.email, u.telefono
+     FROM leads l JOIN usuarios u ON u.id = l.asesor_id
+     WHERE l.origen = 'busqueda_personalizada' AND l.email = ?`
+  ).all(req_.cliente_email || '');
 
   const insertNotif = db.prepare(`INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje) VALUES (?, 'lead_busqueda', ?, ?)`);
-  for (const l of leadsOriginales) insertNotif.run(l.asesor_id, titulo, mensaje);
+
+  for (const a of leadsOriginales) {
+    insertNotif.run(a.asesor_id, tituloNotif, mensajeNotif);
+    if (a.email) {
+      enviarEmailNuevoLeadBusqueda({
+        email: a.email, nombreAsesor: a.nombre,
+        cliente: req_.cliente_nombre, tipo, operacion: oper, zona,
+        presupuesto: presupTexto,
+        detalles: detalles || null,
+        linkCRM: `${BASE_URL_}/panel-asesor.html#crm`,
+      }).catch(() => {});
+    }
+    if (a.telefono) {
+      const msgAsesor = `🔍 *Perfil completo — ${tipo} en ${zona}*\n\nEl cliente *${req_.cliente_nombre}* completó su perfil de búsqueda:\n*${tipo}* para *${oper}* en *${zona}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}${detalles ? `\nDetalles: ${detalles}` : ''}\n\nRevise el lead en su panel:\n${BASE_URL_}/panel-asesor.html#crm`;
+      sendWhatsApp(a.telefono, msgAsesor).catch(() => {});
+    }
+  }
+
+  // 2. Si no había leads (sin match inicial), notificar a asesores activos ahora con perfil completo
+  if (leadsOriginales.length === 0) {
+    const activos = db.prepare(`
+      SELECT DISTINCT u.id as asesor_id, u.nombre, u.email, u.telefono
+      FROM propiedades p JOIN usuarios u ON u.id = p.usuario_id
+      WHERE p.publicado_inmobia = 1 AND p.estado = 'activo' LIMIT 60
+    `).all();
+    for (const a of activos) {
+      insertNotif.run(a.asesor_id, tituloNotif, mensajeNotif);
+      if (a.email) {
+        enviarEmailNuevoLeadBusqueda({
+          email: a.email, nombreAsesor: a.nombre,
+          cliente: req_.cliente_nombre, tipo, operacion: oper, zona,
+          presupuesto: presupTexto,
+          detalles: detalles || null,
+          linkCRM: `${BASE_URL_}/panel-asesor.html#crm`,
+        }).catch(() => {});
+      }
+      if (a.telefono) {
+        sendWhatsApp(a.telefono, `🔍 *Requerimiento InmobIA — Perfil completo*\n\nCliente busca: *${tipo}* para *${oper}* en *${zona}*${presupTexto ? `\nHasta: *${presupTexto}*` : ''}${detalles ? `\nDetalles: ${detalles}` : ''}\n\nSi tiene una propiedad que encaje:\n${BASE_URL_}/panel-asesor.html#crm`).catch(() => {});
+      }
+    }
+  }
+
+  // 3. Magic link + email + WA al cliente con perfil completo
+  const clienteEmail = req_.cliente_email || req_.cliente_origen_email;
+  const clienteTel   = req_.cliente_telefono;
+  if (clienteEmail) {
+    const token = crypto.randomBytes(32).toString('hex');
+    const expira = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const primerLead = db.prepare(
+      `SELECT id FROM leads WHERE origen = 'busqueda_personalizada' AND email = ? ORDER BY creado_en ASC LIMIT 1`
+    ).get(clienteEmail);
+    db.prepare(`INSERT INTO magic_links (token, email, lead_id, expira_en) VALUES (?, ?, ?, ?)`)
+      .run(token, clienteEmail.toLowerCase().trim(), primerLead?.id || null, expira);
+    const linkPanel = `${BASE_URL_}/panel-cliente.html?token=${token}`;
+    const totalLeads = leadsOriginales.length || 0;
+    await enviarEmailBusquedaCliente({
+      email: clienteEmail, nombre: req_.cliente_nombre, tipo, operacion: oper, zona,
+      matches: totalLeads, linkPanel,
+    }).catch(() => {});
+    if (clienteTel) {
+      const msgCliente = `✅ *¡Búsqueda lista, ${req_.cliente_nombre}!*\n\nSu perfil completo fue enviado a los asesores de nuestra red.\n\n*Búsqueda:* ${tipo} para ${oper} en ${zona}${presupTexto ? `\n*Presupuesto:* hasta ${presupTexto}` : ''}${detalles ? `\n*Detalles:* ${detalles}` : ''}\n\n${totalLeads > 0 ? `Encontramos *${totalLeads} propiedad${totalLeads > 1 ? 'es' : ''}* que pueden encajar. Un asesor le contactará pronto.` : 'Notificamos a nuestra red. Le contactaremos cuando tengamos opciones.'}\n\nSiga su búsqueda:\n${linkPanel}\n\n_Su número y correo son privados._`;
+      sendWhatsApp(clienteTel, msgCliente).catch(() => {});
+    }
+  }
 
   res.json({ ok: true });
 });
@@ -753,26 +819,10 @@ router.post('/busqueda-publica', async (req, res) => {
         `${primerNombre} busca ${tipo} para ${operacion} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}. ${notaNegociacion || 'Comunícate a través de la plataforma.'}`,
       );
 
-      // Email al asesor
-      const asesor = db.prepare('SELECT nombre, email, telefono FROM usuarios WHERE id = ?').get(m.asesor_id);
-      if (asesor?.email) {
-        enviarEmailNuevoLeadBusqueda({
-          email: asesor.email, nombreAsesor: asesor.nombre,
-          cliente: primerNombre, tipo, operacion, zona: lugarStr,
-          notaNegociacion,
-          presupuesto: presupTexto,
-          linkCRM: `${BASE_URL}/panel-asesor.html#crm`,
-        }).catch(() => {});
-      }
-
-      // WhatsApp al asesor (si tiene teléfono registrado)
-      if (asesor?.telefono) {
-        const msgAsesor = `🔍 *Nuevo lead InmobIA*\n\nUn cliente busca: *${tipo}* para *${operacion}* en *${lugarStr}*${presupTexto ? `\nPresupuesto cliente: hasta *${presupTexto}*` : ''}${esSobrePresup ? `\n⚠️ Tu propiedad está un *${pct}%* sobre su presupuesto — puede haber margen de negociación.` : ''}\n\nRevisa el lead en tu panel:\n${BASE_URL}/panel-asesor.html#crm`;
-        sendWhatsApp(asesor.telefono, msgAsesor).catch(() => {});
-      }
+      // Email y WhatsApp al asesor se envían al completar el perfil (PATCH /detalles)
     }
 
-    // 5. Si no hubo match, notificar a asesores activos en general
+    // 5. Si no hubo match, solo notificación interna a asesores activos (sin email/WA aún)
     if (matches.length === 0) {
       const activos = db.prepare(`
         SELECT DISTINCT u.id, u.nombre, u.email, u.telefono
@@ -785,39 +835,11 @@ router.post('/busqueda-publica', async (req, res) => {
           `🔍 Requerimiento en red: ${tipo} en ${lugarStr}`,
           `Un cliente InmobIA busca ${tipo} para ${operacion} en ${lugarStr}${presupTexto ? ` · hasta ${presupTexto}` : ''}. Si tienes una propiedad que encaje, aparecerás en sus opciones.`,
         );
-        if (a.email) {
-          enviarEmailNuevoLeadBusqueda({
-            email: a.email, nombreAsesor: a.nombre,
-            cliente: primerNombre, tipo, operacion, zona: lugarStr,
-            presupuesto: presupTexto,
-            linkCRM: `${BASE_URL}/panel-asesor.html#crm`,
-          }).catch(() => {});
-        }
-        if (a.telefono) {
-          sendWhatsApp(a.telefono, `🔍 *Requerimiento InmobIA*\n\nCliente busca: *${tipo}* para *${operacion}* en *${lugarStr}*${presupTexto ? `\nHasta: *${presupTexto}*` : ''}\n\nSi tienes una propiedad que encaje:\n${BASE_URL}/panel-asesor.html#crm`).catch(() => {});
-        }
+        // Email y WA se envían al completar el perfil
       }
     }
 
-    // 6. Magic link + notificaciones al cliente
-    const token = crypto.randomBytes(32).toString('hex');
-    const expira = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-    db.prepare(`INSERT INTO magic_links (token, email, lead_id, expira_en) VALUES (?, ?, ?, ?)`)
-      .run(token, email.toLowerCase().trim(), leadsCreados[0] || null, expira);
-
-    const linkPanel = `${BASE_URL}/panel-cliente.html?token=${token}`;
-
-    // Email al cliente
-    await enviarEmailBusquedaCliente({
-      email, nombre: primerNombre, tipo, operacion, zona: lugarStr,
-      matches: matches.length, linkPanel,
-    });
-
-    // WhatsApp al cliente
-    if (telefono) {
-      const msgCliente = `✅ *¡Búsqueda activa, ${primerNombre}!*\n\nRecibimos su búsqueda de *${tipo}* para *${operacion}* en *${lugarStr}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}.\n\n${matches.length > 0 ? `Encontramos *${matches.length} propiedad${matches.length > 1 ? 'es' : ''}* que pueden encajar. Un asesor le contactará pronto.` : 'Notificamos a nuestra red de asesores. Le contactaremos cuando tengamos opciones.'}\n\nSiga su búsqueda desde su panel personal:\n${linkPanel}\n\n_Su número y correo son privados — los asesores se comunican a través de la plataforma._`;
-      sendWhatsApp(telefono, msgCliente).catch(() => {});
-    }
+    // 6. No enviar notificaciones al cliente aún — se envían al completar el perfil (PATCH /detalles)
 
     res.json({
       ok: true,
