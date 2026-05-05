@@ -697,7 +697,8 @@ router.post('/busqueda-publica', async (req, res) => {
     );
 
     // 3. Match contra propiedades publicadas en InmobIA (buffer 10% sobre presupuesto)
-    let sqlMatch = `SELECT p.id, p.titulo, p.precio, p.usuario_id as asesor_id
+    let sqlMatch = `SELECT p.id, p.titulo, p.precio, p.usuario_id as asesor_id,
+      (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) AS imagen
       FROM propiedades p WHERE p.publicado_inmobia = 1 AND p.estado = 'activo'`;
     const params = [];
     if (tipo)       { sqlMatch += ' AND LOWER(p.tipo) LIKE ?';      params.push(`%${tipo.toLowerCase()}%`); }
@@ -818,7 +819,12 @@ router.post('/busqueda-publica', async (req, res) => {
       sendWhatsApp(telefono, msgCliente).catch(() => {});
     }
 
-    res.json({ ok: true, matches: matches.length, requerimientoId: reqResult.lastInsertRowid });
+    res.json({
+      ok: true,
+      matches: matches.length,
+      requerimientoId: reqResult.lastInsertRowid,
+      propiedades_preview: matches.slice(0, 3).map(m => ({ titulo: m.titulo, imagen: m.imagen || null })),
+    });
   } catch (err) {
     console.error('[busqueda-publica] error:', err.message);
     res.status(500).json({ error: 'Error interno al procesar la búsqueda' });
