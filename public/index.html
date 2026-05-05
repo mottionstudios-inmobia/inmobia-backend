@@ -3447,10 +3447,7 @@ user-select: none;
           <p style="color:rgba(255,255,255,0.4);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 0.65rem;text-align:center">Opciones encontradas</p>
           <div style="display:grid;grid-template-columns:repeat(${Math.min(props.length,3)},1fr);gap:0.6rem">${propsHtml}</div>
         </div>` : `<div style="margin-bottom:1.25rem">${propsHtml}</div>`}
-      ${portalBtn}
-      <button onclick="cerrarModalBusqueda()" style="display:block;width:100%;box-sizing:border-box;margin-top:0.75rem;background:transparent;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.45);border-radius:8px;padding:0.65rem;font-size:0.82rem;cursor:pointer">
-        Cerrar
-      </button>`;
+      ${portalBtn}`;
   }
 
   // ── MATCHES DINÁMICOS EN MODAL: actualiza las tarjetas al completar enriquecimiento
