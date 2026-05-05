@@ -114,6 +114,21 @@
     .sidebar-logo {
       padding: 0 24px 24px;
       border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .admin-notif-bell {
+      position: absolute; top: 0; right: 20px;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); padding: 4px; border-radius: 6px;
+      transition: color 0.2s;
+    }
+    .admin-notif-bell:hover { color: var(--gold); }
+    .admin-notif-bell svg { width: 20px; height: 20px; display: block; }
+    .admin-notif-badge {
+      position: absolute; top: -3px; right: -3px;
+      background: #ef4444; color: #fff; font-size: 0.62rem; font-weight: 700;
+      min-width: 16px; height: 16px; border-radius: 8px; padding: 0 4px;
+      display: none; align-items: center; justify-content: center; line-height: 1;
     }
     .sidebar-logo .inmob { font-family: 'Comfortaa', sans-serif; font-size: 1.3rem; font-weight: 300; color: #fff; letter-spacing: 0.01em; }
     .sidebar-logo .ia    { font-family: 'Century Gothic', 'Trebuchet MS', sans-serif; font-size: 1.5rem; font-weight: 400; color: var(--gold); letter-spacing: -0.01em; line-height: 1; }
@@ -907,6 +922,10 @@
     <div class="sidebar-logo">
       <div><span class="inmob">Inmob</span><span class="ia">IA<span style="font-size:0.38em;font-weight:400;vertical-align:super;letter-spacing:0.05em">GT</span></span></div>
       <small>Panel de Administración</small>
+      <button class="admin-notif-bell" onclick="abrirNotifAdmin()" title="Notificaciones" id="admin-notif-btn" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="admin-notif-badge" id="admin-notif-badge"></span>
+      </button>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="irA('dashboard')">
@@ -2488,12 +2507,53 @@ function mostrarApp() {
   cargarAsesores();
   cargarNotificaciones();
   cargarDpiPendientes();
+  actualizarNotifAdmin();
+  setInterval(actualizarNotifAdmin, 30000);
   // Deep-link desde email: ?busqueda=ID abre la ficha directamente
   const urlBusqueda = new URLSearchParams(window.location.search).get('busqueda');
   if (urlBusqueda) {
     irA('busquedas');
     cargarBusquedasAdmin().then(() => verDetalleBusqueda(Number(urlBusqueda)));
   }
+}
+
+// ── NOTIFICACIONES ADMIN ────────────────────────────────────────────────
+let _adminNotifs = [];
+
+async function actualizarNotifAdmin() {
+  if (!token) return;
+  try {
+    const r = await fetch(`${API}/auth/notificaciones`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!r.ok) return;
+    _adminNotifs = await r.json();
+    const noLeidas = _adminNotifs.filter(n => !n.leida);
+    const btn  = document.getElementById('admin-notif-btn');
+    const badge = document.getElementById('admin-notif-badge');
+    if (!btn) return;
+    if (noLeidas.length > 0) {
+      btn.style.display = 'block';
+      badge.textContent = noLeidas.length > 9 ? '9+' : noLeidas.length;
+      badge.style.display = 'flex';
+    } else {
+      btn.style.display = noLeidas.length === 0 && _adminNotifs.length === 0 ? 'none' : 'block';
+      badge.style.display = 'none';
+    }
+  } catch {}
+}
+
+function abrirNotifAdmin() {
+  // Navegar a busquedas (origen más frecuente de notificaciones admin)
+  const hayBusqueda = _adminNotifs.some(n => n.tipo === 'lead_busqueda_1d' && !n.leida);
+  if (hayBusqueda) {
+    irA('busquedas');
+  }
+  // Marcar todas como leídas
+  _adminNotifs.filter(n => !n.leida).forEach(n => {
+    fetch(`${API}/auth/notificaciones/${n.id}/leer`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` }
+    }).catch(() => {});
+  });
+  document.getElementById('admin-notif-badge').style.display = 'none';
 }
 
 // Si una llamada autenticada devuelve 401, el token está inválido o vencido:

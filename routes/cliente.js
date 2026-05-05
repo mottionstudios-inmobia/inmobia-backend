@@ -760,15 +760,35 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
   `).all(req_.cliente_email || '', req_.creado_en);
 
   if (leadsAdmin.length > 0) {
-    const adminUser = db.prepare("SELECT email, nombre FROM usuarios WHERE rol = 'admin' LIMIT 1").get();
-    if (adminUser?.email) {
-      enviarEmailAdminLeadInmobia({
-        email: adminUser.email, nombreAdmin: adminUser.nombre,
-        cliente: req_.cliente_nombre, tipo, operacion: oper, zona,
-        presupuesto: presupTexto, detalles: detalles || null,
-        propiedades: leadsAdmin,
-        linkAdmin: `${BASE_URL_}/admin.html?busqueda=${id}`,
-      }).catch(() => {});
+    const adminUser = db.prepare("SELECT id, email, nombre, telefono FROM usuarios WHERE rol = 'admin' LIMIT 1").get();
+    if (adminUser) {
+      // Notificación en panel admin
+      db.prepare(`INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje, referencia_id)
+        VALUES (?, 'lead_busqueda_1d', ?, ?, ?)`).run(
+        adminUser.id,
+        `🔍 Nuevo lead InmobIA — ${tipo} en ${zona}`,
+        `${req_.cliente_nombre || 'Cliente'} busca ${tipo} para ${oper} en ${zona}${presupTexto ? ` · hasta ${presupTexto}` : ''}. Lead asignado a InmobIA para seguimiento directo.`,
+        Number(id)
+      );
+
+      // Email al admin
+      if (adminUser.email) {
+        enviarEmailAdminLeadInmobia({
+          email: adminUser.email, nombreAdmin: adminUser.nombre,
+          cliente: req_.cliente_nombre, tipo, operacion: oper, zona,
+          presupuesto: presupTexto, detalles: detalles || null,
+          propiedades: leadsAdmin,
+          linkAdmin: `${BASE_URL_}/admin.html?busqueda=${id}`,
+        }).catch(() => {});
+      }
+
+      // WA al admin (número configurado en platform_settings.wa_consultas)
+      const waSetting = db.prepare("SELECT valor FROM platform_settings WHERE clave = 'wa_consultas'").get();
+      const waAdmin = waSetting?.valor || adminUser.telefono;
+      if (waAdmin) {
+        const msgAdmin = `🔍 *Nuevo lead InmobIA*\n\n*${req_.cliente_nombre || 'Cliente'}* completó su perfil y busca:\n*${tipo}* · ${oper} · ${zona}${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}${detalles ? `\nDetalles: ${detalles}` : ''}\n\nHay *${leadsAdmin.length} propiedad${leadsAdmin.length > 1 ? 'es' : ''} InmobIA* que encajan.\n\nVer en el CRM:\n${BASE_URL_}/admin.html?busqueda=${id}`;
+        sendWhatsApp(waAdmin, msgAdmin).catch(e => console.error('[WA admin 1D]', e.message));
+      }
     }
   }
 
