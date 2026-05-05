@@ -2169,10 +2169,7 @@ user-select: none;
     <div style="text-align:center;margin-bottom:1.5rem">
       <div style="font-size:3rem;margin-bottom:0.6rem">✅</div>
       <h3 style="color:#fff;font-family:var(--font-display);font-size:1.5rem;font-weight:300;margin:0 0 0.75rem">¡Búsqueda activa!</h3>
-      <p id="modal-busqueda-msg" style="color:rgba(255,255,255,0.75);font-size:0.9rem;line-height:1.75;margin:0 0 1rem"></p>
-      <div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:10px;padding:0.75rem 1rem;font-size:0.8rem;color:rgba(255,255,255,0.5);line-height:1.5">
-        Toda comunicación de los asesores es a través del WhatsApp de InmobIA.
-      </div>
+      <p id="modal-busqueda-msg" style="color:rgba(255,255,255,0.75);font-size:0.9rem;line-height:1.75;margin:0"></p>
     </div>
 
     <!-- Opciones dinámicas -->
@@ -3497,8 +3494,7 @@ user-select: none;
             </div>`).join('');
           propsDiv.style.display = '';
         } else {
-          grid.innerHTML = '<p style="color:rgba(255,255,255,0.38);font-size:0.8rem;font-style:italic;width:100%;text-align:center">Ninguna propiedad encaja exactamente aún — los asesores están buscando.</p>';
-          propsDiv.style.display = '';
+          propsDiv.style.display = 'none';
         }
       } catch {}
       if (loading) loading.style.display = 'none';
