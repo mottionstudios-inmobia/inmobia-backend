@@ -829,7 +829,7 @@ export async function enviarEmailBusquedaCliente({ email, nombre, tipo, operacio
         <p style="margin:0;font-weight:600;color:#1e2d4a;font-size:0.95rem">${tipo || 'Propiedad'} · ${operacion || ''} ${zona ? '· ' + zona : ''}</p>
       </div>
       <div style="background:#f0fdf4;border-radius:8px;padding:16px 20px;margin-bottom:24px;font-size:0.85rem;color:#444;line-height:1.6">
-        <strong style="color:#065f46">Importante:</strong> Por tu privacidad, los asesores <strong>no tienen acceso a tu número de WhatsApp ni correo</strong>. Toda la comunicación se gestiona a través de la plataforma InmobIA.
+        <strong style="color:#065f46">Importante:</strong> Por tu privacidad, toda la comunicación se gestiona a través de la plataforma InmobIA.
       </div>
       <div style="text-align:center;margin:24px 0">
         <a href="${linkPanel}" style="display:inline-block;background:#1e2d4a;color:#fff;text-decoration:none;padding:14px 32px;border-radius:7px;font-weight:600;font-size:0.92rem">Ver mis opciones en la plataforma →</a>

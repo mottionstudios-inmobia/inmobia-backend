@@ -636,11 +636,13 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
   const mensajeNotif = `${req_.cliente_nombre || 'Cliente'} completó su perfil: ${tipo} para ${oper} en ${zona}${presupTexto ? ` · hasta ${presupTexto}` : ''}${detalles ? ` · ${detalles}` : ''}. Revise si tiene una propiedad que encaje mejor.`;
 
   // 1. Enviar email + WA a asesores que ya tienen el lead
+  // Filtrar por ventana de tiempo para evitar notificar leads de búsquedas anteriores del mismo email
   const leadsOriginales = db.prepare(
     `SELECT DISTINCT l.asesor_id, u.nombre, u.email, u.telefono
      FROM leads l JOIN usuarios u ON u.id = l.asesor_id
-     WHERE l.origen = 'busqueda_personalizada' AND l.email = ?`
-  ).all(req_.cliente_email || '');
+     WHERE l.origen = 'busqueda_personalizada' AND l.email = ?
+       AND datetime(l.creado_en) >= datetime(?, '-15 minutes')`
+  ).all(req_.cliente_email || '', req_.creado_en);
 
   const insertNotif = db.prepare(`INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje) VALUES (?, 'lead_busqueda', ?, ?)`);
 
@@ -657,7 +659,7 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
     }
     if (a.telefono) {
       const msgAsesor = `🔍 *Perfil completo — ${tipo} en ${zona}*\n\nEl cliente *${req_.cliente_nombre}* completó su perfil de búsqueda:\n*${tipo}* para *${oper}* en *${zona}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}${detalles ? `\nDetalles: ${detalles}` : ''}\n\nRevise el lead en su panel:\n${BASE_URL_}/panel-asesor.html#crm`;
-      sendWhatsApp(a.telefono, msgAsesor).catch(() => {});
+      sendWhatsApp(a.telefono, msgAsesor).catch(e => console.error('[WA asesor busqueda]', e.message));
     }
   }
 
@@ -688,23 +690,29 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
   // 3. Magic link + email + WA al cliente con perfil completo
   const clienteEmail = req_.cliente_email || req_.cliente_origen_email;
   const clienteTel   = req_.cliente_telefono;
+  console.log(`[busqueda-detalles] req=${id} email=${clienteEmail} tel=${clienteTel} leads=${leadsOriginales.length}`);
   if (clienteEmail) {
     const token = crypto.randomBytes(32).toString('hex');
     const expira = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-    const primerLead = db.prepare(
-      `SELECT id FROM leads WHERE origen = 'busqueda_personalizada' AND email = ? ORDER BY creado_en ASC LIMIT 1`
-    ).get(clienteEmail);
+    // Tomar el lead más reciente de esta búsqueda (dentro de la ventana de 15 min)
+    const leadReciente = db.prepare(
+      `SELECT id FROM leads WHERE origen = 'busqueda_personalizada' AND email = ?
+       AND datetime(creado_en) >= datetime(?, '-15 minutes')
+       ORDER BY creado_en DESC LIMIT 1`
+    ).get(clienteEmail, req_.creado_en);
     db.prepare(`INSERT INTO magic_links (token, email, lead_id, expira_en) VALUES (?, ?, ?, ?)`)
-      .run(token, clienteEmail.toLowerCase().trim(), primerLead?.id || null, expira);
+      .run(token, clienteEmail.toLowerCase().trim(), leadReciente?.id || null, expira);
     const linkPanel = `${BASE_URL_}/panel-cliente.html?token=${token}`;
     const totalLeads = leadsOriginales.length || 0;
     await enviarEmailBusquedaCliente({
       email: clienteEmail, nombre: req_.cliente_nombre, tipo, operacion: oper, zona,
       matches: totalLeads, linkPanel,
-    }).catch(() => {});
+    }).catch(e => console.error('[email cliente busqueda]', e.message));
     if (clienteTel) {
       const msgCliente = `✅ *¡Búsqueda lista, ${req_.cliente_nombre}!*\n\nSu perfil completo fue enviado a los asesores de nuestra red.\n\n*Búsqueda:* ${tipo} para ${oper} en ${zona}${presupTexto ? `\n*Presupuesto:* hasta ${presupTexto}` : ''}${detalles ? `\n*Detalles:* ${detalles}` : ''}\n\n${totalLeads > 0 ? `Encontramos *${totalLeads} propiedad${totalLeads > 1 ? 'es' : ''}* que pueden encajar. Un asesor le contactará pronto.` : 'Notificamos a nuestra red. Le contactaremos cuando tengamos opciones.'}\n\nSiga su búsqueda:\n${linkPanel}\n\n_Su número y correo son privados._`;
-      sendWhatsApp(clienteTel, msgCliente).catch(() => {});
+      sendWhatsApp(clienteTel, msgCliente).catch(e => console.error('[WA cliente busqueda] tel=' + clienteTel, e.message));
+    } else {
+      console.warn('[busqueda-detalles] cliente sin telefono, omitiendo WA');
     }
   }
 
