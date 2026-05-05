@@ -710,17 +710,18 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
   // Solo asesores externos (no admin/InmobIA) — los leads 1D los gestiona InmobIA directamente
   const adminUser = db.prepare("SELECT id FROM usuarios WHERE rol = 'admin' LIMIT 1").get();
   const leadsOriginales = db.prepare(
-    `SELECT DISTINCT l.asesor_id, u.nombre, u.email, u.telefono
+    `SELECT l.asesor_id, u.nombre, u.email, u.telefono, MIN(l.id) as lead_id
      FROM leads l JOIN usuarios u ON u.id = l.asesor_id
      WHERE l.origen = 'busqueda_personalizada' AND l.email = ?
        AND datetime(l.creado_en) >= datetime(?, '-15 minutes')
-       AND (l.modelo IS NULL OR l.modelo != '1D')`
+       AND (l.modelo IS NULL OR l.modelo != '1D')
+     GROUP BY l.asesor_id, u.nombre, u.email, u.telefono`
   ).all(req_.cliente_email || '', req_.creado_en);
 
-  const insertNotif = db.prepare(`INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje) VALUES (?, 'lead_busqueda', ?, ?)`);
+  const insertNotif = db.prepare(`INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje, referencia_id) VALUES (?, 'lead_busqueda', ?, ?, ?)`);
 
   for (const a of leadsOriginales) {
-    insertNotif.run(a.asesor_id, tituloNotif, mensajeNotif);
+    insertNotif.run(a.asesor_id, tituloNotif, mensajeNotif, a.lead_id || null);
     if (a.email) {
       enviarEmailNuevoLeadBusqueda({
         email: a.email, nombreAsesor: a.nombre,
@@ -744,7 +745,7 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
       WHERE p.publicado_inmobia = 1 AND p.estado = 'activo' LIMIT 60
     `).all();
     for (const a of activos) {
-      insertNotif.run(a.asesor_id, tituloNotif, mensajeNotif);
+      insertNotif.run(a.asesor_id, tituloNotif, mensajeNotif, null);
       if (a.email) {
         enviarEmailNuevoLeadBusqueda({
           email: a.email, nombreAsesor: a.nombre,

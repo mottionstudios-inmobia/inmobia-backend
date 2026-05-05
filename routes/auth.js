@@ -173,7 +173,7 @@ router.get('/mis-referidos', authMiddleware, (req, res) => {
 // GET /api/auth/notificaciones  (protegida)
 router.get('/notificaciones', authMiddleware, (req, res) => {
   const rows = db.prepare(`
-    SELECT id, tipo, titulo, mensaje, leida, creado_en
+    SELECT id, tipo, titulo, mensaje, leida, creado_en, referencia_id
     FROM notificaciones WHERE usuario_id = ?
     ORDER BY creado_en DESC LIMIT 50
   `).all(req.usuario.id);

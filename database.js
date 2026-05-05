@@ -697,6 +697,7 @@ db.exec(`
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
   )
 `);
+try { db.exec(`ALTER TABLE notificaciones ADD COLUMN referencia_id INTEGER DEFAULT NULL`); } catch {}
 
 // Auto-promover primer usuario a admin si no existe ningún admin
 try {
