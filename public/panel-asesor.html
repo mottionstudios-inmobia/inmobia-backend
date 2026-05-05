@@ -4837,13 +4837,19 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!token) { window.location.href = '/asesores.html'; return; }
   generarZonasCheckbox();
   await cargarPerfil();
+  await cargarLeads();
   cargarPropiedades();
-  cargarLeads();
   cargarLeadsStats();
   cargarScoreDetalle();
   cargarBadge1D();
   actualizarNotificaciones();
-  setInterval(actualizarNotificaciones, 5000); // Revisar cada 5 segundos
+  setInterval(actualizarNotificaciones, 5000);
+  // Deep-link desde email: ?lead=ID abre la ficha directamente
+  const urlLead = new URLSearchParams(window.location.search).get('lead');
+  if (urlLead) {
+    irA('crm');
+    verLead(Number(urlLead));
+  }
 });
 
 // ── PERFIL ────────────────────────────────────────────────────

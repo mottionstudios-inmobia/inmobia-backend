@@ -803,7 +803,7 @@ export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, client
         ${notaNegociacion}
       </div>` : ''}
       <div style="background:#f0fdf4;border-radius:8px;padding:14px 18px;font-size:0.83rem;color:#444;line-height:1.6;margin-bottom:22px">
-        <strong style="color:#065f46">Recordatorio:</strong> Se recuerda la confidencialidad de los datos del cliente InmobIA. Toda la comunicación es a través del chat de la plataforma InmobIA.
+        <strong style="color:#065f46">Recordatorio:</strong> Toda la comunicación es a través del chat de la plataforma InmobIA.
       </div>
       <div style="text-align:center;margin:20px 0 6px">
         <a href="${crm}" style="display:inline-block;background:#1e2d4a;color:#fff;text-decoration:none;padding:12px 28px;border-radius:7px;font-weight:600;font-size:0.9rem">Ver el lead en mi CRM →</a>

@@ -739,7 +739,7 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
         cliente: req_.cliente_nombre, tipo, operacion: oper, zona,
         presupuesto: presupTexto, detalles: detalles || null,
         propiedad: propData,
-        linkCRM: `${BASE_URL_}/panel-asesor.html#crm`,
+        linkCRM: `${BASE_URL_}/panel-asesor.html?lead=${a.lead_id}`,
       }).catch(() => {});
     }
     if (a.telefono) {
