@@ -863,7 +863,7 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
     // ── Email al cliente (fire-and-forget, no bloquea la respuesta) ──
     enviarEmailBusquedaCliente({
       email: clienteEmail, nombre: req_.cliente_nombre, tipo, operacion: oper, zona,
-      matches: totalLeads, propiedades: propiedadesEmailCliente, linkPanel,
+      matches: propiedadesEmailCliente.length, propiedades: propiedadesEmailCliente, linkPanel,
     }).catch(e => console.error('[email cliente]', e.message));
   }
 
