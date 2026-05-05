@@ -722,7 +722,7 @@ router.post('/busqueda-publica', async (req, res) => {
     const insertLead = db.prepare(`
       INSERT INTO leads (asesor_id, nombre, email, telefono, mensaje, tipo,
         propiedad_id, propiedad_titulo, origen, etapa, creado_en, actualizado_en)
-      VALUES (?, ?, ?, NULL, ?, 'busqueda_personalizada', ?, ?,
+      VALUES (?, ?, ?, ?, ?, 'busqueda_personalizada', ?, ?,
         'busqueda_personalizada', 'nuevo', datetime('now'), datetime('now'))
     `);
     const insertNotif = db.prepare(`
@@ -734,7 +734,7 @@ router.post('/busqueda-publica', async (req, res) => {
     const leadsCreados = [];
 
     for (const m of matches) {
-      const r = insertLead.run(m.asesor_id, primerNombre, email, resumen, m.id, m.titulo);
+      const r = insertLead.run(m.asesor_id, primerNombre, email, telefono || null, resumen, m.id, m.titulo);
       leadsCreados.push(r.lastInsertRowid);
 
       const esSobrePresup = sobrePresup(m.precio);
