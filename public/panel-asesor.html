@@ -7776,6 +7776,7 @@ async function actualizarNotificaciones() {
       urgent: true,
       leadId: l.id,
       btnText: '📋 Ver detalles',
+      creado_en: l.creado_en || null,
     });
   });
 
@@ -7829,8 +7830,8 @@ async function actualizarNotificaciones() {
 function formatNotifTime(iso) {
   if (!iso) return '';
   try {
-    const d = new Date(iso);
-    return d.toLocaleString('es-GT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
+    const d = parseSQL(iso);
+    return d.toLocaleString('es-GT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/Guatemala' });
   } catch { return ''; }
 }
 
