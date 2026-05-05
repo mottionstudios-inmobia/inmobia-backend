@@ -2397,8 +2397,28 @@ user-select: none;
           <div class="form-group">
             <label>¿Tiene mascota?</label>
             <div style="display:flex;gap:0.5rem;margin-top:0.25rem">
-              <div class="zona-cap"><input type="radio" id="em-si" name="e-mascota" value="Sí"><label for="em-si">Sí</label></div>
-              <div class="zona-cap"><input type="radio" id="em-no" name="e-mascota" value="No"><label for="em-no">No</label></div>
+              <div class="zona-cap"><input type="radio" id="em-si" name="e-mascota" value="Sí" onchange="toggleDetalleMascotaModal()"><label for="em-si">Sí</label></div>
+              <div class="zona-cap"><input type="radio" id="em-no" name="e-mascota" value="No" onchange="toggleDetalleMascotaModal()"><label for="em-no">No</label></div>
+            </div>
+            <div id="grp-detalle-mascota-modal" style="display:none;margin-top:0.75rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:0.85rem 1rem;display:none;flex-direction:column;gap:0.6rem">
+              <div style="font-size:0.7rem;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.1rem">Detalles de su mascota</div>
+              <div style="display:flex;gap:0.5rem">
+                <div style="flex:1">
+                  <label style="font-size:0.72rem;color:rgba(255,255,255,0.5);margin-bottom:0.25rem;display:block">Raza</label>
+                  <input id="e-mascota-raza" type="text" placeholder="Ej: Golden Retriever, gato doméstico"
+                    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:#fff;padding:0.5rem 0.7rem;font-family:var(--font-body);font-size:0.83rem;outline:none">
+                </div>
+                <div style="flex:0 0 100px">
+                  <label style="font-size:0.72rem;color:rgba(255,255,255,0.5);margin-bottom:0.25rem;display:block">Peso aprox.</label>
+                  <input id="e-mascota-peso" type="text" placeholder="Ej: 30 kg"
+                    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:#fff;padding:0.5rem 0.7rem;font-family:var(--font-body);font-size:0.83rem;outline:none">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.72rem;color:rgba(255,255,255,0.5);margin-bottom:0.25rem;display:block">Detalles adicionales (opcional)</label>
+                <input id="e-mascota-detalle" type="text" placeholder="Ej: muy tranquila, entrenada, nunca ha causado daños"
+                  style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:#fff;padding:0.5rem 0.7rem;font-family:var(--font-body);font-size:0.83rem;outline:none">
+              </div>
             </div>
           </div>
         </div>
@@ -3521,6 +3541,14 @@ user-select: none;
       metros:         val('e-metros'),
       caracteristicas: [...form.querySelectorAll('input[name="e-caract"]:checked')].map(i => i.value).join(', '),
       mascota:        form.querySelector('input[name="e-mascota"]:checked')?.value || '',
+      desc_mascota:   (() => {
+        const tieneMascota = form.querySelector('input[name="e-mascota"][value="Sí"]')?.checked;
+        if (!tieneMascota) return '';
+        const raza   = (document.getElementById('e-mascota-raza')?.value || '').trim();
+        const peso   = (document.getElementById('e-mascota-peso')?.value || '').trim();
+        const detalle = (document.getElementById('e-mascota-detalle')?.value || '').trim();
+        return [raza ? `Raza: ${raza}` : '', peso ? `Peso: ${peso}` : '', detalle].filter(Boolean).join(' · ');
+      })(),
       descripcion:    val('e-descripcion'),
     };
     try {
@@ -3717,6 +3745,12 @@ user-select: none;
     if (ec) ec.style.display = 'none';
     const btn = document.getElementById('enriq-submit');
     if (btn) { btn.disabled = false; btn.textContent = 'Guardar y finalizar →'; }
+    // Ocultar detalle mascota
+    const gdm = document.getElementById('grp-detalle-mascota-modal');
+    if (gdm) gdm.style.display = 'none';
+    ['e-mascota-raza','e-mascota-peso','e-mascota-detalle'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
     // Restore labels on cap toggles
     ['eh-toggle-label','eba-toggle-label','epa-toggle-label'].forEach(id => {
       const el = document.getElementById(id);
@@ -3724,6 +3758,13 @@ user-select: none;
     });
     // Restore búsqueda form
     document.getElementById('busqueda-form-wrap').style.display = 'block';
+  }
+
+  function toggleDetalleMascotaModal() {
+    const tieneMascota = document.getElementById('em-si')?.checked;
+    const grp = document.getElementById('grp-detalle-mascota-modal');
+    if (!grp) return;
+    grp.style.display = tieneMascota ? 'flex' : 'none';
   }
 
   // Saltar enriquecimiento: enviar PATCH con lo que haya y cerrar
