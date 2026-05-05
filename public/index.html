@@ -1945,7 +1945,7 @@ user-select: none;
   </div>
 
   <div class="cita-form animate" id="busqueda-form-wrap">
-    <form id="busqueda-form" onsubmit="enviarBusqueda(event)">
+    <form id="busqueda-form" onsubmit="enviarBusqueda(event)" novalidate>
       <!-- BLOQUE 1: Datos esenciales -->
       <div style="margin-bottom:0.5rem;font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em">1 / Datos básicos</div>
       <div class="form-row">
@@ -3641,6 +3641,32 @@ user-select: none;
     e.preventDefault();
     const form = e.target;
     const btn = document.getElementById('busqueda-submit');
+
+    // Validación manual (form tiene novalidate)
+    const _v = id => (document.getElementById(id)?.value || '').trim();
+    const errores = [];
+    if (!_v('b-nombre'))   errores.push('Nombre y apellido');
+    if (!_v('b-whatsapp')) errores.push('WhatsApp');
+    if (!_v('b-email'))    errores.push('Correo electrónico');
+    if (!form.querySelector('input[name="b-operacion"]:checked')) errores.push('Operación');
+    if (!form.querySelector('input[name="b-tipo"]:checked'))      errores.push('Tipo de propiedad');
+    if (!form.querySelector('input[name="b-departamento"]:checked')) errores.push('Departamento');
+
+    let errDiv = document.getElementById('busqueda-form-error');
+    if (errores.length) {
+      if (!errDiv) {
+        errDiv = document.createElement('div');
+        errDiv.id = 'busqueda-form-error';
+        errDiv.style.cssText = 'background:#fee;border:1px solid #fca5a5;border-radius:8px;padding:0.65rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:#991b1b;line-height:1.4';
+        btn.parentNode.insertBefore(errDiv, btn);
+      }
+      errDiv.textContent = '⚠️ Por favor complete: ' + errores.join(', ') + '.';
+      errDiv.style.display = '';
+      btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (errDiv) errDiv.style.display = 'none';
+
     btn.disabled = true;
     btn.textContent = 'Activando búsqueda...';
 
