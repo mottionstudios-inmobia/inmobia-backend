@@ -2488,6 +2488,12 @@ function mostrarApp() {
   cargarAsesores();
   cargarNotificaciones();
   cargarDpiPendientes();
+  // Deep-link desde email: ?busqueda=ID abre la ficha directamente
+  const urlBusqueda = new URLSearchParams(window.location.search).get('busqueda');
+  if (urlBusqueda) {
+    irA('busquedas');
+    cargarBusquedasAdmin().then(() => verDetalleBusqueda(Number(urlBusqueda)));
+  }
 }
 
 // Si una llamada autenticada devuelve 401, el token está inválido o vencido:

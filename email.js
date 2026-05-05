@@ -766,10 +766,22 @@ export async function enviarCorreoBienvenidaAsesor({ email, nombre, slug }) {
   }
 }
 
-export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, cliente, tipo, operacion, zona, presupuesto, linkCRM, notaNegociacion }) {
+export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, cliente, tipo, operacion, zona, presupuesto, detalles, propiedad, linkCRM, notaNegociacion }) {
   if (!email) return { ok: false };
   const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
   const crm = linkCRM || `${BASE_URL}/panel-asesor.html#crm`;
+  const monedaSim = propiedad?.moneda === 'USD' ? '$' : 'Q';
+  const propCard = propiedad ? `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:22px;border-radius:8px;overflow:hidden;border:1px solid #e5e2da">
+      ${propiedad.img ? `<tr><td style="padding:0;line-height:0">
+        <img src="${BASE_URL}${propiedad.img}" width="540" alt="${propiedad.titulo || ''}" style="display:block;width:100%;height:auto;max-height:220px">
+      </td></tr>` : ''}
+      <tr><td style="padding:14px 18px;background:#f9f8f6">
+        <p style="margin:0;font-size:0.7rem;color:#999;text-transform:uppercase;letter-spacing:0.06em">Tu propiedad que encaja</p>
+        <p style="margin:5px 0 0;font-weight:700;color:#1e2d4a;font-size:0.95rem">${propiedad.titulo || 'Propiedad'}</p>
+        <p style="margin:3px 0 0;color:#666;font-size:0.84rem">${propiedad.zona || zona}${propiedad.precio ? ` · ${monedaSim}${Number(propiedad.precio).toLocaleString('es-GT')}` : ''}</p>
+      </td></tr>
+    </table>` : '';
   const html = `<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f0ede8;font-family:Arial,sans-serif">
@@ -783,8 +795,9 @@ export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, client
       <div style="background:#f4f6fb;border-radius:8px;padding:16px 20px;margin-bottom:20px;border-left:4px solid #c9a84c">
         <p style="margin:0 0 4px;font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.06em">Requerimiento del cliente</p>
         <p style="margin:0;font-weight:700;color:#1e2d4a;font-size:1rem">${tipo} · ${operacion}</p>
-        <p style="margin:4px 0 0;color:#555;font-size:0.88rem">${zona}${presupuesto ? ` · hasta ${presupuesto}` : ''}</p>
+        <p style="margin:4px 0 0;color:#555;font-size:0.88rem">${zona}${presupuesto ? ` · hasta ${presupuesto}` : ''}${detalles ? ` · ${detalles}` : ''}</p>
       </div>
+      ${propCard}
       ${notaNegociacion ? `
       <div style="background:#fffbeb;border-radius:8px;padding:14px 18px;font-size:0.83rem;color:#78350f;line-height:1.6;margin-bottom:16px;border-left:4px solid #f59e0b">
         ${notaNegociacion}
@@ -808,12 +821,31 @@ export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, client
   }
 }
 
-export async function enviarEmailBusquedaCliente({ email, nombre, tipo, operacion, zona, matches, linkPanel }) {
+export async function enviarEmailBusquedaCliente({ email, nombre, tipo, operacion, zona, matches, propiedades, linkPanel }) {
   if (!email) return { ok: false };
   const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
   const matchesMsg = matches > 0
-    ? `Encontramos <strong>${matches} propiedad${matches > 1 ? 'es' : ''}</strong> que podrían encajar con tu búsqueda. Un asesor te contactará pronto a través de la plataforma.`
+    ? `Encontramos <strong>${matches} propiedad${matches > 1 ? 'es' : ''}</strong> que podrían encajar con tu búsqueda. Tu asesor InmobIA se pondrá en contacto contigo pronto.`
     : `Tu búsqueda fue enviada a nuestra red de asesores. Te notificaremos en cuanto tengamos opciones que encajen.`;
+  const props = Array.isArray(propiedades) ? propiedades.slice(0, 4) : [];
+  const propGrid = props.length > 0 ? `
+    <p style="margin:0 0 12px;font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.05em">Propiedades que podrían encajarte</p>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px">
+      <tr>
+        ${props.map(p => {
+          const sim = (p.moneda === 'USD') ? '$' : 'Q';
+          return `<td width="${Math.floor(100/props.length)}%" style="padding:0 5px;vertical-align:top">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:8px;overflow:hidden;border:1px solid #e5e2da">
+              ${p.img ? `<tr><td style="padding:0;line-height:0"><img src="${BASE_URL}${p.img}" width="130" alt="${p.titulo||''}" style="display:block;width:100%;height:auto"></td></tr>` : `<tr><td style="height:90px;background:#f4f6fb;text-align:center;font-size:1.5rem">🏠</td></tr>`}
+              <tr><td style="padding:10px 10px 12px">
+                <p style="margin:0;font-weight:700;color:#1e2d4a;font-size:0.78rem;line-height:1.3">${p.titulo || 'Propiedad'}</p>
+                <p style="margin:3px 0 0;color:#777;font-size:0.73rem">${p.zona || zona}${p.precio ? ` · ${sim}${Number(p.precio).toLocaleString('es-GT')}` : ''}</p>
+              </td></tr>
+            </table>
+          </td>`;
+        }).join('')}
+      </tr>
+    </table>` : '';
   const html = `<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f0ede8;font-family:Arial,sans-serif">
@@ -828,6 +860,7 @@ export async function enviarEmailBusquedaCliente({ email, nombre, tipo, operacio
         <p style="margin:0 0 6px;font-size:0.75rem;color:#999;text-transform:uppercase;letter-spacing:0.06em">Tu búsqueda</p>
         <p style="margin:0;font-weight:600;color:#1e2d4a;font-size:0.95rem">${tipo || 'Propiedad'} · ${operacion || ''} ${zona ? '· ' + zona : ''}</p>
       </div>
+      ${propGrid}
       <div style="background:#f0fdf4;border-radius:8px;padding:16px 20px;margin-bottom:24px;font-size:0.85rem;color:#444;line-height:1.6">
         <strong style="color:#065f46">Importante:</strong> Por tu privacidad, toda la comunicación se gestiona a través de la plataforma InmobIA.
       </div>
@@ -846,6 +879,60 @@ export async function enviarEmailBusquedaCliente({ email, nombre, tipo, operacio
     return { ok: true };
   } catch (err) {
     console.error('⚠️  Error email búsqueda cliente:', err.message);
+    return { ok: false };
+  }
+}
+
+export async function enviarEmailAdminLeadInmobia({ email, nombreAdmin, cliente, tipo, operacion, zona, presupuesto, detalles, propiedades, linkAdmin }) {
+  if (!email) return { ok: false };
+  const BASE_URL = process.env.BASE_URL || 'https://inmobia.site';
+  const props = Array.isArray(propiedades) ? propiedades.slice(0, 4) : [];
+  const propGrid = props.length > 0 ? `
+    <p style="margin:0 0 12px;font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.05em">Propiedades InmobIA que coinciden</p>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:22px">
+      <tr>
+        ${props.map(p => {
+          const sim = (p.moneda === 'USD') ? '$' : 'Q';
+          return `<td width="${Math.floor(100/props.length)}%" style="padding:0 5px;vertical-align:top">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:8px;overflow:hidden;border:1px solid #e5e2da">
+              ${p.img ? `<tr><td style="padding:0;line-height:0"><img src="${BASE_URL}${p.img}" width="130" alt="${p.titulo||''}" style="display:block;width:100%;height:auto"></td></tr>` : `<tr><td style="height:90px;background:#f4f6fb;text-align:center;font-size:1.5rem">🏠</td></tr>`}
+              <tr><td style="padding:10px 10px 12px">
+                <p style="margin:0;font-weight:700;color:#1e2d4a;font-size:0.78rem;line-height:1.3">${p.titulo || 'Propiedad'}</p>
+                <p style="margin:3px 0 0;color:#777;font-size:0.73rem">${p.zona || zona}${p.precio ? ` · ${sim}${Number(p.precio).toLocaleString('es-GT')}` : ''}</p>
+              </td></tr>
+            </table>
+          </td>`;
+        }).join('')}
+      </tr>
+    </table>` : '';
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f0ede8;font-family:Arial,sans-serif">
+  <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <div style="background:#1e2d4a;border-top:4px solid #c9a84c;padding:24px 32px">
+      <p style="margin:0 0 4px;color:rgba(255,255,255,0.6);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em">🔍 Nuevo lead InmobIA — Seguimiento directo</p>
+      <h1 style="margin:0;color:#fff;font-size:1.15rem;font-weight:600">Un cliente buscó una propiedad de tu portafolio</h1>
+    </div>
+    <div style="padding:28px 32px">
+      <p style="margin:0 0 18px;color:#444;line-height:1.6">Hola <strong>${nombreAdmin || 'Admin'}</strong>, el cliente <strong>${cliente || 'Sin nombre'}</strong> completó su perfil de búsqueda y una o más propiedades InmobIA encajan con su requerimiento. Este lead es tuyo para darle seguimiento directo.</p>
+      <div style="background:#f4f6fb;border-radius:8px;padding:16px 20px;margin-bottom:22px;border-left:4px solid #c9a84c">
+        <p style="margin:0 0 4px;font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.06em">Requerimiento del cliente</p>
+        <p style="margin:0;font-weight:700;color:#1e2d4a;font-size:1rem">${tipo} · ${operacion}</p>
+        <p style="margin:4px 0 0;color:#555;font-size:0.88rem">${zona}${presupuesto ? ` · hasta ${presupuesto}` : ''}${detalles ? ` · ${detalles}` : ''}</p>
+      </div>
+      ${propGrid}
+      <div style="text-align:center;margin:20px 0 6px">
+        <a href="${linkAdmin}" style="display:inline-block;background:#c9a84c;color:#fff;text-decoration:none;padding:12px 28px;border-radius:7px;font-weight:600;font-size:0.9rem">Ver búsqueda en el CRM →</a>
+      </div>
+    </div>
+    <div style="background:#f4f6fb;padding:12px 32px;text-align:center;font-size:0.72rem;color:#aaa;border-top:1px solid #e5e2da">InmobIA · Panel administrativo · Notificación interna</div>
+  </div>
+</body></html>`;
+  try {
+    await enviarEmail({ to: email, subject: `🔍 Lead InmobIA — ${cliente || 'Nuevo cliente'} busca ${tipo} en ${zona}`, html });
+    return { ok: true };
+  } catch (err) {
+    console.error('⚠️  Error email admin lead 1D:', err.message);
     return { ok: false };
   }
 }

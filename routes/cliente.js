@@ -4,7 +4,7 @@ import { db } from '../database.js';
 import { authMiddleware } from '../auth.js';
 import { crearCheckoutComision, keysConfigured } from '../lib/recurrente.js';
 import { propiedadEsDeAdmin } from '../lib/modelos.js';
-import { enviarCorreoComisionAsesor, enviarCorreoCierreConfirmado1D, enviarEmailBusquedaCliente, enviarEmailNuevoLeadBusqueda } from '../email.js';
+import { enviarCorreoComisionAsesor, enviarCorreoCierreConfirmado1D, enviarEmailBusquedaCliente, enviarEmailNuevoLeadBusqueda, enviarEmailAdminLeadInmobia } from '../email.js';
 import { sendWhatsApp } from '../whatsapp.js';
 
 const router = Router();
@@ -724,17 +724,51 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
   for (const a of leadsOriginales) {
     insertNotif.run(a.asesor_id, tituloNotif, mensajeNotif, a.lead_id || null);
     if (a.email) {
+      let propData = null;
+      if (a.lead_id) {
+        const lRow = db.prepare(`
+          SELECT l.propiedad_titulo, p.precio, p.zona, p.moneda,
+                 (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) as img
+          FROM leads l LEFT JOIN propiedades p ON p.id = l.propiedad_id
+          WHERE l.id = ?
+        `).get(a.lead_id);
+        if (lRow) propData = { titulo: lRow.propiedad_titulo, precio: lRow.precio, zona: lRow.zona, moneda: lRow.moneda, img: lRow.img };
+      }
       enviarEmailNuevoLeadBusqueda({
         email: a.email, nombreAsesor: a.nombre,
         cliente: req_.cliente_nombre, tipo, operacion: oper, zona,
-        presupuesto: presupTexto,
-        detalles: detalles || null,
+        presupuesto: presupTexto, detalles: detalles || null,
+        propiedad: propData,
         linkCRM: `${BASE_URL_}/panel-asesor.html#crm`,
       }).catch(() => {});
     }
     if (a.telefono) {
       const msgAsesor = `🔍 *Nuevo cliente de búsqueda personalizada — ${tipo} en ${zona}*\n\n*${req_.cliente_nombre}* busca: *${tipo}* para *${oper}* en *${zona}*${presupTexto ? `\nPresupuesto: hasta *${presupTexto}*` : ''}${detalles ? `\nDetalles: ${detalles}` : ''}\n\nRevise el lead en su panel:\n${BASE_URL_}/panel-asesor.html#crm`;
       sendWhatsApp(a.telefono, msgAsesor).catch(e => console.error('[WA asesor busqueda]', e.message));
+    }
+  }
+
+  // 1B. Email al admin para leads 1D (propiedades InmobIA)
+  const leadsAdmin = db.prepare(`
+    SELECT l.propiedad_titulo as titulo, p.precio, p.zona, p.moneda,
+           (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) as img
+    FROM leads l LEFT JOIN propiedades p ON p.id = l.propiedad_id
+    WHERE l.origen = 'busqueda_personalizada' AND l.email = ?
+      AND l.modelo = '1D'
+      AND datetime(l.creado_en) >= datetime(?, '-15 minutes')
+    LIMIT 4
+  `).all(req_.cliente_email || '', req_.creado_en);
+
+  if (leadsAdmin.length > 0) {
+    const adminUser = db.prepare("SELECT email, nombre FROM usuarios WHERE rol = 'admin' LIMIT 1").get();
+    if (adminUser?.email) {
+      enviarEmailAdminLeadInmobia({
+        email: adminUser.email, nombreAdmin: adminUser.nombre,
+        cliente: req_.cliente_nombre, tipo, operacion: oper, zona,
+        presupuesto: presupTexto, detalles: detalles || null,
+        propiedades: leadsAdmin,
+        linkAdmin: `${BASE_URL_}/admin.html?busqueda=${id}`,
+      }).catch(() => {});
     }
   }
 
@@ -795,10 +829,21 @@ router.patch('/busqueda-publica/:id/detalles', async (req, res) => {
       console.warn('[busqueda-detalles] cliente sin telefono — WA omitido');
     }
 
+    // Propiedades para el email del cliente
+    const propiedadesEmailCliente = db.prepare(`
+      SELECT DISTINCT l.propiedad_titulo as titulo, p.precio, p.zona, p.moneda,
+        (SELECT url FROM imagenes WHERE propiedad_id = p.id AND principal = 1 LIMIT 1) as img
+      FROM leads l LEFT JOIN propiedades p ON p.id = l.propiedad_id
+      WHERE l.origen = 'busqueda_personalizada' AND l.email = ?
+        AND datetime(l.creado_en) >= datetime(?, '-15 minutes')
+        AND p.id IS NOT NULL
+      ORDER BY l.id LIMIT 4
+    `).all(clienteEmail, req_.creado_en);
+
     // ── Email al cliente (fire-and-forget, no bloquea la respuesta) ──
     enviarEmailBusquedaCliente({
       email: clienteEmail, nombre: req_.cliente_nombre, tipo, operacion: oper, zona,
-      matches: totalLeads, linkPanel,
+      matches: totalLeads, propiedades: propiedadesEmailCliente, linkPanel,
     }).catch(e => console.error('[email cliente]', e.message));
   }
 
