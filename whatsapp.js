@@ -1,11 +1,20 @@
 /**
- * WhatsApp via Twilio API
+ * WhatsApp — Green API (principal) con fallback a Twilio
  */
 import crypto from 'crypto';
 import { db } from './database.js';
 
-// Leemos env vars en tiempo de ejecución (no en módulo load) para que dotenv ya esté cargado
-function getCreds() {
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
+
+function getGreenCreds() {
+  const instance = process.env.GREEN_API_INSTANCE;
+  const token    = process.env.GREEN_API_TOKEN;
+  const apiBase  = process.env.GREEN_API_URL || 'https://7107.api.greenapi.com';
+  const listo    = !!(instance && token);
+  return { instance, token, apiBase, listo };
+}
+
+function getTwilioCreds() {
   const sid   = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
   const from  = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
@@ -13,58 +22,81 @@ function getCreds() {
   return { sid, token, from, listo };
 }
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
-
-// Log diferido para que dotenv ya esté inicializado
 setTimeout(() => {
-  const { listo, from } = getCreds();
-  if (!listo) console.log('[WA] Twilio no configurado — mensajes desactivados');
-  else console.log('[WA] Twilio activo — from:', from);
+  const g = getGreenCreds();
+  const t = getTwilioCreds();
+  if (g.listo)      console.log('[WA] Green API activo — instancia:', g.instance);
+  else if (t.listo) console.log('[WA] Twilio activo (fallback) — from:', t.from);
+  else              console.log('[WA] Sin proveedor WA configurado — mensajes desactivados');
 }, 100);
 
 const phoneLeadMap = new Map();
 const cooldown     = new Map();
 
 /**
- * Envía un mensaje de WhatsApp via Twilio.
+ * Envía un mensaje de WhatsApp.
+ * Usa Green API si está configurado, si no Twilio.
  * @param {string} telefono - Número guatemalteco (8 dígitos o con 502)
  * @param {string} mensaje
  * @param {number|null} leadId
  */
 export async function sendWhatsApp(telefono, mensaje, leadId = null) {
-  const { sid, token, from, listo } = getCreds();
-  if (!listo) {
-    console.log('[WA] Mensaje omitido — Twilio pendiente de configurar');
-    return false;
+  let num = String(telefono).replace(/\D/g, '');
+  if (num.length === 8) num = `502${num}`;
+
+  const green = getGreenCreds();
+  if (green.listo) {
+    return await sendViaGreenAPI(num, mensaje, leadId, green);
   }
+
+  const twilio = getTwilioCreds();
+  if (twilio.listo) {
+    return await sendViaTwilio(num, mensaje, leadId, twilio);
+  }
+
+  console.log('[WA] Mensaje omitido — sin proveedor configurado');
+  return false;
+}
+
+async function sendViaGreenAPI(num, mensaje, leadId, { instance, token, apiBase }) {
   try {
-    let num = String(telefono).replace(/\D/g, '');
-    if (num.length === 8) num = `502${num}`;
-    const to = `whatsapp:+${num}`;
-
-    const body = new URLSearchParams({ From: from, To: to, Body: mensaje });
-    const apiUrl = `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`;
-    const credentials = Buffer.from(`${sid}:${token}`).toString('base64');
-
-    const res = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${credentials}`,
-        'Content-Type':  'application/x-www-form-urlencoded',
-      },
-      body: body.toString(),
+    const chatId = `${num}@c.us`;
+    const url    = `${apiBase}/waInstance${instance}/sendMessage/${token}`;
+    const res = await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ chatId, message: mensaje }),
     });
-
     const data = await res.json();
-    if (!res.ok) {
-      console.error('[WA] Error Twilio:', data?.message || JSON.stringify(data));
+    if (!res.ok || data.error) {
+      console.error('[WA Green] Error:', data?.error || JSON.stringify(data));
       return false;
     }
-    console.log(`[WA] ✅ Mensaje enviado a ${to} — SID: ${data.sid}`);
+    console.log(`[WA Green] ✅ Enviado a ${chatId} — id: ${data.idMessage}`);
     if (leadId) phoneLeadMap.set(num, leadId);
     return true;
   } catch (e) {
-    console.error('[WA] Error enviando mensaje:', e.message);
+    console.error('[WA Green] Error:', e.message);
+    return false;
+  }
+}
+
+async function sendViaTwilio(num, mensaje, leadId, { sid, token, from }) {
+  try {
+    const to   = `whatsapp:+${num}`;
+    const body = new URLSearchParams({ From: from, To: to, Body: mensaje });
+    const res  = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+      method:  'POST',
+      headers: { 'Authorization': `Basic ${Buffer.from(`${sid}:${token}`).toString('base64')}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body:    body.toString(),
+    });
+    const data = await res.json();
+    if (!res.ok) { console.error('[WA Twilio] Error:', data?.message); return false; }
+    console.log(`[WA Twilio] ✅ Enviado a ${to} — SID: ${data.sid}`);
+    if (leadId) phoneLeadMap.set(num, leadId);
+    return true;
+  } catch (e) {
+    console.error('[WA Twilio] Error:', e.message);
     return false;
   }
 }
