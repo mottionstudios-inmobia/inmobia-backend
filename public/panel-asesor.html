@@ -8765,7 +8765,7 @@ function verLead(id) {
         <button onclick="enviarPropiedadAlCliente(${l.id})" id="btn-env-prop-${l.id}"
           style="background:#e07b39;color:#fff;border:none;border-radius:7px;padding:0.55rem 1.1rem;font-size:0.85rem;font-weight:700;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:0.4rem"
           onmouseover="this.style.background='#c96a2d'" onmouseout="this.style.background='#e07b39'">
-          📤 Enviar propiedad por WhatsApp
+          📤 Enviar propiedad al cliente
         </button>
       </div>
     `);
@@ -10978,7 +10978,7 @@ async function enviarPropiedadAlCliente(leadId) {
     toast(`✅ ${ok === 1 ? 'Propiedad enviada' : ok + ' propiedades enviadas'} al cliente por WhatsApp`);
     cargarBitacora(leadId);
   }
-  btn.disabled = false; btn.textContent = '📤 Enviar propiedad por WhatsApp';
+  btn.disabled = false; btn.textContent = '📤 Enviar propiedad al cliente';
 }
 
 async function enviarMensajeCliente2A(leadId) {
