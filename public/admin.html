@@ -1510,14 +1510,18 @@
       </div>
     </div>
 
-    <!-- Modal detalle de búsqueda -->
-    <div id="modal-busq-detalle" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)cerrarModalBusqDetalle()">
-      <div style="background:#141e2e;border:1px solid #2a3144;border-radius:14px;max-width:700px;width:100%;max-height:88vh;overflow-y:auto;padding:1.5rem">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
-          <h3 style="font-size:1.1rem;font-weight:600;color:#f1f5f9">Detalle de búsqueda</h3>
-          <button onclick="cerrarModalBusqDetalle()" style="background:rgba(255,255,255,0.07);border:none;color:#94a3b8;border-radius:6px;padding:0.35rem 0.65rem;cursor:pointer;font-size:1rem">✕</button>
+    <!-- Modal detalle de búsqueda — ficha completa -->
+    <div id="modal-busq-detalle" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:flex-start;justify-content:center;padding:1.5rem;overflow-y:auto" onclick="if(event.target===this)cerrarModalBusqDetalle()">
+      <div style="background:#0f1923;border:1px solid #1e2d3d;border-radius:16px;max-width:900px;width:100%;position:relative;margin:auto">
+        <!-- Header fijo -->
+        <div style="position:sticky;top:0;z-index:10;background:#0f1923;border-bottom:1px solid #1e2d3d;border-radius:16px 16px 0 0;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <h3 id="modal-busq-titulo" style="font-size:1.05rem;font-weight:700;color:#f1f5f9;margin:0">Ficha del cliente</h3>
+            <p id="modal-busq-subtitulo" style="font-size:0.75rem;color:#64748b;margin:0.2rem 0 0"></p>
+          </div>
+          <button onclick="cerrarModalBusqDetalle()" style="background:#1e2d3d;border:none;color:#94a3b8;border-radius:8px;padding:0.4rem 0.75rem;cursor:pointer;font-size:0.9rem">✕ Cerrar</button>
         </div>
-        <div id="modal-busq-body"></div>
+        <div id="modal-busq-body" style="padding:1.5rem"></div>
       </div>
     </div>
 
@@ -5322,63 +5326,114 @@ async function verDetalleBusqueda(id) {
   const modal = document.getElementById('modal-busq-detalle');
   const body  = document.getElementById('modal-busq-body');
   modal.style.display = 'flex';
-  body.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b">Cargando...</div>';
+  body.innerHTML = '<div style="text-align:center;padding:3rem;color:#64748b">Cargando ficha...</div>';
   try {
     const r = await fetch(`${API}/cliente/busquedas-admin/${id}/leads`, { headers: { Authorization: `Bearer ${token}` } });
     const data = await r.json();
     const req  = data.requerimiento;
     const leads = data.leads || [];
     const sym = (req.moneda||'GTQ')==='USD'?'$':'Q';
-    const presup = req.precio_max ? `${sym}${Number(req.precio_max).toLocaleString('es-GT')}` : 'No especificado';
-    const detalle = [
-      req.habitaciones ? `${req.habitaciones} habitaciones` : '',
-      req.banos        ? `${req.banos} baños` : '',
-      req.metros_min   ? `mín. ${req.metros_min} m²` : '',
-      req.caracteristicas || '',
-    ].filter(Boolean).join(' · ');
+    const presup = req.precio_max ? `${sym}${Number(req.precio_max).toLocaleString('es-GT')}` : null;
     const created = parseAdminDate(req.creado_en).toLocaleString('es-GT', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Guatemala' });
 
+    document.getElementById('modal-busq-titulo').textContent = req.cliente_nombre || 'Cliente';
+    document.getElementById('modal-busq-subtitulo').textContent = `${req.tipo_propiedad||''} · ${req.operacion||''} · Registrado el ${created}`;
+
+    const chip = (label, val, color='#94a3b8') => val ? `<div style="background:#1e2d3d;border-radius:8px;padding:0.5rem 0.75rem">
+      <div style="font-size:0.62rem;color:#475569;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem">${label}</div>
+      <div style="font-size:0.85rem;font-weight:600;color:${color}">${val}</div>
+    </div>` : '';
+
+    const notasArr = (req.notas||'').split('\n').filter(Boolean);
+
+    const etapaNums = {cerrado:6,negociando:5,agendado:4,interesado:3,nuevo:2};
+    const TIPO_BIT = { 'wa-saliente':'💬 WA enviado', 'sistema':'🔧 Sistema', 'llamada':'📞 Llamada', 'whatsapp':'💬 WhatsApp', 'email':'✉ Email', 'reunion':'👥 Reunión', 'nota':'📝 Nota', 'propiedad_presentada':'📤 Propiedad presentada', 'auto-etapa':'⚡ Etapa automática' };
+    const BIT_COLOR = { 'wa-saliente':'#e07b39', 'sistema':'#6366f1', 'llamada':'#22c55e', 'whatsapp':'#25d366', 'email':'#38bdf8', 'propiedad_presentada':'#c9a84c' };
+
+    const BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
+
     body.innerHTML = `
-      <!-- Info del cliente -->
-      <div style="background:#0f172a;border:1px solid #1e2533;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem">
-        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin-bottom:0.65rem">Cliente</div>
-        <div style="font-size:1rem;font-weight:700;color:#f1f5f9">${req.cliente_nombre||'—'}</div>
-        <div style="font-size:0.8rem;color:#94a3b8;margin-top:0.2rem">${req.cliente_email||''} ${req.cliente_telefono ? '· '+req.cliente_telefono : ''}</div>
-        <div style="font-size:0.72rem;color:#475569;margin-top:0.4rem">Registrado el ${created}</div>
+    <!-- ══ BLOQUE CLIENTE ══ -->
+    <div style="background:#141e2e;border:1px solid #1e2d3d;border-left:3px solid #c9a84c;border-radius:12px;padding:1.25rem;margin-bottom:1.25rem">
+      <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:#475569;margin-bottom:0.75rem;font-weight:700">Datos del cliente</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.65rem">
+        ${chip('Nombre', req.cliente_nombre, '#f1f5f9')}
+        ${chip('Email', req.cliente_email)}
+        ${chip('Teléfono', req.cliente_telefono)}
+        ${chip('Estado búsqueda', req.estado === 'activo' ? '✓ Activa' : '⏰ Vencida', req.estado === 'activo' ? '#4ade80' : '#f59e0b')}
+        ${chip('Registrado', created)}
       </div>
-      <!-- Criterios de búsqueda -->
-      <div style="background:#0f172a;border:1px solid #1e2533;border-left:3px solid #c9a84c;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem">
-        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin-bottom:0.65rem">Búsqueda</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.5rem;font-size:0.82rem">
-          <div><span style="color:#64748b">Tipo:</span> <strong style="color:#e2e8f0">${req.tipo_propiedad||'—'}</strong></div>
-          <div><span style="color:#64748b">Operación:</span> <strong style="color:#e2e8f0">${req.operacion||'—'}</strong></div>
-          <div><span style="color:#64748b">Zona:</span> <strong style="color:#e2e8f0">${req.zona||req.municipio||req.departamento||'—'}</strong></div>
-          <div><span style="color:#64748b">Presupuesto:</span> <strong style="color:#c9a84c">${presup}</strong></div>
-          ${detalle ? `<div style="grid-column:1/-1"><span style="color:#64748b">Detalles:</span> <span style="color:#94a3b8">${detalle}</span></div>` : ''}
-          ${req.notas ? `<div style="grid-column:1/-1"><span style="color:#64748b">Notas:</span> <span style="color:#94a3b8">${req.notas}</span></div>` : ''}
-        </div>
+    </div>
+
+    <!-- ══ BLOQUE BÚSQUEDA ══ -->
+    <div style="background:#141e2e;border:1px solid #1e2d3d;border-left:3px solid #6366f1;border-radius:12px;padding:1.25rem;margin-bottom:1.25rem">
+      <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:#475569;margin-bottom:0.75rem;font-weight:700">Criterios de búsqueda</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.65rem">
+        ${chip('Tipo', req.tipo_propiedad, '#e2e8f0')}
+        ${chip('Operación', req.operacion, '#e2e8f0')}
+        ${chip('Zona / Municipio', req.zona || req.municipio || req.departamento)}
+        ${chip('Presupuesto máx.', presup, '#c9a84c')}
+        ${chip('Habitaciones', req.habitaciones ? req.habitaciones + ' hab.' : null)}
+        ${chip('Baños', req.banos ? req.banos + ' baños' : null)}
+        ${chip('Metros mín.', req.metros_min ? req.metros_min + ' m²' : null)}
+        ${chip('Características', req.caracteristicas)}
       </div>
-      <!-- Leads asignados -->
-      <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin-bottom:0.5rem">${leads.length} asesor${leads.length!==1?'es asignados':'asignado'}</div>
-      ${leads.length === 0
-        ? '<div style="text-align:center;padding:1.5rem;color:#475569;font-size:0.85rem;background:#0f172a;border-radius:8px">Sin leads asignados aún</div>'
-        : leads.map(l => {
-          const etColor = ETAPA_COLOR[{cerrado:6,negociando:5,agendado:4,interesado:3,nuevo:2}[l.etapa]||1];
+      ${notasArr.length ? `
+      <div style="margin-top:0.85rem;border-top:1px solid #1e2d3d;padding-top:0.85rem">
+        <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:#475569;margin-bottom:0.5rem">Notas adicionales</div>
+        ${notasArr.map(n => `<div style="font-size:0.82rem;color:#94a3b8;line-height:1.5;margin-bottom:0.25rem">• ${n}</div>`).join('')}
+      </div>` : ''}
+    </div>
+
+    <!-- ══ ASESORES ASIGNADOS ══ -->
+    <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:#475569;margin-bottom:0.75rem;font-weight:700">${leads.length} asesor${leads.length!==1?'es':'} asignado${leads.length!==1?'s':''}</div>
+
+    ${leads.length === 0
+      ? '<div style="text-align:center;padding:2rem;color:#475569;background:#141e2e;border-radius:10px">Sin asesores asignados aún</div>'
+      : leads.map(l => {
+          const etNum   = etapaNums[l.etapa] || 2;
+          const etColor = ETAPA_COLOR[etNum] || '#94a3b8';
+          const etLabel = ETAPA_LABEL[etNum] || l.etapa;
           const act = parseAdminDate(l.actualizado_en).toLocaleString('es-GT', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Guatemala' });
-          return `<div style="background:#0f172a;border:1px solid #1e2533;border-radius:8px;padding:0.75rem 1rem;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem">
-            <div>
-              <div style="font-size:0.85rem;font-weight:600;color:#f1f5f9">${l.asesor_nombre||'—'}</div>
-              <div style="font-size:0.72rem;color:#64748b">${l.asesor_email||''}</div>
-              ${l.propiedad_titulo ? `<div style="font-size:0.75rem;color:#94a3b8;margin-top:0.2rem">🏠 ${l.propiedad_titulo}</div>` : ''}
+          const bits = l.bitacora || [];
+          const bitHtml = bits.length ? bits.map(b => {
+            const bDate = parseAdminDate(b.creado_en).toLocaleString('es-GT', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Guatemala' });
+            const bTipo = TIPO_BIT[b.tipo] || b.tipo;
+            const bColor = BIT_COLOR[b.tipo] || '#64748b';
+            return `<div style="display:flex;gap:0.65rem;padding:0.5rem 0;border-bottom:1px solid #1e2d3d">
+              <div style="flex-shrink:0;font-size:0.72rem;color:${bColor};font-weight:600;white-space:nowrap;width:130px">${bTipo}</div>
+              <div style="flex:1;font-size:0.78rem;color:#94a3b8;line-height:1.4">${b.nota||''}</div>
+              <div style="flex-shrink:0;font-size:0.68rem;color:#334155;white-space:nowrap">${bDate}</div>
+            </div>`;
+          }).join('') : '<div style="font-size:0.78rem;color:#334155;padding:0.5rem 0">Sin actividad registrada</div>';
+
+          return `
+          <div style="background:#141e2e;border:1px solid #1e2d3d;border-radius:12px;margin-bottom:1rem;overflow:hidden">
+            <!-- Header asesor -->
+            <div style="padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;border-bottom:1px solid #1e2d3d">
+              <div style="display:flex;gap:0.85rem;align-items:flex-start">
+                ${l.propiedad_imagen ? `<img src="${BASE}${l.propiedad_imagen}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0">` : ''}
+                <div>
+                  <div style="font-size:0.9rem;font-weight:700;color:#f1f5f9">${l.asesor_nombre||'—'}</div>
+                  <div style="font-size:0.73rem;color:#64748b">${l.asesor_email||''}</div>
+                  ${l.asesor_telefono ? `<div style="font-size:0.72rem;color:#475569">${l.asesor_telefono}</div>` : ''}
+                  ${l.propiedad_titulo ? `<div style="font-size:0.78rem;color:#c9a84c;margin-top:0.3rem">🏠 ${l.propiedad_titulo}</div>` : ''}
+                </div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-size:0.88rem;font-weight:700;color:${etColor};background:${etColor}18;border:1px solid ${etColor}40;border-radius:20px;padding:0.25rem 0.75rem;display:inline-block">${etLabel}</div>
+                <div style="font-size:0.68rem;color:#475569;margin-top:0.35rem">Últ. actividad: ${act}</div>
+              </div>
             </div>
-            <div style="text-align:right;flex-shrink:0">
-              <div style="font-size:0.82rem;font-weight:700;color:${etColor}">${ETAPA_LABEL[{cerrado:6,negociando:5,agendado:4,interesado:3,nuevo:2}[l.etapa]||1]}</div>
-              <div style="font-size:0.68rem;color:#475569;margin-top:0.2rem">${act}</div>
+            <!-- Bitácora -->
+            <div style="padding:0.85rem 1.25rem">
+              <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.07em;color:#334155;font-weight:700;margin-bottom:0.5rem">Bitácora de seguimiento</div>
+              ${bitHtml}
             </div>
           </div>`;
         }).join('')}`;
-  } catch {
-    body.innerHTML = '<div style="color:#ef4444;text-align:center;padding:1.5rem">Error al cargar el detalle.</div>';
+  } catch(e) {
+    body.innerHTML = `<div style="color:#ef4444;text-align:center;padding:1.5rem">Error al cargar: ${e.message}</div>`;
   }
 }
 

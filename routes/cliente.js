@@ -481,22 +481,41 @@ router.get('/busquedas-admin', authMiddleware, (req, res) => {
   res.json({ busquedas, total: busquedas.length });
 });
 
-// ── GET /api/cliente/busquedas-admin/:id/leads  (admin — leads de una búsqueda específica)
+// ── GET /api/cliente/busquedas-admin/:id/leads  (admin — ficha completa de una búsqueda)
 router.get('/busquedas-admin/:id/leads', authMiddleware, (req, res) => {
   if (req.usuario.rol !== 'admin') return res.status(403).json({ error: 'Solo admin' });
   const req_ = db.prepare('SELECT * FROM requerimientos WHERE id = ? AND fuente = ?').get(req.params.id, 'cliente');
   if (!req_) return res.status(404).json({ error: 'No encontrado' });
   const leads = db.prepare(`
-    SELECT l.id, l.etapa, l.nombre as cliente_nombre, l.propiedad_titulo,
-      l.creado_en, l.actualizado_en,
-      u.nombre as asesor_nombre, u.email as asesor_email, u.telefono as asesor_telefono
+    SELECT l.*,
+      u.nombre as asesor_nombre, u.email as asesor_email,
+      u.telefono as asesor_telefono, u.codigo_asesor as asesor_codigo,
+      (SELECT url FROM imagenes WHERE propiedad_id = l.propiedad_id AND principal = 1 LIMIT 1) AS propiedad_imagen
     FROM leads l
     JOIN usuarios u ON u.id = l.asesor_id
     WHERE l.origen = 'busqueda_personalizada' AND l.email = ?
       AND datetime(l.creado_en) >= datetime(?, '-10 minutes')
-    ORDER BY l.etapa DESC, l.actualizado_en DESC
+    ORDER BY
+      CASE l.etapa WHEN 'cerrado' THEN 1 WHEN 'negociando' THEN 2
+        WHEN 'agendado' THEN 3 WHEN 'interesado' THEN 4 ELSE 5 END,
+      l.actualizado_en DESC
   `).all(req_.cliente_email, req_.creado_en);
-  res.json({ leads, requerimiento: req_ });
+
+  const leadIds = leads.map(l => l.id);
+  const bitacora = leadIds.length ? db.prepare(`
+    SELECT b.lead_id, b.tipo, b.nota, b.creado_en, u.nombre as autor
+    FROM lead_bitacora b LEFT JOIN usuarios u ON u.id = b.asesor_id
+    WHERE b.lead_id IN (${leadIds.map(() => '?').join(',')})
+    ORDER BY b.creado_en ASC
+  `).all(...leadIds) : [];
+
+  const bitMap = {};
+  bitacora.forEach(e => { if (!bitMap[e.lead_id]) bitMap[e.lead_id] = []; bitMap[e.lead_id].push(e); });
+
+  res.json({
+    requerimiento: req_,
+    leads: leads.map(l => ({ ...l, bitacora: bitMap[l.id] || [] })),
+  });
 });
 
 router.get('/busqueda', (req, res) => {
