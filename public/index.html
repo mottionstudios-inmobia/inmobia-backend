@@ -2163,7 +2163,7 @@ user-select: none;
 <!-- MODAL ÉXITO: Búsqueda personalizada -->
 <div id="modal-busqueda-exito" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:10000;align-items:flex-start;justify-content:center;padding:1.5rem 1rem;overflow-y:auto">
   <div style="background:linear-gradient(160deg,#1b2640,#0f1729);border:1px solid rgba(255,255,255,0.1);border-radius:20px;max-width:520px;width:100%;position:relative;padding:2rem 1.75rem;margin:auto">
-    <button onclick="cerrarModalBusqueda()" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.5);border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    <button onclick="saltarEnriquecimiento()" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.5);border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
 
     <!-- Paso A: Confirmación -->
     <div style="text-align:center;margin-bottom:1.5rem">
@@ -2308,9 +2308,6 @@ user-select: none;
           <textarea id="e-descripcion" placeholder="Ej: necesito patio para mis hijos, prefiero planta baja, zona segura con garita..." style="height:72px"></textarea>
         </div>
         <button type="submit" class="form-submit" id="enriq-submit">Guardar y finalizar →</button>
-        <p style="text-align:center;margin-top:0.9rem">
-          <button type="button" onclick="saltarEnriquecimiento()" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.78rem;cursor:pointer;text-decoration:underline">Saltar por ahora</button>
-        </p>
       </form>
       <!-- Confirmación guardado -->
       <div id="enriq-confirmado" style="display:none;text-align:center;padding:1.5rem 0">
