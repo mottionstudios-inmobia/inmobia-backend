@@ -7409,6 +7409,26 @@ function lanzarConfetti() {
 }
 
 // ── LEADS STATS (plan gratis) ─────────────────────────────────
+// ── Estado global del límite de leads ──────────────────────────
+let _esPremium   = false;
+let _limiteLeads = 6;
+let _leadsBloqueados = new Set(); // IDs de leads bloqueados (sobre el límite)
+
+function computarLeadsBloqueados(limite) {
+  _leadsBloqueados = new Set();
+  if (!todosLosLeads || _esPremium) return;
+  const mesActual = new Date().toISOString().slice(0, 7); // YYYY-MM
+  const contables = ['busqueda_personalizada', 'inmobia', '2A'];
+  const leadsInmobia = todosLosLeads
+    .filter(l => {
+      if (l._esEspejo) return false;
+      if (!contables.includes(l.origen) && l.modelo !== '2A' && l.modelo !== '1D') return false;
+      try { return parseSQL(l.creado_en).toISOString().slice(0, 7) === mesActual; } catch { return false; }
+    })
+    .sort((a, b) => parseSQL(a.creado_en) - parseSQL(b.creado_en)); // más antiguo primero = ya ganado
+  leadsInmobia.slice(limite).forEach(l => _leadsBloqueados.add(l.id));
+}
+
 async function cargarLeadsStats() {
   if (!token) return;
   try {
@@ -7423,6 +7443,9 @@ function renderLeadsStats(s) {
   const esPremium = (asesor?.plan || s.plan) === 'premium';
   const usados  = s.leads_este_mes || 0;
   const limite  = s.limite_total  || 6;
+  _esPremium   = esPremium;
+  _limiteLeads = limite;
+  computarLeadsBloqueados(limite);
   const extra   = s.leads_extra   || 0;
   const props   = s.props_inmobia || 0;
   const propsParaSig = 5 - (props % 5 === 0 && props > 0 ? 5 : props % 5);
@@ -7505,6 +7528,11 @@ function renderLeadsStats(s) {
     window._limitModalShown = true;
     setTimeout(mostrarModalLimiteLeads, 800);
   }
+
+  // Re-renderizar kanban para mostrar tarjetas bloqueadas
+  if (!esPremium && _leadsBloqueados.size > 0) {
+    setTimeout(() => { try { filtrarLeadsCRM(); } catch {} }, 100);
+  }
 }
 
 function mostrarModalLimiteLeads() {
@@ -7520,9 +7548,14 @@ function mostrarModalLimiteLeads() {
         <div style="font-size:0.82rem;color:rgba(255,255,255,0.8);margin-top:0.3rem">Plan Gratis · ${new Date().toLocaleString('es-GT',{month:'long',year:'numeric'})}</div>
       </div>
       <div style="padding:1.5rem">
+        ${_leadsBloqueados.size > 0 ? `
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:0.9rem 1rem;margin-bottom:0.75rem;font-size:0.85rem;color:#7f1d1d;line-height:1.55;text-align:center">
+          <strong style="font-size:1.05rem">🔒 ${_leadsBloqueados.size} lead${_leadsBloqueados.size > 1 ? 's bloqueados' : ' bloqueado'}</strong><br>
+          <span style="font-size:0.8rem">Hay ${_leadsBloqueados.size} cliente${_leadsBloqueados.size > 1 ? 's interesados' : ' interesado'} en sus propiedades que no puede ver.</span>
+        </div>` : ''}
         <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:0.9rem 1rem;margin-bottom:1.1rem;font-size:0.83rem;color:#78350f;line-height:1.55">
-          Hay clientes buscando propiedades como las suyas en este momento, pero ya llegó a su límite de leads de este mes.
-          <strong>Con Premium los recibe todos.</strong>
+          Ya llegó a su límite de leads de este mes. Con Premium desbloquea todos los clientes que están esperando.
+          <strong>No pierda más oportunidades.</strong>
         </div>
         <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.1rem">
           <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:#1e293b">
@@ -8353,6 +8386,21 @@ function renderKanban(leads) {
     const col = leads.filter(l => etapaKanban(l) === e.id).sort((a, b) => new Date(b.creado_en) - new Date(a.creado_en));
     const cards = col.map(l => {
       const fecha = parseSQL(l.creado_en).toLocaleDateString('es-GT', { day:'2-digit', month:'short' });
+
+      // ── Lead bloqueado (plan gratis, sobre el límite) ──
+      if (_leadsBloqueados.has(l.id)) {
+        return `<div class="kanban-card" onclick="mostrarModalLimiteLeads()" style="background:#1e2d4a;border:1.5px dashed #c9a84c;cursor:pointer">
+          <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#c9a84c;margin-bottom:4px">${getLeadTitulo(l)}</div>
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+            <span style="font-size:0.95rem">🔒</span>
+            <span style="font-size:0.8rem;font-weight:700;color:#94a3b8;font-style:italic">Cliente bloqueado</span>
+          </div>
+          <div style="font-size:0.72rem;color:#64748b;margin-bottom:6px">${l.propiedad_titulo || 'Propiedad'}</div>
+          <div style="font-size:0.63rem;color:#fbbf24;font-weight:600">Activa Premium para ver este lead</div>
+          <div style="font-size:0.6rem;color:#475569;margin-top:3px">${fecha}</div>
+        </div>`;
+      }
+
       const dotColor = getLeadColor(l);
       const postIt = getLeadPostItColors(l);
       const tituloOrigen = getLeadTitulo(l);
@@ -8532,6 +8580,7 @@ function getDragAfterElement(zone, y) {
 let leadActualId = null;
 
 function verLead(id) {
+  if (_leadsBloqueados.has(id)) { mostrarModalLimiteLeads(); return; }
   const l = todosLosLeads.find(x => x.id === id);
   if (!l) return;
   leadActualId = id;
