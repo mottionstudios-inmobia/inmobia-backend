@@ -311,7 +311,7 @@ router.get('/score-detalle', authMiddleware, (req, res) => {
   } catch (e) { console.error('score-detalle crash:', e.message); res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/auth/leads-stats  (estadísticas de leads del mes para el asesor)
+// GET /api/auth/leads-stats  (estadísticas de leads del período de prueba)
 router.get('/leads-stats', (req, res) => {
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Token requerido' });
@@ -320,27 +320,44 @@ router.get('/leads-stats', (req, res) => {
     const u = db.prepare('SELECT plan, creado_en, leads_bonus_referidos FROM usuarios WHERE id = ?').get(id);
     if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    const now = new Date();
-    const mesInicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    // Leads InmobIA de todos los tiempos (no mensual)
+    const leads_inmobia_total = db.prepare(
+      `SELECT COUNT(*) AS n FROM leads
+       WHERE asesor_id = ?
+         AND (origen IN ('busqueda_personalizada','inmobia') OR modelo IN ('2A','1D'))`
+    ).get(id)?.n || 0;
 
-    const leads_este_mes = db.prepare(
-      `SELECT COUNT(*) AS n FROM leads WHERE asesor_id = ? AND creado_en >= ?`
-    ).get(id, mesInicio)?.n || 0;
+    // ¿Tiene algún cierre de lead InmobIA?
+    const tiene_cierre_inmobia = (db.prepare(
+      `SELECT COUNT(*) AS n FROM leads
+       WHERE asesor_id = ? AND etapa = 'cerrado'
+         AND (origen IN ('busqueda_personalizada','inmobia') OR modelo IN ('2A','1D'))`
+    ).get(id)?.n || 0) > 0;
 
     const props_inmobia = db.prepare(
       `SELECT COUNT(*) AS n FROM propiedades WHERE usuario_id = ? AND publicado_inmobia = 1 AND estado = 'activo'`
     ).get(id)?.n || 0;
 
-    const creadoEn = new Date(u.creado_en || now);
-    const diasRegistrado = (now - creadoEn) / (1000 * 60 * 60 * 24);
-    const es_primer_mes = diasRegistrado <= 30;
+    const leads_bonus_ref = u.leads_bonus_referidos || 0;
+    const limite_base     = 6;
+    const limite_total    = limite_base + leads_bonus_ref;
 
-    const leads_extra        = es_primer_mes ? Math.floor(props_inmobia / 5) : 0;
-    const leads_bonus_ref    = u.leads_bonus_referidos || 0;
-    const limite_base        = 6;
-    const limite_total       = limite_base + leads_extra + leads_bonus_ref;
+    // Período de prueba terminado si: usó 6 leads InmobIA O ya cerró uno
+    const prueba_terminada = tiene_cierre_inmobia || leads_inmobia_total >= limite_total;
 
-    res.json({ leads_este_mes, props_inmobia, leads_extra, leads_bonus_ref, limite_base, limite_total, es_primer_mes, plan: u.plan });
+    res.json({
+      leads_este_mes: leads_inmobia_total,   // reutilizado para compatibilidad frontend
+      leads_inmobia_total,
+      tiene_cierre_inmobia,
+      prueba_terminada,
+      props_inmobia,
+      leads_extra: 0,
+      leads_bonus_ref,
+      limite_base,
+      limite_total,
+      es_primer_mes: false,
+      plan: u.plan
+    });
   } catch { res.status(401).json({ error: 'Token inválido' }); }
 });
 

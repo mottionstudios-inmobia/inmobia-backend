@@ -7419,16 +7419,20 @@ let _leadsBloqueados = new Set(); // IDs de leads bloqueados (sobre el límite)
 function computarLeadsBloqueados(limite) {
   _leadsBloqueados = new Set();
   if (!todosLosLeads || _esPremium) return;
-  const mesActual = new Date().toISOString().slice(0, 7); // YYYY-MM
-  const contables = ['busqueda_personalizada', 'inmobia', '2A'];
+  const contables = ['busqueda_personalizada', 'inmobia'];
   const leadsInmobia = todosLosLeads
     .filter(l => {
       if (l._esEspejo) return false;
-      if (!contables.includes(l.origen) && l.modelo !== '2A' && l.modelo !== '1D') return false;
-      try { return parseSQL(l.creado_en).toISOString().slice(0, 7) === mesActual; } catch { return false; }
+      return contables.includes(l.origen) || l.modelo === '2A' || l.modelo === '1D';
     })
-    .sort((a, b) => parseSQL(a.creado_en) - parseSQL(b.creado_en)); // más antiguo primero = ya ganado
-  leadsInmobia.slice(limite).forEach(l => _leadsBloqueados.add(l.id));
+    .sort((a, b) => parseSQL(a.creado_en) - parseSQL(b.creado_en)); // más antiguo primero
+
+  // "6 leads O primer cierre, lo que ocurra primero"
+  const indiceCierre = leadsInmobia.findIndex(l => l.etapa === 'cerrado');
+  const cutoff = indiceCierre !== -1
+    ? indiceCierre + 1   // leads tras el primer cierre → bloqueados
+    : limite;            // leads tras el #6 → bloqueados
+  leadsInmobia.slice(cutoff).forEach(l => _leadsBloqueados.add(l.id));
 }
 
 async function cargarLeadsStats() {
@@ -7508,34 +7512,30 @@ function renderLeadsStats(s) {
     if (elUsados)  elUsados.childNodes[0].textContent = '∞';
     if (elLimite)  elLimite.textContent = '';
     if (elBarWrap) elBarWrap.style.display = 'none';
-    if (elSub)     elSub.textContent = 'Sin límite mensual';
+    if (elSub)     elSub.textContent = 'Sin límite';
+  } else if (s.tiene_cierre_inmobia) {
+    if (elUsados)  elUsados.childNodes[0].textContent = '✓';
+    if (elLimite)  elLimite.textContent = '';
+    if (elBarWrap) elBarWrap.style.display = 'none';
+    if (elSub)     elSub.textContent = 'Primer cierre logrado · activa Premium';
   } else {
     if (elUsados)  elUsados.childNodes[0].textContent = usados;
     if (elLimite)  elLimite.textContent = `/${limite}`;
     if (elBarWrap) elBarWrap.style.display = '';
     if (elBar)     elBar.style.width = `${pct}%`;
-    if (elBar)     elBar.style.background = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f59e0b' : 'var(--gold)';
-    if (elSub)     elSub.textContent = 'Este mes';
+    if (elBar)     elBar.style.background = pct >= 100 ? '#ef4444' : pct >= 70 ? '#f59e0b' : 'var(--gold)';
+    if (elSub)     elSub.textContent = 'Leads de prueba gratuitos';
   }
 
-  // ── Columna "Leads extra" dentro de tarjeta Leads del plan ─────
+  // Ocultar columna "Leads extra" (ya no aplica con nuevo modelo)
   const colExtra  = document.getElementById('leads-extra-col');
   const divExtra  = document.getElementById('leads-extra-divider');
-  const elExtra   = document.getElementById('m-leads-extra');
-  const elExSub   = document.getElementById('m-leads-extra-sub');
-  const showExtra = !esPremium;
-  if (colExtra) colExtra.style.display = showExtra ? '' : 'none';
-  if (divExtra) divExtra.style.display = showExtra ? '' : 'none';
-  if (showExtra) {
-    if (elExtra)  elExtra.textContent = `+${extra}`;
-    if (elExSub)  elExSub.textContent = s.es_primer_mes
-      ? (propsParaSig < 5 ? `Faltan ${propsParaSig} props para +1 lead` : `${props} props compartidas`)
-      : 'Beneficio activo solo el 1er mes';
-  }
+  if (colExtra) colExtra.style.display = 'none';
+  if (divExtra) divExtra.style.display = 'none';
 
-  // Banner primer mes
+  // Banner primer mes → ocultar (ya no aplica)
   const banner = document.getElementById('banner-primer-mes');
-  if (banner) banner.style.display = (!esPremium && s.es_primer_mes) ? 'flex' : 'none';
+  if (banner) banner.style.display = 'none';
 
   // Contador de progreso dentro del banner
   if (!esPremium && s.es_primer_mes) {
@@ -7577,23 +7577,24 @@ function mostrarModalLimiteLeads() {
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:18px;overflow:hidden;max-width:440px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,0.22)">
       <div style="background:linear-gradient(135deg,#1e2d4a,#2a3f6a);padding:1.75rem;text-align:center;border-bottom:3px solid #c9a84c">
-        <div style="font-size:2.2rem;margin-bottom:0.4rem">🔒</div>
-        <div style="font-weight:800;font-size:1.1rem;color:#fff">Límite de leads alcanzado</div>
-        <div style="font-size:0.82rem;color:rgba(255,255,255,0.8);margin-top:0.3rem">Plan Gratis · ${new Date().toLocaleString('es-GT',{month:'long',year:'numeric'})}</div>
+        <div style="font-size:2.2rem;margin-bottom:0.4rem">🎓</div>
+        <div style="font-weight:800;font-size:1.1rem;color:#fff">Período de prueba completado</div>
+        <div style="font-size:0.82rem;color:rgba(255,255,255,0.7);margin-top:0.3rem">Ya experimentaste InmobIA — es hora de crecer</div>
       </div>
       <div style="padding:1.5rem">
         ${_leadsBloqueados.size > 0 ? `
-        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:0.9rem 1rem;margin-bottom:0.75rem;font-size:0.85rem;color:#7f1d1d;line-height:1.55;text-align:center">
-          <strong style="font-size:1.05rem">🔒 ${_leadsBloqueados.size} lead${_leadsBloqueados.size > 1 ? 's bloqueados' : ' bloqueado'}</strong><br>
-          <span style="font-size:0.8rem">Hay ${_leadsBloqueados.size} cliente${_leadsBloqueados.size > 1 ? 's interesados' : ' interesado'} en sus propiedades que no puede ver.</span>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:0.9rem 1rem;margin-bottom:0.9rem;font-size:0.85rem;color:#7f1d1d;line-height:1.55;text-align:center">
+          <strong style="font-size:1.05rem">🔒 ${_leadsBloqueados.size} cliente${_leadsBloqueados.size > 1 ? 's esperando' : ' esperando'}</strong><br>
+          <span style="font-size:0.8rem">${_leadsBloqueados.size > 1 ? 'Están interesados' : 'Está interesado'} en sus propiedades y no puede contactarlos aún.</span>
         </div>` : ''}
-        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:0.9rem 1rem;margin-bottom:1.1rem;font-size:0.83rem;color:#78350f;line-height:1.55">
-          Ya llegó a su límite de leads de este mes. Con Premium desbloquea todos los clientes que están esperando.
-          <strong>No pierda más oportunidades.</strong>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:0.9rem 1rem;margin-bottom:0.9rem;font-size:0.82rem;color:#14532d;line-height:1.65">
+          <strong>✅ Su portal sigue activo sin costo:</strong><br>
+          Puede seguir publicando propiedades, trabajando sus propios leads y usando todas las herramientas del panel. <strong>Sin ningún costo.</strong><br><br>
+          Solo se limita la recepción de nuevos leads de clientes InmobIA — esos requieren Premium.
         </div>
-        <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.1rem">
+        <div style="display:flex;flex-direction:column;gap:0.45rem;margin-bottom:1.1rem">
           <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:#1e293b">
-            <span style="color:#c9a84c;font-size:1rem">✓</span> Leads ilimitados cada mes
+            <span style="color:#c9a84c;font-size:1rem">✓</span> Leads InmobIA ilimitados
           </div>
           <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:#1e293b">
             <span style="color:#c9a84c;font-size:1rem">✓</span> Notificaciones en tiempo real
@@ -7607,12 +7608,12 @@ function mostrarModalLimiteLeads() {
         </div>
         <button onclick="document.getElementById('modal-limite-leads').remove();irA('plan')"
           style="width:100%;padding:0.85rem;border-radius:50px;border:none;background:linear-gradient(135deg,#c9a84c,#b8943e);color:#1e2d4a;font-weight:700;font-size:0.95rem;cursor:pointer">
-          Ver Plan Premium — Q399/mes
+          Activar Plan Premium — Q399/mes
         </button>
         <div style="text-align:center;margin-top:0.75rem">
           <button onclick="document.getElementById('modal-limite-leads').remove()"
             style="background:none;border:none;color:#94a3b8;font-size:0.75rem;cursor:pointer;text-decoration:underline">
-            Continuar con plan Gratis
+            Continuar usando mi portal gratis
           </button>
         </div>
       </div>
