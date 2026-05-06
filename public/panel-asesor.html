@@ -727,10 +727,37 @@ select.form-input { cursor: pointer; }
 .estado-tooltip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#1e2d4a; }
 .estado-select-wrap:hover .estado-tooltip,
 .estado-select-wrap:focus-within .estado-tooltip { opacity: 1; }
-.props-filtros { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid #eef0f6; flex-wrap: wrap; }
-.props-filtros select { font-size: 0.78rem; padding: 0.3rem 0.65rem; border: 1px solid #d1d9e6; border-radius: 7px; background: #f8faff; color: var(--charcoal); outline: none; cursor: pointer; }
-.props-filtros select:focus { border-color: var(--primary); }
-.pf-result { font-size: 0.73rem; color: var(--text-muted); margin-left: auto; }
+.props-filtros { display: flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.25rem; border-bottom: 1px solid #eef0f6; flex-wrap: wrap; }
+.pf-pill-wrap { position: relative; flex: 1; min-width: 0; }
+.pf-pill {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.35rem;
+  width: 100%; padding: 0.52rem 0.9rem;
+  border: 1.5px solid #d1d9e6; border-radius: 99px;
+  background: #f8faff; font-size: 0.82rem; font-weight: 600;
+  color: var(--charcoal); cursor: pointer; white-space: nowrap;
+  overflow: hidden; transition: border-color 0.15s, background 0.15s;
+}
+.pf-pill:hover { border-color: #b0bcd4; }
+.pf-pill.active { border-color: var(--gold); background: #fdf8ec; color: #92733a; }
+.pf-pill svg { flex-shrink: 0; transition: transform 0.18s ease; }
+.pf-pill.open svg { transform: rotate(180deg); }
+.pf-pill-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: left; }
+.pf-dropdown {
+  display: none; position: absolute; top: calc(100% + 0.45rem); left: 0;
+  min-width: 100%; background: #fff; border: 1px solid #e2e6f0;
+  border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  z-index: 600; padding: 0.4rem; flex-direction: column; gap: 0.2rem;
+}
+.pf-dropdown.open { display: flex; }
+.pf-opt {
+  display: block; width: 100%; text-align: left; padding: 0.5rem 0.85rem;
+  border: none; border-radius: 99px; background: none;
+  font-size: 0.82rem; font-weight: 500; color: var(--charcoal); cursor: pointer;
+  transition: background 0.13s;
+}
+.pf-opt:hover { background: #f0f2f8; }
+.pf-opt.selected { background: #fdf8ec; color: #92733a; font-weight: 700; }
+.pf-result { font-size: 0.75rem; color: var(--text-muted); width: 100%; padding: 0 0.25rem; }
 .prop-fecha { font-size: 0.68rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
 
 /* Toggle switch */
@@ -1073,8 +1100,9 @@ select.form-input { cursor: pointer; }
 @media (max-width: 600px) {
   /* Filtros: 2 selects por fila */
   .props-filtros { gap: 0.4rem; padding: 0.6rem 0.9rem; }
-  .props-filtros select { flex: 1 1 calc(50% - 0.2rem); min-width: 0; font-size: 0.73rem; }
-  .pf-result { width: 100%; margin-left: 0; font-size: 0.68rem; }
+  .pf-pill { font-size: 0.78rem; padding: 0.45rem 0.7rem; }
+  .pf-opt { font-size: 0.8rem; }
+  .pf-dropdown { min-width: 140px; }
 }
 
 /* ── CRM KANBAN ── */
@@ -2947,24 +2975,49 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
           </button>
         </div>
         <div class="props-filtros">
-          <select id="pf-operacion" onchange="filtrarProps()">
-            <option value="">Todas las operaciones</option>
-            <option value="venta">Venta</option>
-            <option value="renta">Renta</option>
-          </select>
-          <select id="pf-estado" onchange="filtrarProps()">
-            <option value="">Todos los estados</option>
-            <option value="activo">Disponible</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="vendido">Vendido / Rentado</option>
-            <option value="inactivo">Inactivo</option>
-          </select>
-          <select id="pf-orden" onchange="filtrarProps()">
-            <option value="reciente">Más recientes</option>
-            <option value="antiguo">Más antiguas</option>
-            <option value="precio_asc">Precio: menor a mayor</option>
-            <option value="precio_desc">Precio: mayor a menor</option>
-          </select>
+          <!-- Pill: Operación -->
+          <div class="pf-pill-wrap" id="pf-wrap-operacion">
+            <button class="pf-pill" onclick="togglePfDd('operacion',this)" type="button">
+              <span class="pf-pill-label" id="pf-lbl-operacion">Operación</span>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="pf-dropdown" id="pf-dd-operacion">
+              <button class="pf-opt selected" data-val="" onclick="setPfVal('operacion','','Operación')" type="button">Todas las operaciones</button>
+              <button class="pf-opt" data-val="venta" onclick="setPfVal('operacion','venta','Venta')" type="button">Venta</button>
+              <button class="pf-opt" data-val="renta" onclick="setPfVal('operacion','renta','Renta')" type="button">Renta</button>
+            </div>
+          </div>
+          <!-- Pill: Estado -->
+          <div class="pf-pill-wrap" id="pf-wrap-estado">
+            <button class="pf-pill" onclick="togglePfDd('estado',this)" type="button">
+              <span class="pf-pill-label" id="pf-lbl-estado">Estado</span>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="pf-dropdown" id="pf-dd-estado">
+              <button class="pf-opt selected" data-val="" onclick="setPfVal('estado','','Estado')" type="button">Todos los estados</button>
+              <button class="pf-opt" data-val="activo" onclick="setPfVal('estado','activo','Disponible')" type="button">Disponible</button>
+              <button class="pf-opt" data-val="pendiente" onclick="setPfVal('estado','pendiente','Pendiente')" type="button">Pendiente</button>
+              <button class="pf-opt" data-val="vendido" onclick="setPfVal('estado','vendido','Vendido')" type="button">Vendido / Rentado</button>
+              <button class="pf-opt" data-val="inactivo" onclick="setPfVal('estado','inactivo','Inactivo')" type="button">Inactivo</button>
+            </div>
+          </div>
+          <!-- Pill: Orden -->
+          <div class="pf-pill-wrap" id="pf-wrap-orden">
+            <button class="pf-pill active" onclick="togglePfDd('orden',this)" type="button">
+              <span class="pf-pill-label" id="pf-lbl-orden">Recientes</span>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="pf-dropdown" id="pf-dd-orden">
+              <button class="pf-opt selected" data-val="reciente" onclick="setPfVal('orden','reciente','Recientes')" type="button">Más recientes</button>
+              <button class="pf-opt" data-val="antiguo" onclick="setPfVal('orden','antiguo','Antiguas')" type="button">Más antiguas</button>
+              <button class="pf-opt" data-val="precio_asc" onclick="setPfVal('orden','precio_asc','Precio ↑')" type="button">Precio: menor a mayor</button>
+              <button class="pf-opt" data-val="precio_desc" onclick="setPfVal('orden','precio_desc','Precio ↓')" type="button">Precio: mayor a menor</button>
+            </div>
+          </div>
+          <!-- Selects ocultos — filtrarProps() los lee sin cambios -->
+          <select id="pf-operacion" style="display:none"><option value="">Todas las operaciones</option><option value="venta">Venta</option><option value="renta">Renta</option></select>
+          <select id="pf-estado" style="display:none"><option value="">Todos los estados</option><option value="activo">Disponible</option><option value="pendiente">Pendiente</option><option value="vendido">Vendido / Rentado</option><option value="inactivo">Inactivo</option></select>
+          <select id="pf-orden" style="display:none"><option value="reciente" selected>Más recientes</option><option value="antiguo">Más antiguas</option><option value="precio_asc">Precio ↑</option><option value="precio_desc">Precio ↓</option></select>
           <span class="pf-result" id="pf-result"></span>
         </div>
         <div id="props-list">
@@ -7523,6 +7576,34 @@ async function cargarPropiedades() {
     cargarLeadsStats(); // actualiza leads extra al cambiar propiedades
   } catch {}
 }
+
+function togglePfDd(id, btn) {
+  const dd = document.getElementById(`pf-dd-${id}`);
+  const isOpen = dd.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  ['operacion','estado','orden'].forEach(k => {
+    if (k === id) return;
+    document.getElementById(`pf-dd-${k}`)?.classList.remove('open');
+    document.querySelector(`#pf-wrap-${k} .pf-pill`)?.classList.remove('open');
+  });
+}
+function setPfVal(id, val, label) {
+  const sel = document.getElementById(`pf-${id}`);
+  if (sel) sel.value = val;
+  const lbl = document.getElementById(`pf-lbl-${id}`);
+  if (lbl) lbl.textContent = label;
+  const pill = document.querySelector(`#pf-wrap-${id} .pf-pill`);
+  if (pill) { pill.classList.toggle('active', val !== '' || id === 'orden'); pill.classList.remove('open'); }
+  document.getElementById(`pf-dd-${id}`)?.classList.remove('open');
+  document.querySelectorAll(`#pf-dd-${id} .pf-opt`).forEach(o => o.classList.toggle('selected', o.dataset.val === val));
+  filtrarProps();
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.pf-pill-wrap')) {
+    document.querySelectorAll('.pf-dropdown.open').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.pf-pill.open').forEach(p => p.classList.remove('open'));
+  }
+});
 
 function filtrarProps() {
   const opFiltro  = document.getElementById('pf-operacion')?.value || '';
