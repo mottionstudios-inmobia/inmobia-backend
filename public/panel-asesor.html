@@ -448,19 +448,42 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
 
 /* ── PERFIL RESPONSIVE (móvil) ── */
 @media (max-width: 600px) {
-  /* Código de asesor: alinear a la izquierda al colapsar */
+  /* Código de asesor: alinear a la izquierda */
   #s-perfil .page-header { flex-direction: column; gap: 0.5rem; }
   #s-perfil .page-header > div:last-child { align-items: flex-start !important; }
 
-  /* Badge goal: texto en segunda fila para no aplastarse */
-  #perfil-badge-goal { flex-wrap: wrap !important; row-gap: 0.5rem !important; }
-  #perfil-badge-goal > div:nth-child(2) { order: 3; width: 100%; flex: none; min-width: 100%; }
+  /* Badge goal: grid 2 columnas fila 1 (badge|contador), fila 2 texto completo */
+  #perfil-badge-goal {
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 0.55rem 0.75rem !important;
+    align-items: center !important;
+  }
+  #perfil-badge-goal > div:nth-child(1) { grid-column: 1; grid-row: 1; }
+  #perfil-badge-goal > div:nth-child(2) { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
+  #perfil-badge-goal > div:nth-child(3) {
+    grid-column: 2; grid-row: 1;
+    min-width: 0 !important;
+    text-align: left !important;
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+  }
+  #perfil-badge-goal > div:nth-child(3) > div {
+    text-align: left !important;
+    justify-content: flex-start !important;
+  }
 
   /* Siguiente logro: botón debajo del texto */
   #perfil-next-goal > div { flex-wrap: wrap !important; }
-  #perfil-next-goal > div > button { width: 100%; justify-content: center; margin-top: 0.25rem; }
+  #perfil-next-goal > div > button { width: 100% !important; justify-content: center; margin-top: 0.35rem; }
 
-  /* Acreditaciones: campo de código ocupa el ancho disponible */
+  /* Barra de progreso: mensaje en segunda fila */
+  #perfil-progreso-wrap > div:first-child { flex-direction: column !important; align-items: flex-start !important; gap: 0.25rem !important; }
+
+  /* Acreditaciones */
   #acred-cbr-campo, #acred-gpi-campo { min-width: 0 !important; width: 100%; }
 }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.1rem; }
