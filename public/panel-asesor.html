@@ -447,7 +447,10 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
 .perfil-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; align-items: start; }
 .perfil-col { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
-@media (max-width: 900px) { .perfil-cols { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .perfil-cols { grid-template-columns: 1fr; }
+  #perfil-col-score.score-first { order: -1; }
+}
 
 /* ── GALERÍA DE FONDOS RESPONSIVE ── */
 @media (max-width: 768px) {
@@ -2333,7 +2336,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
 
       <div class="perfil-cols">
 
-        <div class="perfil-col">
+        <div class="perfil-col" id="perfil-col-datos">
         <!-- Datos personales -->
         <div class="card">
           <div class="card-header"><h3>Datos personales</h3></div>
@@ -2684,7 +2687,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
 
         </div>
 
-        <div class="perfil-col">
+        <div class="perfil-col" id="perfil-col-score">
 
           <!-- Score (arriba en la 2da columna) -->
           <div class="card">
@@ -7028,16 +7031,20 @@ function actualizarProgresoPerfil() {
       }, 400);
     }
     if (!_guiaFlags.perfil) { _guiaFlags.perfil = true; checkGuiaMilestone(); }
+    document.getElementById('perfil-col-score')?.classList.add('score-first');
   } else if (pct >= 67) {
     badge.style.display = ''; msg.style.display = '';
+    document.getElementById('perfil-col-score')?.classList.remove('score-first');
     bar.style.background = 'linear-gradient(90deg,#c9a84c,#e0b94a)';
     msg.textContent = `Casi listo — ${pendientes} paso${pendientes > 1 ? 's' : ''} para desbloquear tu insignia`;
   } else if (pct >= 34) {
     badge.style.display = ''; msg.style.display = '';
+    document.getElementById('perfil-col-score')?.classList.remove('score-first');
     bar.style.background = 'linear-gradient(90deg,#c9a84c,#e0b94a)';
     msg.textContent = `Buen avance — ${pendientes} pasos más para desbloquear tu insignia`;
   } else {
     badge.style.display = ''; msg.style.display = '';
+    document.getElementById('perfil-col-score')?.classList.remove('score-first');
     bar.style.background = 'linear-gradient(90deg,#c9a84c,#e0b94a)';
     msg.textContent = 'Completa los pasos para desbloquear tu insignia ✓ Verificado';
   }
