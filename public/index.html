@@ -2335,6 +2335,7 @@ user-select: none;
   </div>
 </div>
  
+<script src="/js/share-property.js"></script>
 <script>
   // ── DROPDOWNS CUSTOM — reemplazan el select nativo ──
   function closeAllDropdowns() {
@@ -3862,90 +3863,6 @@ user-select: none;
     return `${sym}${num}${sfx}`;
   }
 
-  function escapeAttr(value) {
-    return String(value || '')
-      .replace(/&/g, '&amp;')
-      .replace(/"/g, '&quot;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-  }
-
-  function textoCompartirPropiedad(titulo, precio, ubicacion) {
-    return `Mira esta propiedad en InmobIA: ${titulo}${precio ? ` - ${precio}` : ''}${ubicacion ? ` - ${ubicacion}` : ''}`;
-  }
-
-  function slugCompartirPropiedad(texto) {
-    return String(texto || 'propiedad')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 70) || 'propiedad';
-  }
-
-  function cerrarMenusCompartir() {
-    document.querySelectorAll('.property-share.open').forEach(el => el.classList.remove('open'));
-  }
-
-  function toggleMenuCompartir(event, btn) {
-    event.preventDefault();
-    event.stopPropagation();
-    const wrap = btn.closest('.property-share');
-    const estabaAbierto = wrap.classList.contains('open');
-    cerrarMenusCompartir();
-    if (!estabaAbierto) wrap.classList.add('open');
-  }
-
-  async function compartirPropiedad(event, accion, btn) {
-    event.preventDefault();
-    event.stopPropagation();
-    const wrap = btn.closest('.property-share');
-    const baseUrl = wrap.dataset.url;
-    const baseWhatsappUrl = wrap.dataset.whatsappUrl || baseUrl;
-    const url = accion === 'whatsapp'
-      ? baseWhatsappUrl.replace(/s=\d+$/, `s=${Date.now()}`)
-      : `${baseUrl.replace(/-\d+$/, '')}-${Date.now()}`;
-    const titulo = wrap.dataset.title;
-    const texto = wrap.dataset.text;
-    const shareText = `${texto}\n${url}`;
-
-    if (accion === 'native' && navigator.share) {
-      try {
-        await navigator.share({ title: titulo, text: texto, url });
-      } catch (_) {}
-      cerrarMenusCompartir();
-      return;
-    }
-
-    if (accion === 'copy') {
-      try {
-        await navigator.clipboard.writeText(url);
-      } catch (_) {
-        const tmp = document.createElement('input');
-        tmp.value = url;
-        document.body.appendChild(tmp);
-        tmp.select();
-        document.execCommand('copy');
-        tmp.remove();
-      }
-      cerrarMenusCompartir();
-      return;
-    }
-
-    const encodedUrl = encodeURIComponent(url);
-    const encodedText = encodeURIComponent(shareText);
-    const esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-    const destinos = {
-      whatsapp: esMovil ? `whatsapp://send?text=${encodedText}` : `https://wa.me/?text=${encodedText}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent(texto)}`
-    };
-
-    if (destinos[accion]) window.open(destinos[accion], '_blank', 'noopener,noreferrer');
-    cerrarMenusCompartir();
-  }
-
   document.addEventListener('click', cerrarMenusCompartir);
 
   async function cargarMetricasHero() {
@@ -3979,9 +3896,8 @@ user-select: none;
     const precio     = formatearPrecio(p.precio, p.moneda, p.operacion);
     const ubicacion  = [p.colonia, p.zona, p.municipio].filter(Boolean).join(', ') || 'Guatemala';
     const tipoLabel  = p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1);
-    const shareSlug = `${slugCompartirPropiedad(`${p.titulo || 'propiedad'} ${p.nombre_proyecto || ''}`)}-${Date.now()}`;
-    const shareUrl   = new URL(`/propiedad/${shareSlug}/${p.id}?shared=whatsapp`, window.location.origin).href;
-    const whatsappUrl = new URL(`/propiedad.html?id=${p.id}&s=${Date.now()}`, window.location.origin).href;
+    const shareUrl   = InmobiaShare.crearUrlCompartirPropiedad(p);
+    const whatsappUrl = InmobiaShare.crearUrlWhatsappPropiedad(p);
     const shareText  = textoCompartirPropiedad(p.titulo, precio, ubicacion);
     const shareNative = typeof navigator !== 'undefined' && navigator.share
       ? `<button class="property-share-option" type="button" data-accion="native" onclick="compartirPropiedad(event,'native',this)"><span>↗</span> Compartir...</button>`
