@@ -4844,6 +4844,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   cargarBadge1D();
   actualizarNotificaciones();
   setInterval(actualizarNotificaciones, 5000);
+  // Polling plan: detecta upgrade a Premium mientras el asesor está en la página
+  setInterval(cargarLeadsStats, 60000);
   // Deep-link desde email: ?lead=ID abre la ficha directamente
   const urlLead = new URLSearchParams(window.location.search).get('lead');
   if (urlLead) {
@@ -7443,9 +7445,41 @@ function renderLeadsStats(s) {
   const esPremium = (asesor?.plan || s.plan) === 'premium';
   const usados  = s.leads_este_mes || 0;
   const limite  = s.limite_total  || 6;
+
+  // ── Detectar upgrade a Premium ──────────────────────────────────
+  const planAnterior = localStorage.getItem('_inmobia_plan_asesor');
+  const recienSubioPremium = esPremium && planAnterior !== 'premium';
+  localStorage.setItem('_inmobia_plan_asesor', esPremium ? 'premium' : 'gratis');
+
+  // Contar leads que estaban bloqueados ANTES de marcar como premium
+  let desbloqueados = 0;
+  if (recienSubioPremium && todosLosLeads?.length) {
+    const mesActual = new Date().toISOString().slice(0, 7);
+    const contables = ['busqueda_personalizada', 'inmobia'];
+    const leadsInmobia = todosLosLeads.filter(l => {
+      if (l._esEspejo) return false;
+      if (!contables.includes(l.origen) && l.modelo !== '2A' && l.modelo !== '1D') return false;
+      try { return parseSQL(l.creado_en).toISOString().slice(0, 7) === mesActual; } catch { return false; }
+    });
+    desbloqueados = Math.max(0, leadsInmobia.length - limite);
+  }
+
   _esPremium   = esPremium;
   _limiteLeads = limite;
   computarLeadsBloqueados(limite);
+
+  // Mostrar notificación de bienvenida + re-render
+  if (recienSubioPremium) {
+    if (asesor) asesor.plan = 'premium';
+    setTimeout(() => {
+      if (desbloqueados > 0) {
+        toast(`🎉 ¡Premium activo! Tienes ${desbloqueados} lead${desbloqueados > 1 ? 's desbloqueados' : ' desbloqueado'} esperándote — revisa tu CRM.`, 'success');
+      } else {
+        toast('🎉 ¡Bienvenido a Premium! Ahora recibes leads ilimitados cada mes.', 'success');
+      }
+      filtrarLeadsCRM();
+    }, 600);
+  }
   const extra   = s.leads_extra   || 0;
   const props   = s.props_inmobia || 0;
   const propsParaSig = 5 - (props % 5 === 0 && props > 0 ? 5 : props % 5);
