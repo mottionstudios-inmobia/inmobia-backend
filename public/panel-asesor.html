@@ -8019,12 +8019,11 @@ function renderNotificaciones(notifs) {
   const totalPages = Math.ceil(notifs.length / PER_PAGE);
   const totalNotifs = notificacionesTodas.length;
 
-  const btnHistorial = `<button class="notif-nav-btn" title="Historial de notificaciones${totalNotifs > 0 ? ' (' + totalNotifs + ')' : ''}" onclick="abrirHistorialNotificaciones()" style="padding:0.4rem;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:32px;height:32px;transition:all 0.2s"><img src="/recursos/Iconos/historial.png" style="width:18px;height:18px;filter:brightness(0) saturate(100%) invert(65%) sepia(64%) saturate(1138%) hue-rotate(190deg)" alt="Historial"></button>`;
-
   tray.classList.remove('hidden');
 
   if (notifs.length === 0) {
-    tray.innerHTML = `<div id="notif-tray-wrapper" style="justify-content:flex-end"><button onclick="abrirHistorialNotificaciones()" style="display:flex;align-items:center;gap:0.45rem;background:none;border:none;cursor:pointer;color:#e69b22;font-size:0.75rem;font-weight:600;padding:0.3rem 0.6rem;border-radius:6px;transition:opacity 0.2s" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'"><span style="color:#38bdf8">Historial de notificaciones</span><img src="/recursos/Iconos/historial.png" style="width:16px;height:16px;filter:brightness(0) saturate(100%) invert(65%) sepia(64%) saturate(1138%) hue-rotate(190deg)" alt="Historial"></button></div>`;
+    tray.innerHTML = '';
+    tray.classList.add('hidden');
     return;
   }
 
@@ -8057,10 +8056,7 @@ function renderNotificaciones(notifs) {
         <div id="notif-tray-track">${items}</div>
       </div>
       <button class="notif-nav-btn" id="notif-next" onclick="notifNav(1)" ${totalPages <= 1 ? 'disabled' : ''}>›</button>
-      <div style="display:flex;align-items:center;gap:0.5rem">
-        ${totalPages > 1 ? `<span id="notif-tray-pager">1 / ${totalPages}</span>` : ''}
-        ${btnHistorial}
-      </div>
+      ${totalPages > 1 ? `<span id="notif-tray-pager">1 / ${totalPages}</span>` : ''}
     </div>`;
 
   // Ajusta el ancho de cada item al contenedor
