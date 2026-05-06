@@ -447,10 +447,18 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
 }
 
 /* ── PERFIL RESPONSIVE (móvil) ── */
+@media (max-width: 768px) {
+  /* Topbar muestra "Mi Perfil" → ocultar h1 duplicado en la sección */
+  #s-perfil .page-header h1 { display: none !important; }
+  /* Código de asesor va al topbar → ocultar bloque del page-header */
+  #s-perfil .page-header > div:last-child { display: none !important; }
+  /* Reducir margen del page-header sin h1 */
+  #s-perfil .page-header { margin-bottom: 0.85rem !important; }
+}
+
 @media (max-width: 600px) {
-  /* Código de asesor: alinear a la izquierda */
-  #s-perfil .page-header { flex-direction: column; gap: 0.5rem; }
-  #s-perfil .page-header > div:last-child { align-items: flex-start !important; }
+  /* Subtitle: alinear a la izquierda */
+  #s-perfil .page-header { flex-direction: column; gap: 0.25rem; }
 
   /* Badge goal: grid 2 columnas fila 1 (badge|contador), fila 2 texto completo */
   #perfil-badge-goal {
@@ -1833,6 +1841,11 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
       <!-- Botón portal solo visible en móvil (el topbar-url se oculta en ≤768px) -->
       <div class="topbar-portal-mobile" onclick="verPortal()" title="Ver mi portal">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:rgba(255,255,255,0.8);fill:none;stroke-width:2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </div>
+      <!-- Código de asesor compacto — solo visible en mobile cuando está en Mi Perfil -->
+      <div id="topbar-codigo-mobile" style="display:none;align-items:center;gap:0.4rem;background:#1e2d4a;border-radius:8px;padding:0.28rem 0.7rem;cursor:pointer" onclick="copiarCodigoAsesor()" title="Copiar código">
+        <span id="topbar-codigo-txt" style="font-size:0.8rem;font-weight:800;color:#e2d5b0;letter-spacing:0.05em">—</span>
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
       </div>
       <div class="topbar-notif" onclick="abrirHistorialNotificaciones()" title="Historial de notificaciones">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
@@ -5541,8 +5554,11 @@ function actualizarUI() {
   document.getElementById('score-nivel-label').textContent = getNivelLabel(score);
 
   // Código de asesor
+  const codStr = asesor.codigo_asesor ? 'A' + asesor.codigo_asesor : '—';
   const codEl = document.getElementById('codigo-asesor-display');
-  if (codEl) codEl.textContent = asesor.codigo_asesor ? 'A' + asesor.codigo_asesor : '—';
+  if (codEl) codEl.textContent = codStr;
+  const topCodTxt = document.getElementById('topbar-codigo-txt');
+  if (topCodTxt) topCodTxt.textContent = codStr;
 
   // Progreso de perfil — carga inicial y listeners en tiempo real
   setTimeout(actualizarProgresoPerfil, 100);
@@ -13676,6 +13692,9 @@ function irA(section) {
   document.getElementById(`s-${section}`)?.classList.add('active');
   document.querySelector(`[data-section="${section}"]`)?.classList.add('active');
   document.getElementById('topbar-title').textContent = TITULOS[section] || '';
+  // Badge código: solo en Mi Perfil en mobile
+  const topCod = document.getElementById('topbar-codigo-mobile');
+  if (topCod) topCod.style.display = (section === 'perfil' && window.innerWidth <= 768) ? 'flex' : 'none';
   if (section === 'propiedades') cargarPropiedades();
   if (section === 'props1d') cargarPropiedades1D();
   if (section === 'compartidas') cargarCompartidas();
