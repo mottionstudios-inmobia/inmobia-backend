@@ -882,6 +882,27 @@ select.form-input { cursor: pointer; }
   .prop-titulo { font-size: 0.8rem; }
 }
 
+/* ── MIS PROPIEDADES RESPONSIVE ── */
+@media (max-width: 600px) {
+  /* Filtros: 2 selects por fila */
+  .props-filtros { gap: 0.4rem; padding: 0.6rem 0.9rem; }
+  .props-filtros select { flex: 1 1 calc(50% - 0.2rem); min-width: 0; font-size: 0.73rem; }
+  .pf-result { width: 100%; margin-left: 0; font-size: 0.68rem; }
+
+  /* Toggle label: reducir y permitir wrap */
+  .toggle-label { font-size: 0.65rem; white-space: normal; max-width: 90px; line-height: 1.2; }
+
+  /* Botones de acción: más compactos */
+  .prop-actions .btn-sm {
+    font-size: 0.66rem !important;
+    padding: 0.28rem 0.5rem !important;
+    min-height: 28px !important;
+  }
+
+  /* Agrupar Editar + Ver juntos, Destacar + Eliminar juntos */
+  .prop-actions { gap: 0.3rem !important; }
+}
+
 /* ── CRM KANBAN ── */
 /* ── DATE / TIME INPUTS DARK THEME ── */
 input[type="date"][style*="0f172a"],
