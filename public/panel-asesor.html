@@ -1043,6 +1043,9 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1100px) {
+  .metrics-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
   .metrics-grid { grid-template-columns: 1fr 1fr; }
 }
 
@@ -1066,7 +1069,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
 }
 
 @media (max-width: 768px) {
-  .metrics-grid { grid-template-columns: 1fr; }
+  .metrics-grid { grid-template-columns: 1fr 1fr; }
   .grid-2, .grid-3, .form-grid, .two-col-form { grid-template-columns: 1fr; }
   .content { padding: 1.25rem; }
   .zonas-check-grid { grid-template-columns: 1fr; }
@@ -1261,6 +1264,32 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
 
 @media (max-width: 480px) {
   .req-filtros-grid { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* ── GUÍA DE INICIO — RESPONSIVE ── */
+.guia-pasos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  position: relative;
+}
+.guia-siguientes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+}
+@media (max-width: 768px) {
+  .guia-pasos-grid { grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  .guia-siguientes-grid { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+  #guia-inicio { padding: 1.25rem !important; }
+}
+@media (max-width: 480px) {
+  .guia-pasos-grid { grid-template-columns: 1fr; gap: 0.7rem; }
+  .guia-siguientes-grid { grid-template-columns: 1fr; gap: 0.6rem; }
+  #guia-inicio { padding: 1rem 0.9rem !important; }
+  #guia-inicio > div:first-child { margin-bottom: 0.85rem !important; }
+  #guia-inicio > div:first-child h3 { font-size: 0.93rem !important; }
+  #guia-inicio > div:first-child p { font-size: 0.71rem !important; }
 }
 
 /* ── MODAL NUEVA PROPIEDAD ── */
@@ -1688,7 +1717,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
             <p style="margin:0.3rem 0 0;font-size:0.76rem;color:rgba(255,255,255,0.55)">Completar estos 3 pasos aumenta hasta 3× sus posibilidades de recibir leads calificados</p>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;position:relative">
+        <div class="guia-pasos-grid">
           <div id="guia-paso-perfil" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:1.25rem 1.15rem 1.15rem;position:relative;overflow:hidden;transition:all 0.4s ease;display:flex;flex-direction:column">
             <div id="guia-paso-perfil-num" style="position:absolute;top:-0.4rem;right:0.7rem;font-size:4.5rem;font-weight:900;color:rgba(201,168,76,0.18);line-height:1;user-select:none;pointer-events:none">1</div>
             <div id="guia-paso-perfil-titulo" style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.3rem;position:relative">Complete su perfil</div>
@@ -1726,7 +1755,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
         </div>
         <!-- Siguientes pasos -->
         <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:0.85rem">Siguientes pasos para su primer cierre</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.85rem">
+        <div class="guia-siguientes-grid">
           <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:1rem;position:relative;overflow:hidden">
             <div style="position:absolute;top:-0.3rem;right:0.6rem;font-size:3rem;font-weight:900;color:rgba(74,222,128,0.08);line-height:1;user-select:none">A</div>
             <div style="font-size:0.85rem;font-weight:700;color:#fff;margin-bottom:0.2rem;position:relative">Responda leads rápido</div>
