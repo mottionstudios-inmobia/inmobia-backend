@@ -2304,7 +2304,7 @@ user-select: none;
           <label>Algo más que deberíamos saber (opcional)</label>
           <textarea id="e-descripcion" placeholder="Ej: necesito patio para mis hijos, prefiero planta baja, zona segura con garita..." style="height:72px"></textarea>
         </div>
-        <button type="submit" class="form-submit" id="enriq-submit">Guardar y finalizar →</button>
+        <button type="submit" class="form-submit" id="enriq-submit">Guardar y ver propiedades →</button>
       </form>
       <!-- Confirmación guardado -->
       <div id="enriq-confirmado" style="display:none;text-align:center;padding:1.5rem 0">
@@ -3399,9 +3399,9 @@ user-select: none;
       if (json.ok) {
         mostrarResultadosBusqueda(json);
       } else {
-        btn.disabled = false; btn.textContent = 'Guardar y finalizar →';
+        btn.disabled = false; btn.textContent = 'Guardar y ver propiedades →';
       }
-    } catch { btn.disabled = false; btn.textContent = 'Guardar y finalizar →'; }
+    } catch { btn.disabled = false; btn.textContent = 'Guardar y ver propiedades →'; }
   }
 
   // ── RESULTADOS FINALES: modal de propiedades tras guardar el perfil ─────────────
@@ -3626,7 +3626,7 @@ user-select: none;
     const ec = document.getElementById('enriq-confirmado');
     if (ec) ec.style.display = 'none';
     const btn = document.getElementById('enriq-submit');
-    if (btn) { btn.disabled = false; btn.textContent = 'Guardar y finalizar →'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Guardar y ver propiedades →'; }
     // Ocultar detalle mascota
     const gdm = document.getElementById('grp-detalle-mascota-modal');
     if (gdm) gdm.style.display = 'none';
