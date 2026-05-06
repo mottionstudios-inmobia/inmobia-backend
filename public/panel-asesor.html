@@ -7877,8 +7877,9 @@ async function actualizarNotificaciones() {
         'nuevo_referido':    '👥',
         'referido_premium':  '⭐',
         'lead_busqueda':     '🔍',
+        'wa-entrante':       '💬',
       };
-      const esLeadBusqueda = n.tipo === 'lead_busqueda' && n.referencia_id;
+      const esConLead = (n.tipo === 'lead_busqueda' || n.tipo === 'wa-entrante') && n.referencia_id;
       notifs.unshift({
         id:        `backend-${n.id}`,
         tipo:      n.tipo,
@@ -7886,9 +7887,9 @@ async function actualizarNotificaciones() {
         title:     n.titulo,
         spec:      '',
         desc:      n.mensaje,
-        urgent:    esLeadBusqueda,
-        leadId:    esLeadBusqueda ? n.referencia_id : null,
-        btnText:   esLeadBusqueda ? '📋 Ver detalles' : null,
+        urgent:    esConLead,
+        leadId:    esConLead ? n.referencia_id : null,
+        btnText:   esConLead ? '📋 Ver lead' : null,
         backendId: n.id,
         creado_en: n.creado_en || null,
       });
