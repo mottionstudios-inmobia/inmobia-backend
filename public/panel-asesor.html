@@ -1903,11 +1903,14 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
       <!-- Próximos pasos -->
       <div id="guia-inicio" style="margin-bottom:1.25rem;background:linear-gradient(135deg,#0f172a 0%,#1e2d4a 55%,#1e1b4b 100%);border-radius:14px;padding:1.75rem 1.5rem;position:relative;overflow:hidden">
 
-        <div style="margin-bottom:1.35rem;position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
-          <div>
+        <div style="margin-bottom:1.1rem;display:flex;align-items:flex-start;justify-content:space-between;gap:0.75rem">
+          <div style="min-width:0">
             <div style="font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:0.3rem">Guía de inicio</div>
-            <h3 style="margin:0;font-size:1.08rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:0.5rem"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Próximos pasos para cerrar su primer negocio</h3>
-            <p style="margin:0.3rem 0 0;font-size:0.76rem;color:rgba(255,255,255,0.55)">Completar estos 3 pasos aumenta hasta 3× sus posibilidades de recibir leads calificados</p>
+            <h3 style="margin:0;font-size:1rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:0.45rem"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Próximos pasos para cerrar su primer negocio</h3>
+          </div>
+          <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:0.35rem;margin-top:0.1rem">
+            <span id="guia-contador" style="font-size:0.67rem;font-weight:700;background:rgba(255,255,255,0.09);color:rgba(255,255,255,0.6);border-radius:99px;padding:0.2rem 0.6rem;white-space:nowrap">0 de 3</span>
+            <button id="guia-btn-toggle" onclick="_toggleGuiaCompletados()" style="display:none;background:none;border:none;color:#4ade80;font-size:0.71rem;font-weight:600;cursor:pointer;padding:0;white-space:nowrap;font-family:inherit">Ver completados ▾</button>
           </div>
         </div>
         <div class="guia-pasos-grid">
@@ -6974,7 +6977,10 @@ function actualizarProgresoPerfil() {
       btn.onmouseenter      = null;
       btn.onmouseleave      = null;
       btn.onclick           = null;
+      guiaPaso.dataset.completado = '1';
+      _actualizarGuiaAcordeon();
     } else {
+      guiaPaso.dataset.completado = '0';
       guiaPaso.style.background    = 'rgba(255,255,255,0.07)';
       guiaPaso.style.borderColor   = 'rgba(255,255,255,0.12)';
       document.getElementById('guia-paso-perfil-num').style.color   = 'rgba(201,168,76,0.18)';
@@ -7344,6 +7350,8 @@ async function cargarPropiedades() {
       }
       const num = document.getElementById('guia-paso-prop-num');
       if (num) num.style.color = 'rgba(74,222,128,0.2)';
+      guiaProp.dataset.completado = '1';
+      _actualizarGuiaAcordeon();
     }
     document.getElementById('portal-props').textContent = todasLasPropiedades.length;
     filtrarProps();
@@ -7682,6 +7690,42 @@ function renderKanbanVacio() {
 
 // ── MILESTONE GUÍA — 3 PASOS COMPLETOS ───────────────────────
 const _guiaFlags = { perfil: false, prop: false, score: 0, celebrado: false };
+let _guiaMostrarCompletados = false;
+
+function _toggleGuiaCompletados() {
+  _guiaMostrarCompletados = !_guiaMostrarCompletados;
+  _actualizarGuiaAcordeon();
+}
+
+function _actualizarGuiaAcordeon() {
+  const IDS = ['perfil', 'prop', 'score'];
+  const completados = IDS.filter(id => {
+    const el = document.getElementById(`guia-paso-${id}`);
+    return el && el.dataset.completado === '1';
+  });
+
+  const cEl = document.getElementById('guia-contador');
+  if (cEl) cEl.textContent = `${completados.length} de 3`;
+
+  const btn = document.getElementById('guia-btn-toggle');
+  if (btn) {
+    if (completados.length > 0) {
+      btn.style.display = '';
+      btn.textContent = _guiaMostrarCompletados
+        ? 'Ocultar completados ▴'
+        : `Ver completados (${completados.length}) ▾`;
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  IDS.forEach(id => {
+    const el = document.getElementById(`guia-paso-${id}`);
+    if (!el) return;
+    const done = el.dataset.completado === '1';
+    el.style.display = (done && !_guiaMostrarCompletados) ? 'none' : 'flex';
+  });
+}
 
 function checkGuiaMilestone(scoreVal) {
   if (scoreVal !== undefined) _guiaFlags.score = scoreVal;
@@ -7715,6 +7759,8 @@ function activarMilestone2_5(score) {
     }
     const num = document.getElementById('guia-paso-score-num');
     if (num) num.style.color = 'rgba(74,222,128,0.2)';
+    paso.dataset.completado = '1';
+    _actualizarGuiaAcordeon();
   }
 
   // Confetti
