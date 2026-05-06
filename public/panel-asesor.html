@@ -351,6 +351,11 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
 .perfil-col { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
 @media (max-width: 900px) { .perfil-cols { grid-template-columns: 1fr; } }
 
+/* ── GALERÍA DE FONDOS RESPONSIVE ── */
+@media (max-width: 768px) {
+  #galeria-fondos { grid-template-columns: repeat(3, 1fr) !important; gap: 0.35rem !important; }
+}
+
 /* ── PERFIL RESPONSIVE (móvil) ── */
 @media (max-width: 600px) {
   /* Código de asesor: alinear a la izquierda al colapsar */
