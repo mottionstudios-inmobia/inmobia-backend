@@ -494,9 +494,8 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
   /* Siguiente logro: acordión — solo icono + label visible por defecto */
   #ng-chevron { display: flex !important; }
   #ng-collapsible { display: none !important; }
-  #ng-action-btn { display: none !important; }
   #ng-collapsible.open { display: block !important; }
-  #ng-action-btn.open { display: block !important; margin-top: 0.5rem; width: 100%; }
+  #perfil-next-goal > div { align-items: flex-start !important; }
 
   /* Barra de progreso: mensaje en segunda fila */
   #perfil-progreso-wrap > div:first-child { flex-direction: column !important; align-items: flex-start !important; gap: 0.25rem !important; }
@@ -2313,15 +2312,15 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
               <div id="ng-collapsible">
                 <div data-ng-title style="font-size:0.82rem;font-weight:700;color:var(--charcoal);margin-bottom:0.1rem;margin-top:0.15rem">Sube 2 propiedades con 5+ fotos (1/2)</div>
                 <div data-ng-desc style="font-size:0.68rem;color:var(--text-muted);line-height:1.4;margin-bottom:0.5rem">Tienes 1 de 2 propiedades con galería completa. Completar este logro suma +0.5★ a tu score.</div>
-                <div style="display:flex;align-items:center;gap:0.5rem">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem">
                   <div style="flex:1;background:rgba(201,168,76,0.15);border-radius:99px;height:5px;overflow:hidden">
                     <div id="ng-progress-bar" style="height:100%;border-radius:99px;background:linear-gradient(90deg,#c9a84c,#e0b94a);width:50%;transition:width 0.6s ease"></div>
                   </div>
                   <span id="ng-progress-label" style="font-size:0.65rem;font-weight:700;color:#c9a84c;white-space:nowrap">1/2</span>
                 </div>
+                <button id="ng-action-btn" onclick="irA('propiedades')" style="background:#c9a84c;color:#fff;border:none;border-radius:8px;padding:0.45rem 0.85rem;font-size:0.73rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.18s;width:100%" onmouseenter="this.style.background='#b8963e'" onmouseleave="this.style.background='#c9a84c'">Ir a propiedades →</button>
               </div>
             </div>
-            <button id="ng-action-btn" onclick="irA('propiedades')" style="flex-shrink:0;background:#c9a84c;color:#fff;border:none;border-radius:8px;padding:0.45rem 0.85rem;font-size:0.73rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.18s" onmouseenter="this.style.background='#b8963e'" onmouseleave="this.style.background='#c9a84c'">Ir a propiedades →</button>
           </div>
         </div>
       </div>
@@ -7772,11 +7771,9 @@ function renderKanbanVacio() {
 const _guiaFlags = { perfil: false, prop: false, score: 0, celebrado: false };
 function toggleNextGoal() {
   const body = document.getElementById('ng-collapsible');
-  const btn  = document.getElementById('ng-action-btn');
   const icon = document.getElementById('ng-chevron-icon');
   if (!body) return;
   const open = body.classList.toggle('open');
-  if (btn)  btn.classList.toggle('open', open);
   if (icon) icon.style.transform = open ? 'rotate(180deg)' : '';
 }
 
