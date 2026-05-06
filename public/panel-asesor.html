@@ -7974,6 +7974,11 @@ async function actualizarNotificaciones() {
   const dot = document.querySelector('.notif-dot');
   if (dot) dot.style.display = notifsNoVistas.length > 0 ? 'block' : 'none';
 
+  // Solo re-renderizar si la lista cambió — evita resetear el scroll táctil cada 5s
+  const notifsKey = notifsNoVistas.map(n => n.id).join(',');
+  if (notifsKey === window._lastNotifsKey) return;
+  window._lastNotifsKey = notifsKey;
+
   renderNotificaciones(notifsNoVistas);
 }
 
@@ -8122,6 +8127,7 @@ function notifNav(dir) {
 
 function marcarNotifVista(notifId) {
   notificacionesVistas.add(notifId);
+  window._lastNotifsKey = null; // forzar re-render en próximo poll
   // Si es notificación del backend, marcarla como leída en la DB
   if (String(notifId).startsWith('backend-')) {
     const backendId = String(notifId).replace('backend-', '');
