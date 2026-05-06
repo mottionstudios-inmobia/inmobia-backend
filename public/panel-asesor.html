@@ -350,6 +350,24 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
 .perfil-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; align-items: start; }
 .perfil-col { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
 @media (max-width: 900px) { .perfil-cols { grid-template-columns: 1fr; } }
+
+/* ── PERFIL RESPONSIVE (móvil) ── */
+@media (max-width: 600px) {
+  /* Código de asesor: alinear a la izquierda al colapsar */
+  #s-perfil .page-header { flex-direction: column; gap: 0.5rem; }
+  #s-perfil .page-header > div:last-child { align-items: flex-start !important; }
+
+  /* Badge goal: texto en segunda fila para no aplastarse */
+  #perfil-badge-goal { flex-wrap: wrap !important; row-gap: 0.5rem !important; }
+  #perfil-badge-goal > div:nth-child(2) { order: 3; width: 100%; flex: none; min-width: 100%; }
+
+  /* Siguiente logro: botón debajo del texto */
+  #perfil-next-goal > div { flex-wrap: wrap !important; }
+  #perfil-next-goal > div > button { width: 100%; justify-content: center; margin-top: 0.25rem; }
+
+  /* Acreditaciones: campo de código ocupa el ancho disponible */
+  #acred-cbr-campo, #acred-gpi-campo { min-width: 0 !important; width: 100%; }
+}
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.1rem; }
 
 /* ── LEADS RECIENTES ── */
