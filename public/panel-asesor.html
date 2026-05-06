@@ -1876,9 +1876,12 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:rgba(255,255,255,0.8);fill:none;stroke-width:2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       </div>
       <!-- Código de asesor compacto — solo visible en mobile cuando está en Mi Perfil -->
-      <div id="topbar-codigo-mobile" style="display:none;align-items:center;gap:0.35rem;cursor:pointer;opacity:0.75" onclick="copiarCodigoAsesor()" title="Copiar código" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.75'">
-        <span id="topbar-codigo-txt" style="font-size:0.8rem;font-weight:700;color:#374151;letter-spacing:0.05em">—</span>
-        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#6b7280" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      <div id="topbar-codigo-mobile" style="display:none;flex-direction:column;align-items:flex-end;gap:0.05rem;cursor:pointer;opacity:0.75" onclick="copiarCodigoAsesor()" title="Copiar código" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.75'">
+        <span style="font-size:0.55rem;font-weight:300;color:#9aa3b5;letter-spacing:0.04em;line-height:1">código de asesor</span>
+        <div style="display:flex;align-items:center;gap:0.3rem">
+          <span id="topbar-codigo-txt" style="font-size:0.8rem;font-weight:700;color:#374151;letter-spacing:0.05em">—</span>
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#6b7280" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </div>
       </div>
       <div class="topbar-notif" onclick="abrirHistorialNotificaciones()" title="Historial de notificaciones">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
