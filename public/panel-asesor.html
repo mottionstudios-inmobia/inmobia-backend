@@ -1950,24 +1950,15 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
       </div>
 
       <!-- Banner Mi Portal -->
-      <div id="banner-mi-portal" style="margin-bottom:1.25rem;background:#161c28;border:1px solid rgba(201,168,76,0.25);border-radius:12px;padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
-        <div style="width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(201,168,76,0.65);margin-bottom:0.1rem">Mi portal público</div>
-          <div id="banner-portal-url" style="font-size:0.78rem;color:#e2d5b0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">inmobia.site/asesor/...</div>
-        </div>
-        <div style="display:flex;gap:0.4rem;flex-shrink:0">
-          <button onclick="verPortal()" style="background:#c9a84c;color:#1a1200;border:none;border-radius:7px;padding:0.45rem 0.85rem;font-size:0.76rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:0.35rem;white-space:nowrap" onmouseenter="this.style.background='#b8963e'" onmouseleave="this.style.background='#c9a84c'">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            Ver
-          </button>
-          <button onclick="copiarPortalUrl()" style="background:#1e2d4a;color:#94a3b8;border:1px solid #334155;border-radius:7px;padding:0.45rem 0.7rem;font-size:0.76rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem" title="Copiar enlace" onmouseenter="this.style.background='#263a5e'" onmouseleave="this.style.background='#1e2d4a'">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            Copiar
-          </button>
-        </div>
+      <div id="banner-mi-portal" style="margin-bottom:1.25rem;display:flex;align-items:center;gap:0.5rem;min-width:0">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        <a id="banner-portal-url" href="#" target="_blank" onclick="verPortal();return false;" style="font-size:0.8rem;font-weight:600;color:#c9a84c;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">inmobia.site/asesor/...</a>
+        <button onclick="verPortal()" title="Abrir portal" style="flex-shrink:0;background:none;border:none;padding:0.15rem;cursor:pointer;color:#c9a84c;display:flex;align-items:center;opacity:0.75" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.75'">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </button>
+        <button onclick="copiarPortalUrl()" title="Copiar enlace" style="flex-shrink:0;background:none;border:none;padding:0.15rem;cursor:pointer;color:#94a3b8;display:flex;align-items:center;opacity:0.75" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.75'">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </button>
       </div>
 
       <!-- Próximos pasos -->
@@ -5619,7 +5610,7 @@ function actualizarUI() {
   document.getElementById('portal-url-display').textContent = portalUrl;
   document.getElementById('topbar-url-text').textContent    = portalUrl;
   const bannerPortalUrl = document.getElementById('banner-portal-url');
-  if (bannerPortalUrl) bannerPortalUrl.textContent = portalUrl;
+  if (bannerPortalUrl) { bannerPortalUrl.textContent = portalUrl; bannerPortalUrl.href = portalUrl; }
   document.getElementById('portal-props').textContent       = '0';
   const subInm = document.getElementById('m-props-inmobia'); if (subInm) subInm.textContent = '0';
   document.getElementById('portal-leads').textContent       = '0';
