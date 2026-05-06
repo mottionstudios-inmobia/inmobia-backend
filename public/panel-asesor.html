@@ -8623,24 +8623,21 @@ function verLead(id) {
 
   const wa = document.getElementById('modal-lead-wa');
   const es5RACaptor = l.origen === 'red-5ra' && !l._esEspejo;
-  const es2A = l.modelo === '2A' || l.origen === 'inmobia';
-  const telParaCTA = es5RACaptor ? l.partner_telefono : l.telefono;
 
-  // Leads modelo 2A (70/30 - Lead InmobIA): comunicación SOLO a través de la plataforma
-  if (es2A) {
-    wa.style.display = 'none';
-  } else if (telParaCTA) {
+  // Toda comunicación con el cliente es a través de la plataforma InmobIA.
+  // El botón solo aparece en colaboraciones 5RA para contactar al ASESOR referente (no al cliente).
+  if (es5RACaptor && l.partner_telefono) {
     wa.style.display = '';
     wa.style.opacity = '';
     wa.style.cursor = '';
     wa.style.pointerEvents = '';
-    wa.dataset.tel = telParaCTA;
-    wa.dataset.nombre = l.nombre || '';
+    wa.dataset.tel = l.partner_telefono;
+    wa.dataset.nombre = l.partner_nombre || '';
     wa.dataset.propiedad = l.propiedad_titulo || '';
-    wa.dataset.tripartito = l.origen === 'tripartito' ? '1' : '';
-    wa.dataset.red5ra = l.origen === 'red-5ra' ? '1' : '';
+    wa.dataset.tripartito = '';
+    wa.dataset.red5ra = '1';
     wa.dataset.partner = l.partner_nombre || '';
-    wa.innerHTML = '<span style="font-size:1.1rem">💬</span> ' + (es5RACaptor ? 'Contactar al asesor del cliente' : 'Contactar al cliente');
+    wa.innerHTML = '<span style="font-size:1.1rem">💬</span> Contactar al asesor colaborador';
   } else if (es5RACaptor) {
     wa.style.display = '';
     wa.dataset.tel = '';
@@ -8648,8 +8645,9 @@ function verLead(id) {
     wa.style.opacity = '0.55';
     wa.style.cursor = 'not-allowed';
     wa.style.pointerEvents = 'none';
+  } else {
+    wa.style.display = 'none';
   }
-  else wa.style.display = 'none';
 
   // Helper: sección oscura con título
   const seccion = (titulo, contenido) => `
