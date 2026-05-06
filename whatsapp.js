@@ -23,8 +23,6 @@ function getTwilioCreds() {
 }
 
 setTimeout(() => {
-  console.log('[WA DEBUG] GREEN_API_INSTANCE:', process.env.GREEN_API_INSTANCE || 'NO DEFINIDO');
-  console.log('[WA DEBUG] GREEN_API_TOKEN:', process.env.GREEN_API_TOKEN ? '***SET***' : 'NO DEFINIDO');
   const g = getGreenCreds();
   const t = getTwilioCreds();
   if (g.listo)      console.log('[WA] Green API activo — instancia:', g.instance);
