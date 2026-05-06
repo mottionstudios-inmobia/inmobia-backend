@@ -2290,11 +2290,10 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
             <div id="pbg-desc" style="font-size:0.7rem;color:var(--text-muted);line-height:1.4">Complete todos los pasos y obtenga la insignia <strong>✓ Verificado</strong> visible en su portal público</div>
           </div>
           <div style="flex-shrink:0;text-align:right;min-width:fit-content">
-            <div id="pbg-logro-chip" style="display:none;font-size:0.68rem;font-weight:700;color:#16a34a;margin-bottom:0.25rem;white-space:nowrap">✓ Perfil completado</div>
             <div style="display:flex;align-items:baseline;gap:0.15rem;justify-content:flex-end">
               <div id="pbg-num" style="font-size:1.05rem;font-weight:800;color:#b0bcd4;line-height:1;transition:color 0.5s ease">0/9</div>
             </div>
-            <div style="font-size:0.6rem;color:var(--text-muted);margin-top:0.1rem;text-align:right">pasos</div>
+            <div id="pbg-pasos-label" style="font-size:0.6rem;color:var(--text-muted);margin-top:0.1rem;text-align:right">pasos</div>
           </div>
         </div>
 
@@ -6958,12 +6957,9 @@ function actualizarProgresoPerfil() {
 
   const pendientes = campos.length - completados;
   if (pct === 100) {
-    badge.style.cssText += ';background:rgba(39,174,96,0.12);color:#27ae60;border-color:rgba(39,174,96,0.25)';
+    badge.style.display = 'none';
+    msg.style.display   = 'none';
     bar.style.background = 'linear-gradient(90deg,#16a34a,#22c55e)';
-    msg.textContent = '¡Perfil completo! Ya está en la mejor posición para recibir leads.';
-    // Mostrar chip de logro
-    const logroChip = document.getElementById('pbg-logro-chip');
-    if (logroChip) logroChip.style.display = 'block';
     // Colapsar barra de progreso y mostrar siguiente logro
     const collapsible = document.getElementById('perfil-progreso-collapsible');
     if (collapsible && collapsible.style.display !== 'none') {
@@ -6976,12 +6972,15 @@ function actualizarProgresoPerfil() {
     }
     if (!_guiaFlags.perfil) { _guiaFlags.perfil = true; checkGuiaMilestone(); }
   } else if (pct >= 67) {
+    badge.style.display = ''; msg.style.display = '';
     bar.style.background = 'linear-gradient(90deg,#c9a84c,#e0b94a)';
     msg.textContent = `Casi listo — ${pendientes} paso${pendientes > 1 ? 's' : ''} para desbloquear tu insignia`;
   } else if (pct >= 34) {
+    badge.style.display = ''; msg.style.display = '';
     bar.style.background = 'linear-gradient(90deg,#c9a84c,#e0b94a)';
     msg.textContent = `Buen avance — ${pendientes} pasos más para desbloquear tu insignia`;
   } else {
+    badge.style.display = ''; msg.style.display = '';
     bar.style.background = 'linear-gradient(90deg,#c9a84c,#e0b94a)';
     msg.textContent = 'Completa los pasos para desbloquear tu insignia ✓ Verificado';
   }
@@ -6996,7 +6995,17 @@ function actualizarProgresoPerfil() {
   const descEl  = document.getElementById('pbg-desc');
   const numEl   = document.getElementById('pbg-num');
   if (goalEl && numEl) {
-    numEl.textContent = `${completados}/${campos.length}`;
+    numEl.textContent = pct === 100 ? '100%' : `${completados}/${campos.length}`;
+    const pasosLbl = document.getElementById('pbg-pasos-label');
+    if (pasosLbl) {
+      if (pct === 100) {
+        pasosLbl.textContent = 'Su perfil está listo para recibir leads';
+        pasosLbl.style.cssText = 'font-size:0.62rem;color:#16a34a;margin-top:0.15rem;text-align:right;white-space:normal;max-width:90px;line-height:1.35;font-weight:600';
+      } else {
+        pasosLbl.textContent = 'pasos';
+        pasosLbl.style.cssText = 'font-size:0.6rem;color:var(--text-muted);margin-top:0.1rem;text-align:right';
+      }
+    }
     if (pct === 100) {
       goalEl.style.borderColor = 'rgba(22,163,74,0.35)';
       goalEl.style.borderStyle = 'solid';
