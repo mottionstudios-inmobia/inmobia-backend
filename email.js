@@ -773,9 +773,9 @@ export async function enviarEmailNuevoLeadBusqueda({ email, nombreAsesor, client
   const monedaSim = propiedad?.moneda === 'USD' ? '$' : 'Q';
   const propCard = propiedad ? `
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:22px;border-radius:8px;overflow:hidden;border:1px solid #e5e2da">
-      ${propiedad.img ? `<tr><td style="padding:0;line-height:0">
-        <img src="${BASE_URL}${propiedad.img}" width="540" alt="${propiedad.titulo || ''}" style="display:block;width:100%;height:auto;max-height:220px">
-      </td></tr>` : ''}
+      ${propiedad.img ? `<tr><td style="padding:0;line-height:0;height:200px;overflow:hidden">
+        <img src="${BASE_URL}${propiedad.img}" width="540" height="200" alt="${propiedad.titulo || ''}" style="display:block;width:100%;height:200px;object-fit:cover">
+      </td></tr>` : `<tr><td style="height:200px;background:#f4f6fb;text-align:center;font-size:2rem;line-height:200px">🏠</td></tr>`}
       <tr><td style="padding:14px 18px;background:#f9f8f6">
         <p style="margin:0;font-size:0.7rem;color:#999;text-transform:uppercase;letter-spacing:0.06em">Tu propiedad que encaja</p>
         <p style="margin:5px 0 0;font-weight:700;color:#1e2d4a;font-size:0.95rem">${propiedad.titulo || 'Propiedad'}</p>
@@ -836,7 +836,7 @@ export async function enviarEmailBusquedaCliente({ email, nombre, tipo, operacio
           const sim = (p.moneda === 'USD') ? '$' : 'Q';
           return `<td width="${Math.floor(100/props.length)}%" style="padding:0 5px;vertical-align:top">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:8px;overflow:hidden;border:1px solid #e5e2da">
-              ${p.img ? `<tr><td style="padding:0;line-height:0"><img src="${BASE_URL}${p.img}" width="130" alt="${p.titulo||''}" style="display:block;width:100%;height:auto"></td></tr>` : `<tr><td style="height:90px;background:#f4f6fb;text-align:center;font-size:1.5rem">🏠</td></tr>`}
+              ${p.img ? `<tr><td style="padding:0;line-height:0;height:160px;overflow:hidden"><img src="${BASE_URL}${p.img}" width="160" height="160" alt="${p.titulo||''}" style="display:block;width:100%;height:160px;object-fit:cover"></td></tr>` : `<tr><td style="height:160px;background:#f4f6fb;text-align:center;font-size:1.8rem;line-height:160px">🏠</td></tr>`}
               <tr><td style="padding:10px 10px 12px">
                 <p style="margin:0;font-weight:700;color:#1e2d4a;font-size:0.78rem;line-height:1.3">${p.titulo || 'Propiedad'}</p>
                 <p style="margin:3px 0 0;color:#777;font-size:0.73rem">${p.zona || zona}${p.precio ? ` · ${sim}${Number(p.precio).toLocaleString('es-GT')}` : ''}</p>
@@ -895,7 +895,7 @@ export async function enviarEmailAdminLeadInmobia({ email, nombreAdmin, cliente,
           const sim = (p.moneda === 'USD') ? '$' : 'Q';
           return `<td width="${Math.floor(100/props.length)}%" style="padding:0 5px;vertical-align:top">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:8px;overflow:hidden;border:1px solid #e5e2da">
-              ${p.img ? `<tr><td style="padding:0;line-height:0"><img src="${BASE_URL}${p.img}" width="130" alt="${p.titulo||''}" style="display:block;width:100%;height:auto"></td></tr>` : `<tr><td style="height:90px;background:#f4f6fb;text-align:center;font-size:1.5rem">🏠</td></tr>`}
+              ${p.img ? `<tr><td style="padding:0;line-height:0;height:160px;overflow:hidden"><img src="${BASE_URL}${p.img}" width="160" height="160" alt="${p.titulo||''}" style="display:block;width:100%;height:160px;object-fit:cover"></td></tr>` : `<tr><td style="height:160px;background:#f4f6fb;text-align:center;font-size:1.8rem;line-height:160px">🏠</td></tr>`}
               <tr><td style="padding:10px 10px 12px">
                 <p style="margin:0;font-weight:700;color:#1e2d4a;font-size:0.78rem;line-height:1.3">${p.titulo || 'Propiedad'}</p>
                 <p style="margin:3px 0 0;color:#777;font-size:0.73rem">${p.zona || zona}${p.precio ? ` · ${sim}${Number(p.precio).toLocaleString('es-GT')}` : ''}</p>
