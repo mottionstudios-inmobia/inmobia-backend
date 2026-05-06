@@ -101,6 +101,96 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
 .btn-logout:hover { color: var(--danger); border-color: rgba(231,76,60,0.3); }
 .btn-logout svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; }
 
+/* ── HAMBURGER (mobile only) ── */
+.topbar-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  color: #1a2540;
+  flex-shrink: 0;
+  margin-right: 0.4rem;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.topbar-hamburger:hover { background: #f0f2f8; }
+.topbar-hamburger svg { display: block; }
+
+/* ── SIDEBAR OVERLAY ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.54);
+  z-index: 7999;
+}
+.sidebar-overlay.active { display: block; }
+
+/* ── SIDEBAR MOBILE DRAWER ── */
+@media (max-width: 768px) {
+  .topbar-hamburger { display: flex; align-items: center; }
+
+  .sidebar {
+    position: fixed !important;
+    left: 0; top: 0;
+    width: 280px !important;
+    height: 100dvh;
+    z-index: 8000;
+    transform: translateX(-100%);
+    transition: transform 0.26s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+    box-shadow: 4px 0 32px rgba(0,0,0,0.35);
+  }
+  .sidebar.sidebar-open { transform: translateX(0); }
+
+  /* Forzar visibilidad de todos los elementos de texto del sidebar */
+  .sidebar .inmob,
+  .sidebar .ia,
+  .sidebar-logo-img,
+  .sidebar-profile-name,
+  .sidebar-profile-plan,
+  .sidebar-stars,
+  .nav-item span,
+  .nav-badge,
+  .nav-section,
+  .btn-logout span { display: revert !important; }
+
+  /* Profile — más grande y prominente */
+  .sidebar-profile {
+    padding: 1.3rem 1.4rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.09);
+  }
+  .sb-profile-inner { gap: 0.85rem !important; }
+  .sidebar-avatar { width: 52px !important; height: 52px !important; font-size: 1.3rem !important; }
+  .sidebar-profile-name { font-size: 0.95rem !important; }
+  .sidebar-stars { margin-top: 0.5rem; }
+
+  /* Nav items — tap targets estilo InDriver */
+  .nav-item {
+    padding: 0.9rem 1.4rem;
+    font-size: 0.88rem;
+    gap: 0.9rem;
+  }
+  .nav-item svg { width: 20px !important; height: 20px !important; }
+  .nav-section { padding: 0.75rem 1.4rem 0.2rem; font-size: 0.6rem; display: block !important; }
+
+  /* Footer — logout prominente */
+  .sidebar-footer { padding: 1rem 1.4rem 1.5rem; }
+  .btn-logout {
+    padding: 0.85rem 1rem;
+    font-size: 0.88rem;
+    border-radius: 10px;
+    justify-content: center;
+    background: rgba(231,76,60,0.1);
+    border-color: rgba(231,76,60,0.25);
+    color: rgba(231,76,60,0.75);
+  }
+
+  /* Main — ancho completo */
+  .main { margin-left: 0 !important; }
+}
+
 /* ── MAIN ── */
 .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; min-width: 0; overflow-x: hidden; }
 
@@ -1608,6 +1698,7 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
 <body>
 
 <!-- SIDEBAR -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="cerrarSidebarMobile()"></div>
 <aside class="sidebar">
   <a href="/index.html" class="sidebar-logo">
     <img src="/logo-inmobia-home.svg" alt="InmobIA" class="sidebar-logo-img" style="height:48px;width:auto;display:block;max-width:100%">
@@ -1693,6 +1784,9 @@ input[type="time"][style*="0f172a"]::-webkit-calendar-picker-indicator {
 <!-- MAIN -->
 <main class="main">
   <div class="topbar">
+    <button class="topbar-hamburger" onclick="toggleSidebarMobile()" aria-label="Menú">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <span class="topbar-title" id="topbar-title">Dashboard</span>
     <div class="topbar-actions">
       <div class="topbar-url" id="topbar-url" style="padding:0;gap:0;overflow:hidden;background:#1e2d4a;border-color:#1e2d4a;color:#fff">
@@ -13493,7 +13587,21 @@ function irACrmConHint() {
   }, 350);
 }
 
+function toggleSidebarMobile() {
+  const sb = document.querySelector('.sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  const open = sb.classList.toggle('sidebar-open');
+  ov.classList.toggle('active', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function cerrarSidebarMobile() {
+  document.querySelector('.sidebar').classList.remove('sidebar-open');
+  document.getElementById('sidebar-overlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
 function irA(section) {
+  if (window.innerWidth <= 768) cerrarSidebarMobile();
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(`s-${section}`)?.classList.add('active');
