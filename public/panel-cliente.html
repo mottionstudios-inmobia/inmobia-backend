@@ -1310,7 +1310,8 @@ function abrirChatInmobia(e, leadId) {
   const propiedad = lead?.propiedad_titulo || 'una propiedad';
   const asesor    = lead?.asesor_nombre || 'el asesor';
   const msg = `Hola InmobIA, soy ${nombre}. Quisiera comunicarme sobre la propiedad "${propiedad}" que tengo agendada con ${asesor}. ¿Me pueden ayudar?`;
-  window.open(`https://wa.me/14155238886?text=${encodeURIComponent(msg)}`, '_blank');
+  const waNum = (clienteData?.wa_inmobia || '50239600421').replace(/\D/g, '');
+  window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 async function confirmarVisita(e, leadId) {

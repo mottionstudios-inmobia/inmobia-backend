@@ -154,11 +154,16 @@ router.get('/verify/:token', (req, res) => {
   const nuevaExpira  = new Date(Date.now() + diasRenovar * 24 * 60 * 60 * 1000).toISOString();
   db.prepare('UPDATE magic_links SET expira_en = ? WHERE token = ?').run(nuevaExpira, ml.token);
 
-  // Solo los leads que pasaron por el flujo del cliente (tienen magic link asociado)
-  // Esto garantiza que cada cliente ve únicamente SUS agendamientos, no datos de otros
-  const leadsIds = db.prepare(
+  // Leads del cliente: los vinculados por magic link + todos sus leads de búsqueda personalizada
+  const leadsFromMagicLink = db.prepare(
     `SELECT DISTINCT lead_id FROM magic_links WHERE LOWER(email) = ? AND lead_id IS NOT NULL`
   ).all(ml.email.toLowerCase()).map(r => r.lead_id);
+
+  const leadsFromBusqueda = db.prepare(
+    `SELECT id FROM leads WHERE LOWER(email) = ? AND origen = 'busqueda_personalizada'`
+  ).all(ml.email.toLowerCase()).map(r => r.id);
+
+  const leadsIds = [...new Set([...leadsFromMagicLink, ...leadsFromBusqueda])];
 
   const leads = leadsIds.length ? db.prepare(`
     SELECT l.*,
@@ -181,11 +186,15 @@ router.get('/verify/:token', (req, res) => {
     ORDER BY l.creado_en DESC
   `).all(...leadsIds) : [];
 
+  const waSetting = db.prepare("SELECT valor FROM platform_settings WHERE clave = 'wa_consultas'").get();
+  const waInmobia = waSetting?.valor || '50239600421';
+
   res.json({
     email: ml.email,
     leads,
     magic_lead_id: ml.lead_id,
-    total_visitas: leads.filter(l => l.etapa !== 'nuevo').length
+    total_visitas: leads.filter(l => l.etapa !== 'nuevo').length,
+    wa_inmobia: waInmobia
   });
 });
 
