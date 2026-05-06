@@ -8338,7 +8338,7 @@ function renderVistaPerdidos(leads) {
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;flex-shrink:0">
               <span style="font-size:0.75rem;color:#9ca3af">${fecha}</span>
-              ${l.telefono ? `<a href="https://wa.me/${l.telefono.replace(/\D/g,'')}" target="_blank" onclick="event.stopPropagation()" style="font-size:0.8rem;color:#25d366;text-decoration:none;font-weight:600">💬 WA</a>` : ''}
+              ${l.telefono && l.origen !== 'busqueda_personalizada' && l.modelo !== '2A' && l.modelo !== '1D' ? `<a href="https://wa.me/${l.telefono.replace(/\D/g,'')}" target="_blank" onclick="event.stopPropagation()" style="font-size:0.8rem;color:#25d366;text-decoration:none;font-weight:600">💬 WA</a>` : ''}
             </div>
           </div>
         `;
@@ -8388,7 +8388,7 @@ function renderKanban(leads) {
         })() : ''}
         <div class="kanban-card-footer">
           <span class="kanban-date">${fecha}</span>
-          ${l.telefono ? `<a class="kanban-wa-link" href="https://wa.me/${l.telefono.replace(/\D/g,'')}" target="_blank" style="font-size:0.65rem;color:#0d7f3e;text-decoration:none;font-weight:600" onclick="event.stopPropagation()">💬 WA</a>` : ''}
+          ${l.telefono && l.origen !== 'busqueda_personalizada' && l.modelo !== '2A' && l.modelo !== '1D' ? `<a class="kanban-wa-link" href="https://wa.me/${l.telefono.replace(/\D/g,'')}" target="_blank" style="font-size:0.65rem;color:#0d7f3e;text-decoration:none;font-weight:600" onclick="event.stopPropagation()">💬 WA</a>` : ''}
         </div>
       </div>`;
     }).join('');
