@@ -198,8 +198,9 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
   background: var(--white); border-bottom: 1px solid #e2e6f0;
   padding: 0 2rem; height: 58px;
   display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; z-index: 50; min-width: 0;
+  position: fixed; top: 0; left: var(--sidebar-w); right: 0; z-index: 200; min-width: 0;
 }
+.content { padding-top: calc(58px + 2rem) !important; }
 .topbar-title { font-size: 1rem; font-weight: 600; color: var(--charcoal); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
 .topbar-actions { display: flex; align-items: center; gap: 1rem; }
 .topbar-url {
@@ -898,7 +899,8 @@ select.form-input { cursor: pointer; }
   .topbar { padding: 0 1rem; }
 }
 @media (max-width: 768px) {
-  .topbar { padding: 0 0.75rem; height: 50px; }
+  .topbar { padding: 0 0.75rem; height: 50px; left: 0; }
+  .content { padding-top: calc(50px + 1.25rem) !important; }
   .topbar-url { display: none; }
   .topbar-title { font-size: 0.9rem; }
   .topbar-portal-mobile { display: flex; }
