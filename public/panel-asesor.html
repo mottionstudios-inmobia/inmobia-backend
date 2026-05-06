@@ -219,7 +219,14 @@ body { font-family: 'Inter', sans-serif; background: var(--content-bg); color: #
 }
 .topbar-notif:hover { border-color: var(--gold); }
 .topbar-notif svg { width: 16px; height: 16px; stroke: #6b7a99; fill: none; stroke-width: 2; }
-.notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; background: var(--danger); border-radius: 50%; border: 2px solid var(--white); }
+.notif-dot {
+  position: absolute; top: 2px; right: 2px;
+  min-width: 17px; height: 17px; padding: 0 4px;
+  background: var(--danger); border-radius: 99px;
+  border: 2px solid var(--white);
+  display: none; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 800; color: #fff; line-height: 1;
+}
 
 .content { padding: 2rem; overflow-x: hidden; }
 .section { display: none; }
@@ -8355,9 +8362,18 @@ async function actualizarNotificaciones() {
   notificacionesTodas = notifs;
   const notifsNoVistas = notifs.filter(n => !notificacionesVistas.has(n.id));
 
-  // Mostrar/ocultar punto rojo en campanita según no vistas
+  // Badge con número en campanita según no vistas
   const dot = document.querySelector('.notif-dot');
-  if (dot) dot.style.display = notifsNoVistas.length > 0 ? 'block' : 'none';
+  if (dot) {
+    const cnt = notifsNoVistas.length;
+    if (cnt > 0) {
+      dot.style.display = 'flex';
+      dot.textContent = cnt > 9 ? '9+' : String(cnt);
+    } else {
+      dot.style.display = 'none';
+      dot.textContent = '';
+    }
+  }
 
   // Solo re-renderizar si la lista cambió — evita resetear el scroll táctil cada 5s
   const notifsKey = notifsNoVistas.map(n => n.id).join(',');
@@ -8535,8 +8551,17 @@ async function abrirHistorialNotificaciones() {
     const all = await r.json();
     const ultimas7 = all.slice(0, 7);
 
+    // Actualizar título del modal con contador de no leídas
+    const sinLeer = ultimas7.filter(n => !n.leida).length;
+    const modalHead = modal.querySelector('.modal-head h2');
+    if (modalHead) {
+      modalHead.innerHTML = sinLeer > 0
+        ? `🔔 Notificaciones <span style="font-size:0.7rem;font-weight:700;background:#e53e3e;color:#fff;border-radius:99px;padding:0.15rem 0.55rem;margin-left:0.4rem;vertical-align:middle">${sinLeer} sin leer</span>`
+        : '🔔 Notificaciones';
+    }
+
     if (ultimas7.length === 0) {
-      body.innerHTML = '<div style="padding:2rem;text-align:center;color:#999">No hay notificaciones en el historial</div>';
+      body.innerHTML = '<div style="padding:2rem;text-align:center;color:#999">No hay notificaciones</div>';
       return;
     }
 
@@ -8545,16 +8570,24 @@ async function abrirHistorialNotificaciones() {
     const html = ultimas7.map(n => {
       const timeStr = n.creado_en ? formatNotifTime(n.creado_en) : '';
       const icon = iconMap[n.tipo] || '🔔';
+      const esNueva = !n.leida;
       return `
-        <div style="display:flex;gap:0.8rem;padding:0.9rem 1rem;border-bottom:1px solid #e5e2da;align-items:flex-start${n.leida ? ';opacity:0.55' : ''}">
-          <div style="font-size:1.3rem;flex-shrink:0">${icon}</div>
+        <div style="display:flex;gap:0.85rem;padding:0.95rem 1rem;border-bottom:1px solid #ede9e1;align-items:flex-start;
+          ${esNueva
+            ? 'background:rgba(230,155,34,0.07);border-left:3px solid #c9a84c;'
+            : 'background:#fff;border-left:3px solid transparent;opacity:0.58;'}">
+          <div style="font-size:1.25rem;flex-shrink:0;margin-top:0.05rem">${icon}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-weight:600;color:#1e2d4a;font-size:0.88rem;line-height:1.3">${n.titulo}</div>
-            <div style="font-size:0.82rem;color:#4a5568;margin-top:0.35rem;line-height:1.4">${n.mensaje}</div>
-            <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem">
-              ${n.referencia_id ? `<button class="btn-sm btn-primary" style="font-size:0.75rem" onclick="cerrarHistorialNotificaciones();verLead(${n.referencia_id})">📋 Ver detalles</button>` : ''}
-              ${timeStr ? `<span style="font-size:0.7rem;color:#999">${timeStr}</span>` : ''}
-              ${n.leida ? '<span style="font-size:0.68rem;color:#aaa;background:#f5f5f5;padding:0.2rem 0.5rem;border-radius:3px">Visto</span>' : '<span style="font-size:0.68rem;color:#e07b39;font-weight:600">Nuevo</span>'}
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.2rem">
+              <span style="font-weight:${esNueva ? '700' : '600'};color:#1e2d4a;font-size:0.88rem;line-height:1.3;flex:1;min-width:0">${n.titulo}</span>
+              ${esNueva
+                ? '<span style="font-size:0.6rem;font-weight:800;color:#fff;background:#e07b39;padding:0.12rem 0.5rem;border-radius:99px;white-space:nowrap;flex-shrink:0">NUEVO</span>'
+                : '<span style="font-size:0.62rem;color:#bbb;white-space:nowrap;flex-shrink:0">Visto</span>'}
+            </div>
+            <div style="font-size:0.8rem;color:#4a5568;line-height:1.45">${n.mensaje}</div>
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;flex-wrap:wrap">
+              ${n.referencia_id ? `<button class="btn-sm btn-primary" style="font-size:0.73rem" onclick="cerrarHistorialNotificaciones();verLead(${n.referencia_id})">📋 Ver detalles</button>` : ''}
+              ${timeStr ? `<span style="font-size:0.68rem;color:#aaa">${timeStr}</span>` : ''}
             </div>
           </div>
         </div>`;
@@ -8562,7 +8595,7 @@ async function abrirHistorialNotificaciones() {
 
     body.innerHTML = html;
   } catch {
-    body.innerHTML = '<div style="padding:2rem;text-align:center;color:#999">Error al cargar el historial</div>';
+    body.innerHTML = '<div style="padding:2rem;text-align:center;color:#999">Error al cargar</div>';
   }
 }
 
