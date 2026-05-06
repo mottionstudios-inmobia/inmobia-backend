@@ -9137,6 +9137,9 @@ function verLead(id) {
   // ── Sección: Pago comisión ─────────────────────────────────────
   const bloquePago = renderPagoAsesor1D(l);
 
+  // ── Sección: Comisión InmobIA (modelos 2A/4T/5RA) ──────────────
+  const bloqueComision = renderComisionInmobia(l);
+
   // ── Sección: Mis notas ─────────────────────────────────────────
   const bloqueNotas = l.notas ? seccion('Mis notas',
     `<div style="font-size:0.85rem;color:#e2e8f0;line-height:1.55;white-space:pre-wrap">${l.notas}</div>`) : '';
@@ -9636,6 +9639,7 @@ function verLead(id) {
     bloqueDetalles +
     bloqueTripartito +
     bloquePago +
+    bloqueComision +
     bloqueNotas +
     bloqueRazon +
     bloqueBitacora;
@@ -9806,6 +9810,89 @@ async function confirmarPagoRecibido1D(leadId) {
     await cargarLeads();
     verLead(leadId);
   } catch { alert('Error de conexión'); }
+}
+
+// ── Comisión InmobIA — modelos 2A / 4T / 5RA ──────────────────────────────
+function renderComisionInmobia(l) {
+  if (l.modelo === '1D' || l.etapa !== 'cerrado') return '';
+
+  const moneda = l.moneda_cierre || 'GTQ';
+  const sim = moneda === 'USD' ? '$' : 'Q';
+  const monto = Number(l.comision_inmobia || 0);
+  const montoFmt = `${sim}${monto.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const estado = l.comision_estado || '';
+
+  const wrap = (contenido) => `
+    <div style="background:#161c28;border-radius:8px;padding:1rem 1.25rem;margin-top:0.25rem">
+      <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;font-weight:600;margin-bottom:0.75rem">Comisión InmobIA · Modelo ${l.modelo || '2A'}</div>
+      ${contenido}
+    </div>`;
+
+  if (estado === 'pagada') {
+    const cuando = l.comision_pagada_en
+      ? new Date(l.comision_pagada_en).toLocaleDateString('es-GT', { day:'numeric', month:'long', year:'numeric' })
+      : '';
+    return wrap(`<div style="background:#052e16;border:1px solid #16a34a;border-left:3px solid #4ade80;border-radius:8px;padding:0.85rem 1rem">
+      <div style="font-size:0.85rem;font-weight:700;color:#4ade80">✓ Comisión pagada · ${montoFmt}</div>
+      ${cuando ? `<div style="font-size:0.72rem;color:#4ade80;opacity:0.75;margin-top:0.2rem">Confirmada el ${cuando}</div>` : ''}
+    </div>`);
+  }
+
+  if (!monto) return '';
+
+  const linkPago = l.comision_link_pago || '';
+  const tieneLinkActivo = linkPago && estado === 'pendiente';
+
+  const alertColor = estado === 'vencida' ? '#ef4444' : '#f59e0b';
+  const alertBg = estado === 'vencida' ? '#2d0a0a' : '#1a1500';
+  const alertBorder = estado === 'vencida' ? '#ef4444' : '#d4a017';
+  const alertTitle = estado === 'vencida' ? '⚠️ Pago vencido · debes regularizar' : '💰 Comisión InmobIA pendiente';
+  const alertDesc = estado === 'vencida'
+    ? `Tu cuenta tiene leads suspendidos hasta que pagues la comisión de ${montoFmt}.`
+    : `Al cerrar este negocio a través de InmobIA, corresponde pagar una comisión de <strong>${montoFmt}</strong>.<br><span style="font-size:0.72rem;color:#94a3b8">Plazo: 5 días hábiles · el pago activa tu conteo de cierres</span>`;
+
+  return wrap(`<div style="background:${alertBg};border:1px solid ${alertBorder};border-left:3px solid ${alertColor};border-radius:8px;padding:0.9rem 1rem">
+    <div style="font-size:0.88rem;font-weight:700;color:${alertColor};margin-bottom:0.4rem">${alertTitle}</div>
+    <div style="font-size:0.78rem;color:${alertColor};opacity:0.85;line-height:1.5;margin-bottom:0.75rem">${alertDesc}</div>
+    ${tieneLinkActivo ? `
+      <div style="background:#0f172a;border:1px solid #334155;border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem;overflow:hidden">
+        <span style="font-size:0.72rem;color:#64748b;flex-shrink:0">Link:</span>
+        <a href="${linkPago}" target="_blank" style="font-size:0.72rem;color:#38bdf8;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${linkPago}</a>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+        <a href="${linkPago}" target="_blank" style="flex:1;min-width:140px;background:#15803d;color:#fff;border:none;border-radius:6px;padding:0.6rem 1rem;font-size:0.82rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block">Pagar ahora →</a>
+        <button onclick="pagarComisionLead(${l.id}, true)" style="flex:0 0 auto;background:#1e2d4a;color:#94a3b8;border:1px solid #334155;border-radius:6px;padding:0.6rem 0.75rem;font-size:0.75rem;cursor:pointer">↻ Generar nuevo link</button>
+      </div>` : `
+      <button id="btn-pagar-comision-${l.id}" onclick="pagarComisionLead(${l.id})" style="width:100%;background:#d4a017;color:#000;border:none;border-radius:6px;padding:0.65rem 1rem;font-size:0.85rem;font-weight:700;cursor:pointer">
+        💳 Generar link de pago
+      </button>`}
+  </div>`);
+}
+
+async function pagarComisionLead(leadId, forzar = false) {
+  const btn = document.getElementById(`btn-pagar-comision-${leadId}`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Generando...'; }
+  try {
+    const r = await fetch(`${API}/pagos/checkout-comision/${leadId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ forzar }),
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      alert(data.error || 'No se pudo generar el link de pago.');
+      if (btn) { btn.disabled = false; btn.textContent = '💳 Generar link de pago'; }
+      return;
+    }
+    // Refresh local lead data then re-render modal
+    await cargarLeads();
+    verLead(leadId);
+    // Open checkout in new tab
+    if (data.url) window.open(data.url, '_blank');
+  } catch {
+    alert('Error de conexión. Intente de nuevo.');
+    if (btn) { btn.disabled = false; btn.textContent = '💳 Generar link de pago'; }
+  }
 }
 
 // ── Vista lead Propiedades InmobIA (modelo 1D · 50/50) ─────────────────────
@@ -12352,10 +12439,20 @@ async function reconciliarPagoTrasRegreso() {
       toast('¡Pago recibido! Verificando con Recurrente…', 'info');
       reconciliarPagoTrasRegreso();
     }, 500);
+  } else if (pago === 'comision') {
+    const leadId = Number(params.get('lead'));
+    setTimeout(async () => {
+      toast('¡Pago de comisión procesado! Actualizando…', 'info');
+      await cargarLeads();
+      if (leadId) {
+        mostrarSeccion('crm');
+        verLead(leadId);
+      }
+    }, 600);
   } else if (pago === 'cancelado') {
     setTimeout(() => toast('Pago cancelado. Puedes reintentar cuando quieras.', 'info'), 500);
   }
-  // Limpiar query param de la URL
+  // Limpiar query params de la URL
   history.replaceState({}, '', location.pathname + location.hash);
 })();
 

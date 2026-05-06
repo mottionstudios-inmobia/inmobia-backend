@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { db } from '../database.js';
 import { authMiddleware } from '../auth.js';
-import { crearCheckoutPremium, obtenerSuscripcion, cancelarSuscripcion, obtenerCheckout, listarSuscripciones, keysConfigured, verificarFirmaWebhook, webhookSecretConfigured } from '../lib/recurrente.js';
-import { enviarCorreoBienvenidaPremium } from '../email.js';
+import { crearCheckoutPremium, crearCheckoutComision, obtenerSuscripcion, cancelarSuscripcion, obtenerCheckout, listarSuscripciones, keysConfigured, verificarFirmaWebhook, webhookSecretConfigured } from '../lib/recurrente.js';
+import { enviarCorreoBienvenidaPremium, enviarCorreoComisionAsesor, enviarEmail } from '../email.js';
 
 const router = Router();
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
@@ -368,6 +368,89 @@ router.post('/webhook', async (req, res) => {
     // Siempre devolver 200 para que Recurrente no reintente en loop ante errores nuestros
     res.json({ received: true, error: err.message });
   }
+});
+
+// ── POST /api/pagos/checkout-comision/:leadId (asesor autenticado)
+// Genera el link de pago de la comisión InmobIA para un lead cerrado.
+// Solo aplica a modelos 2A / 4T / 5RA (en 1D es InmobIA quien paga al asesor).
+router.post('/checkout-comision/:leadId', authMiddleware, async (req, res) => {
+  if (!keysConfigured()) {
+    return res.status(503).json({ error: 'Pasarela de pagos no configurada' });
+  }
+
+  const lead = db.prepare(`
+    SELECT l.id, l.etapa, l.modelo, l.moneda_cierre, l.comision_inmobia,
+           l.comision_estado, l.propiedad_titulo, l.nombre AS cliente,
+           l.asesor_id, u.nombre AS asesor_nombre, u.email AS asesor_email
+    FROM leads l
+    JOIN usuarios u ON u.id = l.asesor_id
+    WHERE l.id = ?
+  `).get(req.params.leadId);
+
+  if (!lead) return res.status(404).json({ error: 'Lead no encontrado' });
+  if (lead.asesor_id !== req.usuario.id) return res.status(403).json({ error: 'Sin permiso' });
+  if (lead.etapa !== 'cerrado') return res.status(400).json({ error: 'El lead debe estar en etapa cerrado' });
+  if (lead.modelo === '1D') return res.status(400).json({ error: 'Modelo 1D: InmobIA paga al asesor, no al revés' });
+  if (lead.comision_estado === 'pagada') return res.status(409).json({ error: 'La comisión ya fue pagada' });
+
+  const montoQ = Number(lead.comision_inmobia);
+  if (!montoQ || montoQ < 1) return res.status(400).json({ error: 'Monto de comisión inválido o no calculado' });
+
+  const moneda = lead.moneda_cierre || 'GTQ';
+  const usuario = { id: lead.asesor_id, email: lead.asesor_email };
+
+  try {
+    const checkout = await crearCheckoutComision({
+      leadId: lead.id,
+      usuario,
+      montoQ,
+      moneda,
+      successUrl: `${BASE_URL}/panel-asesor.html?pago=comision&lead=${lead.id}`,
+      cancelUrl:  `${BASE_URL}/panel-asesor.html?pago=cancelado`,
+    });
+
+    const checkoutId  = checkout.id || '';
+    const linkPago    = checkout.checkout_url || checkout.url || '';
+    const creadoEn    = new Date().toISOString();
+
+    db.prepare(`UPDATE leads SET comision_estado = 'pendiente',
+      comision_checkout_id = ?, comision_link_pago = ?, comision_link_creado_en = ?
+      WHERE id = ?`)
+      .run(checkoutId, linkPago, creadoEn, lead.id);
+
+    db.prepare(`INSERT INTO pagos (usuario_id, tipo, monto, moneda, estado, recurrente_id, payload)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`)
+      .run(lead.asesor_id, 'checkout_comision', montoQ, moneda, 'pendiente', checkoutId, JSON.stringify(checkout));
+
+    // Email al asesor con el link de pago
+    enviarCorreoComisionAsesor({
+      email:            lead.asesor_email,
+      nombreAsesor:     lead.asesor_nombre,
+      nombreCliente:    lead.cliente,
+      propiedadTitulo:  lead.propiedad_titulo,
+      valorCierre:      null,
+      comisionInmobia:  montoQ,
+      moneda,
+      linkPago,
+      diasPlazo:        5,
+    }).catch(e => console.error('[Email comisión]', e.message));
+
+    res.json({ ok: true, url: linkPago, checkout_id: checkoutId, monto: montoQ, moneda });
+  } catch (err) {
+    console.error('[Pagos] Error checkout comisión:', err.message, err.data || '');
+    res.status(err.status || 500).json({ error: 'No se pudo generar el checkout', detalle: err.message });
+  }
+});
+
+// ── GET /api/pagos/comision-estado/:leadId (asesor autenticado)
+router.get('/comision-estado/:leadId', authMiddleware, (req, res) => {
+  const lead = db.prepare(`
+    SELECT id, etapa, modelo, moneda_cierre, comision_inmobia, comision_asesor,
+           comision_estado, comision_link_pago, comision_pagada_en, cerrado_en
+    FROM leads WHERE id = ? AND asesor_id = ?
+  `).get(req.params.leadId, req.usuario.id);
+  if (!lead) return res.status(404).json({ error: 'Lead no encontrado' });
+  res.json(lead);
 });
 
 // ── GET /api/pagos/webhook/diag (admin) — últimos eventos recibidos para depurar
